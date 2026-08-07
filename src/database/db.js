@@ -103,9 +103,14 @@ export function addBook(book) {
 /**
  * Retrieves all books stored in IndexedDB.
  *
- * File and Blob values are returned as File/Blob objects.
+ * Each book record contains its database ID, title,
+ * and original EPUB archive as a Blob.
  *
- * @returns {Promise<Array<Object>>}
+ * @returns {Promise<Array<{
+ *   id: number,
+ *   title: string,
+ *   file: Blob
+ * }>>}
  * Resolves with all stored book records.
  */
 export function getBooks() {

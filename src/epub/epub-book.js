@@ -2,41 +2,79 @@ import { unzipSync, strFromU8 } from "../vendor/fflate.js";
 
 export class EpubBook {
    #files = null;
+   #epubBlob = null;
 
-   constructor() {
+   /**
+    * Creates an EpubBook from an EPUB Blob.
+    *
+    * File objects are also accepted because File extends Blob.
+    *
+    * The EPUB is not parsed automatically because parsing requires
+    * asynchronous operations. Call parse() after construction.
+    *
+    * @param {Blob} epubBlob - The original EPUB archive.
+    */
+   constructor(epubBlob) {
+      this.#epubBlob = epubBlob;
+
       this.metadata = null;
       this.cover = null;
    }
-
+   
    /**
-    * Creates an EpubBook from a File.
+    * Parses the EPUB archive.
     *
-    * @param {File} file - The EPUB file selected by the user.
-    * @returns {Promise<EpubBook>} The parsed EPUB book.
+    * Decompresses the EPUB, locates its package document,
+    * and extracts metadata and the cover image.
+    *
+    * @returns {Promise<EpubBook>} The parsed EpubBook instance.
     */
-   static async fromFile(file) {
-      const files = await EpubBook.#unzipFile(file);
+   async parse() {
+      const files = await EpubBook.#unzipBlob(this.#epubBlob);
+
       const packagePath = EpubBook.#getPackagePath(files);
-      const packageDoc = EpubBook.#getPackageDocument(files, packagePath);
 
-      const book = new EpubBook();
+      const packageDoc = EpubBook.#getPackageDocument(
+         files,
+         packagePath
+      );
 
-      book.#files = files;
-      book.metadata = EpubBook.#parseMetadata(packageDoc);
-      book.cover = EpubBook.#parseCover(files, packageDoc, packagePath);
+      this.#files = files;
 
-      return book;
+      this.metadata = EpubBook.#parseMetadata(packageDoc);
+
+      this.cover = EpubBook.#parseCover(
+         files,
+         packageDoc,
+         packagePath
+      );
+
+      return this;
    }
 
    /**
-    * @returns {Object}
+    * Returns the original EPUB archive.
+    *
+    * If the EpubBook was constructed from a File, the returned
+    * value is still that File because File extends Blob.
+    *
+    * @returns {Blob} The original EPUB Blob or File.
+    */
+   getEpubBlob() {
+      return this.#epubBlob;
+   }
+
+   /**
+    * Returns the parsed EPUB metadata.
+    *
+    * @returns {Object|null}
     */
    getMetadata() {
       return this.metadata;
    }
 
    /**
-    * Returns the cover image as a Blob.
+    * Returns the extracted cover image.
     *
     * @returns {Blob|null}
     */
@@ -44,20 +82,44 @@ export class EpubBook {
       return this.cover;
    }
 
-   static async #unzipFile(file) {
+   /**
+    * Decompresses an EPUB archive.
+    *
+    * File objects are also accepted because File extends Blob.
+    *
+    * @param {Blob} epubBlob - The EPUB archive.
+    * @returns {Promise<Object<string, Uint8Array>>}
+    * The decompressed EPUB files keyed by their paths.
+    */
+   static async #unzipBlob(epubBlob) {
       try {
-         const rawBytes = new Uint8Array(await file.arrayBuffer());
+         const rawBytes = new Uint8Array(
+            await epubBlob.arrayBuffer()
+         );
+
          return unzipSync(rawBytes);
       } catch {
-         throw new Error("File does not appear to be a valid EPUB.");
+         throw new Error(
+            "File does not appear to be a valid EPUB."
+         );
       }
    }
 
+   /**
+    * Finds the EPUB package document path from container.xml.
+    *
+    * @param {Object<string, Uint8Array>} files
+    * The decompressed EPUB files.
+    *
+    * @returns {string} The package document path.
+    */
    static #getPackagePath(files) {
       const containerBytes = files["META-INF/container.xml"];
 
       if (!containerBytes) {
-         throw new Error("Invalid EPUB: META-INF/container.xml not found.");
+         throw new Error(
+            "Invalid EPUB: META-INF/container.xml not found."
+         );
       }
 
       const containerDoc = EpubBook.#parseXml(containerBytes);
@@ -67,22 +129,50 @@ export class EpubBook {
          ?.getAttribute("full-path");
 
       if (!packagePath) {
-         throw new Error("Invalid EPUB: package file not found.");
+         throw new Error(
+            "Invalid EPUB: package file not found."
+         );
       }
 
       return packagePath;
    }
 
+   /**
+    * Retrieves and parses the EPUB package document.
+    *
+    * @param {Object<string, Uint8Array>} files
+    * The decompressed EPUB files.
+    *
+    * @param {string} packagePath
+    * Path to the package document.
+    *
+    * @returns {Document} The parsed package document.
+    */
    static #getPackageDocument(files, packagePath) {
       const packageBytes = files[packagePath];
 
       if (!packageBytes) {
-         throw new Error(`Invalid EPUB: ${packagePath} not found.`);
+         throw new Error(
+            `Invalid EPUB: ${packagePath} not found.`
+         );
       }
 
       return EpubBook.#parseXml(packageBytes);
    }
 
+   /**
+    * Extracts metadata from the EPUB package document.
+    *
+    * @param {Document} packageDoc
+    * The parsed EPUB package document.
+    *
+    * @returns {{
+    *   title: string,
+    *   author: string,
+    *   language: string,
+    *   identifier: string
+    * }}
+    */
    static #parseMetadata(packageDoc) {
       const DC = "http://purl.org/dc/elements/1.1/";
 
@@ -100,6 +190,23 @@ export class EpubBook {
       };
    }
 
+   /**
+    * Extracts the cover image from the EPUB.
+    *
+    * Supports the EPUB 3 cover-image property and the older
+    * EPUB 2 metadata cover declaration.
+    *
+    * @param {Object<string, Uint8Array>} files
+    * The decompressed EPUB files.
+    *
+    * @param {Document} packageDoc
+    * The parsed EPUB package document.
+    *
+    * @param {string} packagePath
+    * Path to the package document.
+    *
+    * @returns {Blob|null} The cover image, or null if none exists.
+    */
    static #parseCover(files, packageDoc, packagePath) {
       let coverItem = packageDoc.querySelector(
          'manifest item[properties~="cover-image"]'
@@ -111,8 +218,11 @@ export class EpubBook {
             ?.getAttribute("content");
 
          if (coverId) {
-            coverItem = [...packageDoc.querySelectorAll("manifest item")]
-               .find(item => item.getAttribute("id") === coverId);
+            coverItem = [
+               ...packageDoc.querySelectorAll("manifest item"),
+            ].find(
+               (item) => item.getAttribute("id") === coverId
+            );
          }
       }
 
@@ -126,7 +236,11 @@ export class EpubBook {
          return null;
       }
 
-      const coverPath = EpubBook.#resolvePath(packagePath, href);
+      const coverPath = EpubBook.#resolvePath(
+         packagePath,
+         href
+      );
+
       const coverBytes = files[coverPath];
 
       if (!coverBytes) {
@@ -136,10 +250,16 @@ export class EpubBook {
       return new Blob([coverBytes], {
          type:
             coverItem.getAttribute("media-type") ??
-            "application/octet-stream"
+            "application/octet-stream",
       });
    }
 
+   /**
+    * Parses XML bytes into a Document.
+    *
+    * @param {Uint8Array} bytes - UTF-8 encoded XML bytes.
+    * @returns {Document} The parsed XML document.
+    */
    static #parseXml(bytes) {
       return new DOMParser().parseFromString(
          strFromU8(bytes),
@@ -151,15 +271,21 @@ export class EpubBook {
     * Resolves a resource path relative to the OPF file.
     *
     * @param {string} packagePath
+    * Path to the EPUB package document.
+    *
     * @param {string} resourcePath
-    * @returns {string}
+    * Resource path relative to the package document.
+    *
+    * @returns {string} The resolved EPUB resource path.
     */
    static #resolvePath(packagePath, resourcePath) {
-      const base = packagePath.split("/").slice(0, -1);
+      const base = packagePath
+         .split("/")
+         .slice(0, -1);
 
       const parts = [
          ...base,
-         ...resourcePath.split("/")
+         ...resourcePath.split("/"),
       ];
 
       const resolved = [];
