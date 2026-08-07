@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="./styles/bookshelf.css">
+  <title>Honomi — Bookshelf</title>
+</head>
+
+<body>
+  <main class="bookshelf">
+    <header class="bookshelf-header">
+      <h1>Bookshelf</h1>
+
+      <input id="epub-file-input" type="file" accept=".epub,application/epub+zip" hidden>
+
+      <div class="bookshelf-actions" role="toolbar" aria-label="Bookshelf actions">
+        <button type="button" id="import-book-btn">Import</button>
+        <button type="button" id="edit-bookshelf-btn">Edit</button>
+        <button type="button" id="setting-toggle-btn">Settings</button>
+      </div>
+    </header>
+
+    <section class="book-category">
+      <h2>Category</h2>
+
+      <div class="book-list">
+        <article class="book-card">
+          <div class="book-cover-wrapper">
+            <img src="./assets/OIP.webp" alt="Placeholder book cover">
+          </div>
+          <div class="book-metadata">
+            <h3 class="book-title">コンビニ人間</h3>
+            <p class="book-author">村田沙耶香</p>
+
+            <dl class="book-details">
+              <div>
+                <dt>Language</dt>
+                <dd>Japanese</dd>
+              </div>
+
+              <div>
+                <dt>Progress</dt>
+                <dd>42%</dd>
+              </div>
+            </dl>
+          </div>
+
+      </div>
+      </article>
+
+      </div>
+    </section>
+
+  </main>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+
+</html>
