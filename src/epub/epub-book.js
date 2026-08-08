@@ -5,6 +5,7 @@ export default class EpubBook {
    #epubFile = null;
    metadata = null;
    cover = null;
+   categoryId = null;
    /**
     * Creates an EpubBook from an EPUB file.
     *
@@ -22,6 +23,7 @@ export default class EpubBook {
       this.#epubFile = epubFile;
       this.metadata = null;
       this.cover = null;
+      this.categoryId = null;
    }
 
    /**
@@ -85,6 +87,13 @@ export default class EpubBook {
       return this.cover;
    }
 
+   setCategoryId(categoryId) {
+      this.categoryId = categoryId;
+   }
+
+   getCategoryId() {
+      return this.categoryId;
+   }
    /**
     * Decompresses an EPUB archive.
     *

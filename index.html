@@ -11,32 +11,28 @@
 <body>
   <main class="bookshelf">
     <header class="bookshelf-header">
-      <h1>Bookshelf</h1>
-
       <input id="epub-file-input" type="file" accept=".epub,application/epub+zip" hidden>
 
-      <div class="bookshelf-actions" role="toolbar" aria-label="Bookshelf actions">
-        <button type="button" id="import-book-btn">Import</button>
-        <button type="button" id="edit-bookshelf-btn">Edit</button>
-        <button type="button" id="setting-toggle-btn">Settings</button>
-      </div>
+      <button type="button" id="import-book-btn">Import</button>
+      <button type="button" id="edit-bookshelf-btn">Edit</button>
+      <button type="button" id="toggle-setting-btn">Settings</button>
     </header>
 
-    <section class="book-category" id="unorganised-bookshelf">
-      <h2>Test</h2>
-    </section>
+    <section class="book-category" id="unorganised-bookshelf"></section>
 
-    <section class="book-category" id="category-holder">
+    <section class="book-category">
       <h2>Bookshelf</h2>
 
       <article class="book-card">
-        <div class="book-cover-wrapper">
+        <div class="cover-wrapper">
           <img src="./assets/OIP.webp" alt="Placeholder book cover">
         </div>
 
-        <div class="book-metadata">
-          <h3 class="book-title">コンビニ人間</h3>
-          <p class="book-author">村田沙耶香</p>
+        <div class="metadata">
+          <h3 class="title">コンビニ人間</h3>
+          <p class="author">by 村田沙耶香</p>
+          <p class="language">Japanese</p>
+          <div class="progress-bar">0%</div>
         </div>
       </article>
     </section>

@@ -1,12 +1,13 @@
-import { getBooks } from "../../../database/db.js";
+import { getBooks, getCategories } from "../../../database/db.js";
 import EpubBook from "../../../epub/epub-book.js";
 
 /**
- * Renders one stored book into the unorganised bookshelf.
+ * Creates a card for one stored book.
  *
  * @param {Object} book - Book record from IndexedDB.
+ * @param {number} book.categoryId - Category ID of the book.
  * @param {Blob} book.file - Original EPUB file.
- * @returns {Promise<void>}
+ * @returns {Promise<HTMLElement>}
  */
 async function renderBookCard(book) {
    const epub = new EpubBook(book.file);
@@ -15,13 +16,11 @@ async function renderBookCard(book) {
    const metadata = epub.getMetadata();
    const cover = epub.getCover();
 
-   const bookshelf = document.getElementById("unorganised-bookshelf");
-
    const bookCard = document.createElement("article");
    bookCard.classList.add("book-card");
 
    const coverWrapper = document.createElement("div");
-   coverWrapper.classList.add("book-cover-wrapper");
+   coverWrapper.classList.add("cover-wrapper");
 
    if (cover) {
       const img = document.createElement("img");
@@ -38,14 +37,14 @@ async function renderBookCard(book) {
    }
 
    const bookMetadata = document.createElement("div");
-   bookMetadata.classList.add("book-metadata");
+   bookMetadata.classList.add("metadata");
 
    const title = document.createElement("h3");
-   title.classList.add("book-title");
+   title.classList.add("title");
    title.textContent = metadata.title;
 
    const author = document.createElement("p");
-   author.classList.add("book-author");
+   author.classList.add("author");
    author.textContent = metadata.author;
 
    bookMetadata.append(title, author);
@@ -55,7 +54,7 @@ async function renderBookCard(book) {
       bookMetadata
    );
 
-   bookshelf.appendChild(bookCard);
+   return bookCard;
 }
 
 /**
@@ -65,9 +64,34 @@ async function renderBookCard(book) {
  */
 export default async function renderBookshelf() {
    const books = await getBooks();
+   const categories = await getCategories();
 
-   document.getElementById("unorganised-bookshelf").innerHTML = "";
-   for (const book of books) {
-      await renderBookCard(book);
+   for (const category of categories) {
+      let shelf = document.getElementById(category.name);
+
+      if (!shelf) {
+         shelf = document.createElement("section");
+         shelf.classList.add("book-category");
+         shelf.id = category.name;
+         document.querySelector(".bookshelf").append(shelf);
+      }
+
+      shelf.replaceChildren();
+
+      const categoryName = document.createElement("h2");
+      const formattedName = category.name
+         .replace(/-/g, " ")
+         .replace(/^./, (c) => c.toUpperCase());
+      categoryName.textContent = formattedName;
+      shelf.append(categoryName);
+
+      for (const book of books) {
+         if (book.categoryId !== category.id) {
+            continue;
+         }
+
+         const bookCard = await renderBookCard(book);
+         shelf.append(bookCard);
+      }
    }
 }

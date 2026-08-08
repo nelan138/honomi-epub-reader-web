@@ -22,7 +22,7 @@ export function openDatabase() {
       const request = indexedDB.open(DB_NAME, DB_VERSION);
 
       request.onupgradeneeded = () => {
-         createSchema(request.result);
+         createSchema(request.result, request.transaction);
       };
 
       request.onsuccess = () => {
@@ -59,6 +59,7 @@ function getDatabase() {
  * {
  *   title: "コンビニ人間",
  *   author: "村田沙耶香",
+ *   categoryId: 1,
  *   file: File,
  *   cover: Blob
  * }
@@ -71,6 +72,9 @@ function getDatabase() {
  *
  * @param {string} book.author
  * Book author.
+ *
+ * @param {IDBValidKey} book.categoryId
+ * Primary key of the category this book belongs to.
  *
  * @param {File|Blob} book.file
  * Original EPUB file. After IndexedDB retrieval, this value is a Blob;
@@ -102,15 +106,99 @@ export function addBook(book) {
 }
 
 /**
+ * Returns the category ID for the given name, creating the category
+ * first if it does not exist yet.
+ *
+ * @param {string} name - Category name (must be unique).
+ * @returns {Promise<IDBValidKey>} Resolves with the category's primary key.
+ */
+export function addCategory(name) {
+   return new Promise((resolve, reject) => {
+      const db = getDatabase();
+      const transaction = db.transaction(STORES.CATEGORIES, "readwrite");
+      const store = transaction.objectStore(STORES.CATEGORIES);
+      const existingRequest = store.index("name").getKey(name);
+
+      existingRequest.onsuccess = () => {
+         if (existingRequest.result !== undefined) {
+            resolve(existingRequest.result);
+            return;
+         }
+
+         const request = store.add({ name });
+
+         request.onsuccess = () => {
+            resolve(request.result);
+         };
+
+         request.onerror = () => {
+            reject(request.error);
+         };
+      };
+
+      existingRequest.onerror = () => {
+         reject(existingRequest.error);
+      };
+   });
+}
+
+/**
+ * Deletes one category from IndexedDB.
+ *
+ * @param {IDBValidKey} id - Primary key of the category to delete.
+ * @returns {Promise<void>} Resolves when the delete request succeeds.
+ */
+export function deleteCategory(id) {
+   return new Promise((resolve, reject) => {
+      const db = getDatabase();
+      const transaction = db.transaction(STORES.CATEGORIES, "readwrite");
+      const store = transaction.objectStore(STORES.CATEGORIES);
+      const request = store.delete(id);
+
+      request.onsuccess = () => {
+         resolve();
+      };
+
+      request.onerror = () => {
+         reject(request.error);
+      };
+   });
+}
+
+/**
+ * Retrieves all categories stored in IndexedDB.
+ *
+ * @returns {Promise<Array<{ id: IDBValidKey, name: string }>>}
+ * Resolves with all stored category records.
+ */
+export function getCategories() {
+   return new Promise((resolve, reject) => {
+      const db = getDatabase();
+      const transaction = db.transaction(STORES.CATEGORIES, "readonly");
+      const store = transaction.objectStore(STORES.CATEGORIES);
+      const request = store.getAll();
+
+      request.onsuccess = () => {
+         resolve(request.result);
+      };
+
+      request.onerror = () => {
+         reject(request.error);
+      };
+   });
+}
+
+/**
  * Retrieves all books stored in IndexedDB.
  *
- * Each book record contains its database ID, title,
+ * Each book record contains its database ID, title, category ID,
  * and original EPUB archive as a Blob. EpubBook treats this Blob as the
  * EPUB file payload when parsing it.
  *
  * @returns {Promise<Array<{
  *   id: number,
  *   title: string,
+ *   categoryId: IDBValidKey,
  *   file: Blob
  * }>>}
  * Resolves with all stored book records.

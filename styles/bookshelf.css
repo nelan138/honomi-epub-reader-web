@@ -39,24 +39,24 @@ body {
    border: 1px solid;
 }
 
-.book-cover-wrapper {
+.cover-wrapper {
    width: 50%;
    border-right: 1px solid;
    background: #ddd;
 }
 
-.book-cover-wrapper img {
+.cover-wrapper img {
    width: 100%;
    height: 100%;
    object-fit: cover;
    display: block;
 }
 
-.book-metadata {
+.metadata {
    padding: 8px;
 }
 
-.book-title,
-.book-author {
+.title,
+.author {
    margin: 0;
 }
