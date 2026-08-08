@@ -13,6 +13,23 @@ async function renderBookCard(book) {
    const epub = new EpubBook(book.file);
    await epub.parse();
 
+   // Metadata
+   const metadata = epub.getMetadata();
+
+   const title = document.createElement("h3");
+   title.classList.add("title");
+   title.textContent = metadata.title;
+   const author = document.createElement("p");
+   author.classList.add("author");
+   author.textContent = `by ${metadata.author}`;
+   const language = document.createElement("div");
+   language.classList.add("language");
+   language.textContent = metadata.language;
+
+   const bookMetadata = document.createElement("div");
+   bookMetadata.classList.add("metadata");
+   bookMetadata.append(title, author, language);
+
    // Book cover
    const coverWrapper = document.createElement("div");
    coverWrapper.classList.add("cover-wrapper");
@@ -32,30 +49,11 @@ async function renderBookCard(book) {
       coverWrapper.appendChild(img);
    }
 
-   // Metadata
-   const title = document.createElement("h3");
-   title.classList.add("title");
-
-   const author = document.createElement("p");
-   author.classList.add("author");
-
-   const language = document.createElement("div");
-   language.classList.add("language");
-
-   const metadata = epub.getMetadata();
-   title.textContent = metadata.title;
-   author.textContent = `by ${metadata.author}`;
-   language.textContent = metadata.language;
-
-   const bookMetadata = document.createElement("div");
-   bookMetadata.classList.add("metadata");
-   bookMetadata.append(title, author, language);
-
    // Progress bar
    const progressBar = document.createElement("div");
    progressBar.classList.add("progress-bar");
    progressBar.textContent = `${book.progress}%`
-   // progressBar.style.setProperty("--progress", "42%");
+   progressBar.style.setProperty("--progress", "42%");
 
    const bookCard = document.createElement("article");
    bookCard.classList.add("book-card");
