@@ -1,5 +1,5 @@
 import { getBooks } from "../../../database/db.js";
-import { EpubBook } from "../../../epub/epub-book.js";
+import EpubBook from "../../../epub/epub-book.js";
 
 /**
  * Renders one stored book into the unorganised bookshelf.
@@ -66,6 +66,7 @@ async function renderBookCard(book) {
 export default async function renderBookshelf() {
    const books = await getBooks();
 
+   document.getElementById("unorganised-bookshelf").innerHTML = "";
    for (const book of books) {
       await renderBookCard(book);
    }

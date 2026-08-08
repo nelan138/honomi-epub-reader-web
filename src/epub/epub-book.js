@@ -1,26 +1,29 @@
 import { unzipSync, strFromU8 } from "../vendor/fflate.js";
 
-export class EpubBook {
+export default class EpubBook {
    #files = null;
-   #epubBlob = null;
-
+   #epubFile = null;
+   metadata = null;
+   cover = null;
    /**
-    * Creates an EpubBook from an EPUB Blob.
+    * Creates an EpubBook from an EPUB file.
     *
-    * File objects are also accepted because File extends Blob.
+    * The file can be a browser File or a Blob restored from IndexedDB.
+    * Both are supported because File extends Blob and parsing uses the
+    * Blob interface.
     *
     * The EPUB is not parsed automatically because parsing requires
     * asynchronous operations. Call parse() after construction.
     *
-    * @param {Blob} epubBlob - The original EPUB archive.
+    * @param {File|Blob} epubFile - The original EPUB archive.
     */
-   constructor(epubBlob) {
-      this.#epubBlob = epubBlob;
-
+   constructor(epubFile) {
+      this.#files = null;
+      this.#epubFile = epubFile;
       this.metadata = null;
       this.cover = null;
    }
-   
+
    /**
     * Parses the EPUB archive.
     *
@@ -30,7 +33,7 @@ export class EpubBook {
     * @returns {Promise<EpubBook>} The parsed EpubBook instance.
     */
    async parse() {
-      const files = await EpubBook.#unzipBlob(this.#epubBlob);
+      const files = await EpubBook.#unzipFile(this.#epubFile);
 
       const packagePath = EpubBook.#getPackagePath(files);
 
@@ -55,13 +58,13 @@ export class EpubBook {
    /**
     * Returns the original EPUB archive.
     *
-    * If the EpubBook was constructed from a File, the returned
-    * value is still that File because File extends Blob.
+    * A browser File is returned unchanged. A value restored from IndexedDB
+    * is returned as its original Blob, which is accepted as the EPUB file.
     *
-    * @returns {Blob} The original EPUB Blob or File.
+    * @returns {File|Blob} The original EPUB file.
     */
-   getEpubBlob() {
-      return this.#epubBlob;
+   getEpubFile() {
+      return this.#epubFile;
    }
 
    /**
@@ -85,16 +88,16 @@ export class EpubBook {
    /**
     * Decompresses an EPUB archive.
     *
-    * File objects are also accepted because File extends Blob.
+    * Files and IndexedDB-restored Blobs are both accepted.
     *
-    * @param {Blob} epubBlob - The EPUB archive.
+    * @param {File|Blob} epubFile - The EPUB archive.
     * @returns {Promise<Object<string, Uint8Array>>}
     * The decompressed EPUB files keyed by their paths.
     */
-   static async #unzipBlob(epubBlob) {
+   static async #unzipFile(epubFile) {
       try {
          const rawBytes = new Uint8Array(
-            await epubBlob.arrayBuffer()
+            await epubFile.arrayBuffer()
          );
 
          return unzipSync(rawBytes);

@@ -1,4 +1,4 @@
-import { EpubBook } from "../../../epub/epub-book.js";
+import EpubBook from "../../../epub/epub-book.js";
 import { addBook } from "../../../database/db.js";
 import renderBookshelf from "./render-bookshelf.js"
 
@@ -17,7 +17,7 @@ fileInput.addEventListener("change", async () => {
 
    const book = {
       title: metadata.title,
-      file: epub.getEpubBlob(),
+      file: epub.getEpubFile(),
    };
 
    await addBook(book);

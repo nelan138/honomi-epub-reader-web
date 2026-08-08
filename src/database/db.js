@@ -73,7 +73,8 @@ function getDatabase() {
  * Book author.
  *
  * @param {File|Blob} book.file
- * Original EPUB file.
+ * Original EPUB file. After IndexedDB retrieval, this value is a Blob;
+ * EpubBook accepts it as the EPUB file payload.
  *
  * @param {Blob|null} [book.cover]
  * Extracted cover image, if available.
@@ -104,7 +105,8 @@ export function addBook(book) {
  * Retrieves all books stored in IndexedDB.
  *
  * Each book record contains its database ID, title,
- * and original EPUB archive as a Blob.
+ * and original EPUB archive as a Blob. EpubBook treats this Blob as the
+ * EPUB file payload when parsing it.
  *
  * @returns {Promise<Array<{
  *   id: number,
