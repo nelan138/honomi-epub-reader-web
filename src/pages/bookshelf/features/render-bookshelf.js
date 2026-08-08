@@ -45,13 +45,23 @@ async function renderBookCard(book) {
 
    const author = document.createElement("p");
    author.classList.add("author");
-   author.textContent = metadata.author;
+   author.textContent = `by ${metadata.author}`;
 
-   bookMetadata.append(title, author);
+   const language = document.createElement("div");
+   language.classList.add("language");
+   language.textContent = metadata.language;
+
+   bookMetadata.append(title, author, language);
+
+   const progressBar = document.createElement("div");
+   progressBar.classList.add("progress-bar");
+   progressBar.textContent = `${book.progress}%`
+   // progressBar.style.setProperty("--progress", "42%");
 
    bookCard.append(
       coverWrapper,
-      bookMetadata
+      bookMetadata,
+      progressBar,
    );
 
    return bookCard;
@@ -71,7 +81,7 @@ export default async function renderBookshelf() {
 
       if (!shelf) {
          shelf = document.createElement("section");
-         shelf.classList.add("book-category");
+         shelf.classList.add("category");
          shelf.id = category.name;
          document.querySelector(".bookshelf").append(shelf);
       }
@@ -79,16 +89,11 @@ export default async function renderBookshelf() {
       shelf.replaceChildren();
 
       const categoryName = document.createElement("h2");
-      const formattedName = category.name
-         .replace(/-/g, " ")
-         .replace(/^./, (c) => c.toUpperCase());
-      categoryName.textContent = formattedName;
+      categoryName.textContent = category.name;
       shelf.append(categoryName);
 
       for (const book of books) {
-         if (book.categoryId !== category.id) {
-            continue;
-         }
+         if (book.categoryId !== category.id) continue;
 
          const bookCard = await renderBookCard(book);
          shelf.append(bookCard);

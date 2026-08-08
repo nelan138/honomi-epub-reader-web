@@ -1,4 +1,4 @@
-import { addCategory, openDatabase } from "./database/db.js";
+import { openDatabase } from "./database/db.js";
 import renderBookshelf from "./pages/bookshelf/features/render-bookshelf.js";
 
 await openDatabase();

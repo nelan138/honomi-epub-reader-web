@@ -188,6 +188,23 @@ export function getCategories() {
    });
 }
 
+export function getBookProgress(bookId) {
+   return new Promise((resolve, reject) => {
+      const db = getDatabase();
+      const transaction = db.transaction(STORES.BOOKS, "readonly");
+      const store = transaction.objectStore(STORES.BOOKS);
+      const request = store.get(bookId);
+
+      request.onsuccess = () => {
+         resolve(request.result?.progress ?? null);
+      };
+      
+      request.onerror = () => {
+         reject(request.error);
+      };
+   });
+}
+
 /**
  * Retrieves all books stored in IndexedDB.
  *

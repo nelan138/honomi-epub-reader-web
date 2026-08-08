@@ -14,17 +14,15 @@ fileInput.addEventListener("change", async () => {
    await epub.parse();
 
    const categoryId = await addCategory("Your Library");
-
    const metadata = epub.getMetadata();
-
    const book = {
       title: metadata.title,
       categoryId: categoryId,
       file: epub.getEpubFile(),
+      progress: 0,
    };
 
    await addBook(book);
-   fileInput.value = "";
-
    await renderBookshelf();
+   fileInput.value = "";
 });
