@@ -1,4 +1,4 @@
-import { getBooks, getCategories } from "../../../database/db.js";
+import { getBooks, getCategories } from "../../../database/database.js";
 import EpubBook from "../../../epub/epub-book.js";
 
 /**
@@ -13,15 +13,11 @@ async function renderBookCard(book) {
    const epub = new EpubBook(book.file);
    await epub.parse();
 
-   const metadata = epub.getMetadata();
-   const cover = epub.getCover();
-
-   const bookCard = document.createElement("article");
-   bookCard.classList.add("book-card");
-
+   // Book cover
    const coverWrapper = document.createElement("div");
    coverWrapper.classList.add("cover-wrapper");
 
+   const cover = epub.getCover();
    if (cover) {
       const img = document.createElement("img");
       const coverUrl = URL.createObjectURL(cover);
@@ -36,28 +32,33 @@ async function renderBookCard(book) {
       coverWrapper.appendChild(img);
    }
 
-   const bookMetadata = document.createElement("div");
-   bookMetadata.classList.add("metadata");
-
+   // Metadata
    const title = document.createElement("h3");
    title.classList.add("title");
-   title.textContent = metadata.title;
 
    const author = document.createElement("p");
    author.classList.add("author");
-   author.textContent = `by ${metadata.author}`;
 
    const language = document.createElement("div");
    language.classList.add("language");
+
+   const metadata = epub.getMetadata();
+   title.textContent = metadata.title;
+   author.textContent = `by ${metadata.author}`;
    language.textContent = metadata.language;
 
+   const bookMetadata = document.createElement("div");
+   bookMetadata.classList.add("metadata");
    bookMetadata.append(title, author, language);
 
+   // Progress bar
    const progressBar = document.createElement("div");
    progressBar.classList.add("progress-bar");
    progressBar.textContent = `${book.progress}%`
    // progressBar.style.setProperty("--progress", "42%");
 
+   const bookCard = document.createElement("article");
+   bookCard.classList.add("book-card");
    bookCard.append(
       coverWrapper,
       bookMetadata,

@@ -1,5 +1,5 @@
 import EpubBook from "../../../epub/epub-book.js";
-import { addBook, addCategory } from "../../../database/db.js";
+import { addBook, addCategory } from "../../../database/database.js";
 import renderBookshelf from "./render-bookshelf.js";
 
 const importBtn = document.getElementById("import-book-btn");
@@ -13,6 +13,7 @@ fileInput.addEventListener("change", async () => {
    const epub = new EpubBook(file);
    await epub.parse();
 
+   // Newly imported books always go to "Your Library"
    const categoryId = await addCategory("Your Library");
    const metadata = epub.getMetadata();
    const book = {
