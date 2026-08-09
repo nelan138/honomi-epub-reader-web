@@ -1,5 +1,5 @@
 export const DB_NAME = "Honomi";
-export const DB_VERSION = 2;
+export const DB_VERSION = 1;
 
 // Additional stores such as word banks can be added here as needed.
 export const STORES = {

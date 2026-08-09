@@ -2,44 +2,44 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="./styles/bookshelf.css">
-  <title>Honomi — Bookshelf</title>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <link rel="stylesheet" href="./styles/bookshelf.css">
+   <title>Honomi — Bookshelf</title>
 </head>
 
 <body>
-  <main class="bookshelf">
-    <header class="bookshelf-header">
-      <input id="epub-file-input" type="file" accept=".epub,application/epub+zip" hidden>
+   <main class="bookshelf">
+      <header class="bookshelf-header">
+         <input id="epub-file-input" type="file" accept=".epub,application/epub+zip" hidden>
 
-      <button type="button" id="import-book-btn">Import</button>
-      <button type="button" id="edit-bookshelf-btn">Edit</button>
-      <button type="button" id="toggle-setting-btn">Settings</button>
-    </header>
+         <button type="button" id="import-book-btn">Import</button>
+         <button type="button" id="edit-bookshelf-btn">Edit</button>
+         <button type="button" id="toggle-setting-btn">Settings</button>
+      </header>
 
-    <section class="category" id="unorganised-bookshelf"></section>
+      <section class="category" id="unorganised-bookshelf"></section>
 
-    <section class="category">
-      <h2>Bookshelf</h2>
+      <section class="category">
+         <h2>Bookshelf</h2>
 
-      <article class="book-card">
-        <div class="cover-wrapper">
-          <img src="./assets/test.jpg" alt="Placeholder book cover">
-        </div>
+         <article class="book-card">
+            <div class="cover-wrapper">
+               <img src="./assets/test.jpg" alt="Placeholder book cover">
+            </div>
 
-        <div class="metadata">
-          <h3 class="title">コンビニ人間</h3>
-          <p class="author">by 村田沙耶香</p>
-          <p class="language">Japanese</p>
-        </div>
+            <div class="metadata">
+               <h3 class="title">コンビニ人間</h3>
+               <p class="author">by 村田沙耶香</p>
+               <p class="language">Japanese</p>
+            </div>
 
-        <div class="progress-bar">0%</div>
-      </article>
-    </section>
-  </main>
+            <div class="progress-bar">0%</div>
+         </article>
+      </section>
+   </main>
 
-  <script type="module" src="./src/main.js"></script>
+   <script type="module" src="./src/main.js"></script>
 </body>
 
 </html>
