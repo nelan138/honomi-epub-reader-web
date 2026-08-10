@@ -1,0 +1,29 @@
+{
+  "name": "honomi-epub-reader-web",
+  "version": "1.0.0",
+  "description": "A browser-based EPUB reader and personal digital bookshelf, built for Japanese reading with full control over typography, furigana, and display orientation.",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "vitest",
+    "test:run": "vitest run"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/huyh-lmv/honomi-epub-reader-web.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/huyh-lmv/honomi-epub-reader-web/issues"
+  },
+  "homepage": "https://github.com/huyh-lmv/honomi-epub-reader-web#readme",
+  "devDependencies": {
+    "jsdom": "^30.0.1",
+    "vitest": "^4.1.10"
+  }
+}
