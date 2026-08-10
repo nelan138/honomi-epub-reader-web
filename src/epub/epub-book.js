@@ -52,7 +52,29 @@ export default class EpubBook {
    }
 
    static fromRecord(bookRecord) {
-      // TODO:
+      const book = new EpubBook();
+
+      book.#metadata = {
+         title: bookRecord.title ?? "",
+         creator: bookRecord.creator ?? "",
+         language: bookRecord.language ?? "",
+         identifier: bookRecord.identifier ?? "",
+         publisher: bookRecord.publisher ?? "",
+         description: bookRecord.description ?? "",
+         subject: bookRecord.subject ?? []
+      };
+
+      book.#bookId = bookRecord.id ?? null;
+      book.#categoryId = bookRecord.categoryId ?? null;
+      book.#epubFile = bookRecord.epubFile ?? null;
+      book.#epubData = bookRecord.epubData ?? null;
+      book.#opfPath = bookRecord.opfPath ?? null;
+      book.#manifest = bookRecord.manifest ?? [];
+      book.#spine = bookRecord.spine ?? [];
+      book.#navigation = bookRecord.navigation ?? [];
+      book.#cover = bookRecord.cover ?? null;
+
+      return book;
    }
 
    setBookId(id) {

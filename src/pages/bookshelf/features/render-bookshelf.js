@@ -6,12 +6,11 @@ import EpubBook from "../../../epub/epub-book.js";
  *
  * @param {Object} book - Book record from IndexedDB.
  * @param {number} book.categoryId - Category ID of the book.
- * @param {Blob} book.file - Original EPUB file.
+ * @param {Blob} book.epubFile - Original EPUB file.
  * @returns {Promise<HTMLElement>}
  */
 async function renderBookCard(book) {
-   const epub = new EpubBook(book.file);
-   await epub.parse();
+   const epub = EpubBook.fromRecord(book);
 
    // Metadata
    const metadata = epub.getMetadata();
@@ -19,16 +18,18 @@ async function renderBookCard(book) {
    const title = document.createElement("h3");
    title.classList.add("title");
    title.textContent = metadata.title;
-   const author = document.createElement("p");
-   author.classList.add("author");
-   author.textContent = `by ${metadata.author}`;
+
+   const creator = document.createElement("p");
+   creator.classList.add("creator");
+   creator.textContent = `by ${metadata.creator}`;
+
    const language = document.createElement("div");
    language.classList.add("language");
    language.textContent = metadata.language;
 
    const bookMetadata = document.createElement("div");
    bookMetadata.classList.add("metadata");
-   bookMetadata.append(title, author, language);
+   bookMetadata.append(title, creator, language);
 
    // Book cover
    const coverWrapper = document.createElement("div");
@@ -42,9 +43,7 @@ async function renderBookCard(book) {
       img.src = coverUrl;
       img.alt = `${metadata.title} cover`;
 
-      img.onload = () => {
-         URL.revokeObjectURL(coverUrl);
-      };
+      img.onload = () => { URL.revokeObjectURL(coverUrl); };
 
       coverWrapper.appendChild(img);
    }
@@ -53,15 +52,11 @@ async function renderBookCard(book) {
    const progressBar = document.createElement("div");
    progressBar.classList.add("progress-bar");
    progressBar.textContent = `${book.progress}%`
-   progressBar.style.setProperty("--progress", "42%");
+   progressBar.style.setProperty("--progress", "42%"); // ! FIXME: Calculate progress based on reading position
 
    const bookCard = document.createElement("article");
    bookCard.classList.add("book-card");
-   bookCard.append(
-      coverWrapper,
-      bookMetadata,
-      progressBar,
-   );
+   bookCard.append(coverWrapper, bookMetadata, progressBar,);
 
    return bookCard;
 }
