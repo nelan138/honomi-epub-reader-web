@@ -27,9 +27,9 @@ export default class EpubBook {
     * @param {File | Blob} file EPUB file.
     * @returns {Promise<EpubBook>}
     */
-   static async from(file) {
+   static async fromFile(file) {
       if (!(file instanceof Blob) && !(file instanceof File)) throw new TypeError("file must be a File or Blob");
-      
+
       const book = new EpubBook();
 
       book.#bookId = null;
@@ -49,6 +49,10 @@ export default class EpubBook {
       book.#cover = book.getCover();
 
       return book;
+   }
+
+   static fromRecord(bookRecord) {
+      // TODO:
    }
 
    setBookId(id) {
@@ -92,12 +96,9 @@ export default class EpubBook {
    }
 
    /**
-    * Gets the EPUB manifest indexed by item ID.
+    * Gets the EPUB manifest, which is an array of items.
     *
-    * Each item contains its original href and its resolved path
-    * within the EPUB archive.
-    *
-    * @returns {Map<string, {
+    * @returns {Array<{
     *    id: string,
     *    href: string,
     *    path: string,
@@ -112,7 +113,7 @@ export default class EpubBook {
       const manifestElement = opfDocument.getElementsByTagName("manifest")[0];
 
       if (!manifestElement) throw new Error("EPUB package does not contain a manifest");
-      this.#manifest = new Map();
+      this.#manifest = [];
 
       for (const item of manifestElement.getElementsByTagName("item")) {
          const id = item.getAttribute("id");
@@ -120,7 +121,7 @@ export default class EpubBook {
 
          const href = item.getAttribute("href") ?? "";
 
-         this.#manifest.set(id, {
+         this.#manifest.push({
             id,
             href,
             path: this.#resolvePath(this.getOpfPath(), href),
@@ -133,14 +134,30 @@ export default class EpubBook {
    }
 
    /**
+    * Finds a manifest item by its ID.
+    *
+    * @param {string} id
+    * @returns {{
+    *   id: string,
+    *   href: string,
+    *   path: string,
+    *   mediaType: string,
+    *   properties: string
+    * } | undefined}
+    */
+   getManifestItem(id) {
+      return this.getManifest().find((item) => item.id === id);
+   }
+
+   /**
     * Gets the EPUB spine in reading order.
     *
-    * Each entry references an item from the manifest through `idref`.
+    * Each entry references an item that can be found by
+    * searching the manifest for a matching id.
     *
     * @returns {Array<{
-    *    idref: string,
-    *    linear: boolean,
-    *    item: object | null
+    *   idref: string | null,
+    *   linear: boolean
     * }>}
     */
    getSpine() {
@@ -151,8 +168,6 @@ export default class EpubBook {
 
       if (!spineElement) throw new Error("EPUB package does not contain a spine");
 
-      const manifest = this.getManifest();
-
       this.#spine = Array.from(
          spineElement.getElementsByTagName("itemref"),
          (itemref) => {
@@ -160,8 +175,7 @@ export default class EpubBook {
 
             return {
                idref,
-               linear: itemref.getAttribute("linear") !== "no",
-               item: idref ? manifest.get(idref) ?? null : null
+               linear: itemref.getAttribute("linear") !== "no"
             };
          }
       );
@@ -172,9 +186,17 @@ export default class EpubBook {
    /**
     * Gets the EPUB navigation / table of contents.
     *
-    * EPUB 3 navigation is preferred, with EPUB 2 NCX used as a fallback.
-    *
-    * @returns {Array<object>}
+    * @returns {Array<{
+    *   label: string,
+    *   href: string,
+    *   path: string,
+    *   children: Array<{
+    *     label: string,
+    *     href: string,
+    *     path: string,
+    *     children: Array
+    *   }>
+    * }>}
     */
    getNavigation() {
       if (this.#navigation) return this.#navigation;
@@ -182,12 +204,8 @@ export default class EpubBook {
       const manifest = this.getManifest();
 
       const navigationItem =
-         Array.from(manifest.values()).find((item) =>
-            item.properties.split(/\s+/).includes("nav")
-         ) ??
-         Array.from(manifest.values()).find(
-            (item) => item.mediaType === "application/x-dtbncx+xml"
-         );
+         manifest.find((item) => item.properties.split(/\s+/).includes("nav"))
+         ?? manifest.find((item) => item.mediaType === "application/x-dtbncx+xml");
 
       if (!navigationItem) {
          this.#navigation = [];
@@ -196,9 +214,7 @@ export default class EpubBook {
 
       const navigationDocument = this.#getXmlDocument(navigationItem.path);
 
-      const navElements = Array.from(
-         navigationDocument.getElementsByTagName("nav")
-      );
+      const navElements = Array.from(navigationDocument.getElementsByTagName("nav"));
 
       const tocElement =
          navElements.find(
@@ -219,13 +235,20 @@ export default class EpubBook {
       this.#navigation = Array.from(
          navigationDocument.getElementsByTagName("navPoint"),
          (navPoint) => {
-            const label = navPoint.getElementsByTagName("text")[0]?.textContent?.trim() ?? "";
-            const src = navPoint.getElementsByTagName("content")[0]?.getAttribute("src") ?? "";
+            const label = navPoint
+               .getElementsByTagName("text")[0]
+               ?.textContent
+               ?.trim() ?? "";
+
+            const href = navPoint
+               .getElementsByTagName("content")[0]
+               ?.getAttribute("src") ?? "";
 
             return {
                label,
-               href: src,
-               path: this.#resolvePath(navigationItem.path, src)
+               href,
+               path: this.#resolvePath(navigationItem.path, href),
+               children: []
             };
          }
       );
@@ -284,20 +307,13 @@ export default class EpubBook {
       const manifest = this.getManifest();
       const opfDocument = this.#getXmlDocument(this.getOpfPath());
 
-      let coverItem = Array.from(manifest.values()).find((item) =>
-         item.properties.split(/\s+/).includes("cover-image")
-      );
-
+      let coverItem = manifest.find((item) => item.properties.split(/\s+/).includes("cover-image"));
       if (!coverItem) {
-         const metadataElements = Array.from(
-            opfDocument.getElementsByTagName("meta")
-         );
+         const metadataElements = Array.from(opfDocument.getElementsByTagName("meta"));
 
-         const coverId = metadataElements.find((element) =>
-            element.getAttribute("name") === "cover"
-         )?.getAttribute("content");
+         const coverId = metadataElements.find((element) => element.getAttribute("name") === "cover")?.getAttribute("content");
 
-         if (coverId) coverItem = manifest.get(coverId);
+         if (coverId) coverItem = manifest.find((item) => item.id === coverId);
       }
 
       if (!coverItem) {
@@ -355,10 +371,7 @@ export default class EpubBook {
                label: link?.textContent?.trim() ?? "",
                href,
                path: this.#resolvePath(navigationPath, href),
-               children: this.#readNavigationList(
-                  listItem,
-                  navigationPath
-               )
+               children: this.#readNavigationList(listItem, navigationPath)
             };
          });
    }

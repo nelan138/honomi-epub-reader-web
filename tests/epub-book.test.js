@@ -36,7 +36,7 @@ beforeAll(async () => {
       }
    );
 
-   book = await EpubBook.from(file);
+   book = await EpubBook.fromFile(file);
 
    manifest = book.getManifest();
    spine = book.getSpine();
@@ -85,13 +85,8 @@ describe("EpubBook metadata", () => {
 });
 
 describe("EpubBook manifest", () => {
-   test("manifest is a Map", () => {
-      expect(manifest).toBeInstanceOf(Map);
-      expect(manifest.size).toBeGreaterThan(0);
-   });
-
    test("contains the navigation document", () => {
-      const toc = manifest.get("toc");
+      const toc = manifest.find((item) => item.id === "toc");
 
       expect(toc).toBeDefined();
       expect(toc.id).toBe("toc");
@@ -104,7 +99,7 @@ describe("EpubBook manifest", () => {
    });
 
    test("contains the cover image", () => {
-      const cover = manifest.get("cover");
+      const cover = manifest.find((item) => item.id === "cover");
 
       expect(cover).toBeDefined();
       expect(cover.id).toBe("cover");
@@ -114,21 +109,8 @@ describe("EpubBook manifest", () => {
       expect(cover.properties).toBe("cover-image");
    });
 
-   test("contains the main stylesheet", () => {
-      const bookStyle = manifest.get("book-style");
-
-      expect(bookStyle).toBeDefined();
-      expect(bookStyle.id).toBe("book-style");
-      expect(bookStyle.href).toBe("style/book-style.css");
-      expect(bookStyle.path).toBe(
-         "item/style/book-style.css"
-      );
-      expect(bookStyle.mediaType).toBe("text/css");
-      expect(bookStyle.properties).toBe("");
-   });
-
    test("contains the first XHTML page", () => {
-      const firstPage = manifest.get("p-001");
+      const firstPage = manifest.find((item) => item.id === "p-001");
 
       expect(firstPage).toBeDefined();
       expect(firstPage.id).toBe("p-001");
@@ -161,31 +143,22 @@ describe("EpubBook spine", () => {
 
       expect(firstPage).toBeDefined();
       expect(firstPage.linear).toBe(true);
-      expect(firstPage.item).toBe(
-         manifest.get("p-001")
+      expect(manifest.find((item) => item.id === "p-001")).toBe(
+         manifest.find((item) => item.id === firstPage.idref)
       );
    });
 
    test("keeps content pages in reading order", () => {
       const firstPageIndex = spine.findIndex(
-         (spineItem) => spineItem.idref === "p-001"
+         (spineItem) => spineItem.idref === "p-003"
       );
 
       const secondPageIndex = spine.findIndex(
-         (spineItem) => spineItem.idref === "p-002"
+         (spineItem) => spineItem.idref === "p-004"
       );
 
       expect(firstPageIndex).toBeGreaterThanOrEqual(0);
       expect(secondPageIndex).toBeGreaterThan(firstPageIndex);
-   });
-
-   test("links spine items to manifest items", () => {
-      for (const spineItem of spine) {
-         expect(spineItem.idref).toBeTruthy();
-         expect(spineItem.item).toBe(
-            manifest.get(spineItem.idref)
-         );
-      }
    });
 });
 

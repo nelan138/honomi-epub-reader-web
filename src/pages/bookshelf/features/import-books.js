@@ -10,17 +10,28 @@ fileInput.addEventListener("change", async () => {
    const file = fileInput.files[0];
    if (!file) return;
 
-   const epub = new EpubBook(file);
-   await epub.parse();
+   const epub = await EpubBook.fromFile(file);
 
-   // Newly imported books always go to "Your Library"
-   const categoryId = await addCategory("Your Library");
+   // ! Newly imported books always go to "Your Library"
    const metadata = epub.getMetadata();
+
    const book = {
+      categoryId: await addCategory("Your Library"),
+
       title: metadata.title,
-      categoryId: categoryId,
-      file: epub.getEpubFile(),
+      creator: metadata.creator,
+      language: metadata.language,
+      publisher: metadata.publisher,
+      identifier: metadata.identifier,
+
+      cover: epub.getCover(),
       progress: 0,
+
+      epubFile: epub.getEpubFile(),
+      opfPath: epub.getOpfPath(),
+      manifest: epub.getManifest(),
+      navigation: epub.getNavigation(),
+      spine: epub.getSpine(),
    };
 
    await addBook(book);
