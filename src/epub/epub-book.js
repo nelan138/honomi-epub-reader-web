@@ -1,5 +1,17 @@
 import { unzipSync, strFromU8 } from "../vendor/fflate.js";
 
+/**
+ * Represents an EPUB book.
+ * @property {string} bookId
+ * @property {string} categoryId
+ * @property {File | Blob} epubFile - The original EPUB file (imported from <input>) or Blob (pulled from DB).
+ * @property {string} opfPath - The path to the EPUB package document (OPF).
+ * @property {Array<{id: string, href: string, path: string, mediaType: string, properties: string}>} manifest.
+ * @property {Array<{idref: string | null, linear: boolean}>} spine
+ * @property {Array<{label: string, href: string, path: string, children: Array}>} navigation
+ * @property {Object[{title: string, creator: string, language: string, identifier: string, publisher: string, description: string, subject: string[]}]} metadata
+ * @property {Blob} cover - The cover image declared by the EPUB.
+ */
 export default class EpubBook {
    // * Identity
    #bookId = null;
@@ -15,20 +27,21 @@ export default class EpubBook {
    #spine = null;
    #navigation = null;
 
-   // Bookshelf page
+   // * Bookshelf page
    #metadata = null;
    #cover = null;
+   progress = null;
+   constructor() {};
 
    /**
-    * Creates an EpubBook from an EPUB file or Blob.
-    *
+    * Creates an EpubBook from an EPUB file (imported from <input>).
     * The EPUB is unzipped and its main structures are parsed and cached.
     *
-    * @param {File | Blob} file EPUB file.
+    * @param {File} file EPUB file.
     * @returns {Promise<EpubBook>}
     */
    static async fromFile(file) {
-      if (!(file instanceof Blob) && !(file instanceof File)) throw new TypeError("file must be a File or Blob");
+      if (!(file instanceof File)) throw new TypeError("file must be a File");
 
       const book = new EpubBook();
 
@@ -52,6 +65,7 @@ export default class EpubBook {
    }
 
    static fromRecord(bookRecord) {
+      if (typeof bookRecord !== "object" || bookRecord === null) throw new TypeError("bookRecord must be an object");
       const book = new EpubBook();
 
       book.#metadata = {
@@ -91,6 +105,22 @@ export default class EpubBook {
 
    getCategoryId() {
       return this.#categoryId;
+   }
+
+   /**
+    * Sets the reading progress of the book.
+    * @param {Number} progress 
+    */
+   setProgress(progress) {
+      this.progress = progress;
+   }
+
+   /**
+    * 
+    * @returns {Number} 0 to 100
+    */
+   getProgress() {
+      return this.progress;
    }
 
    getEpubFile() {

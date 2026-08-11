@@ -1,65 +1,53 @@
-import { getBooks, getCategories } from "../../../database/database.js";
+import { getAllBooks, getAllCategories, addBook, addCategory, getBooksByCategory } from "../../../database/database.js";
+import { BookRecord } from "../../../database/schema.js";
 import EpubBook from "../../../epub/epub-book.js";
 
 /**
- * Creates a card for one stored book.
- *
- * @param {Object} book - Book record from IndexedDB.
- * @param {number} book.categoryId - Category ID of the book.
- * @param {Blob} book.epubFile - Original EPUB file.
- * @returns {Promise<HTMLElement>}
+ * 
+ * @param {Object} book 
+ * @returns {HTMLElement} The rendered book card element.
  */
-async function renderBookCard(book) {
-   const epub = EpubBook.fromRecord(book);
+async function renderBookCard(bookRecord) {
+   const epubBook = await EpubBook.fromRecord(bookRecord);
+   const metadata = epubBook.getMetadata();
+   const cover = epubBook.getCover();
 
-   // Metadata
-   const metadata = epub.getMetadata();
+   const card = document.createElement('article');
+   card.className = 'book-card';
 
-   const title = document.createElement("h3");
-   title.classList.add("title");
+   const coverWrapper = document.createElement('div');
+   coverWrapper.className = 'cover-wrapper';
+
+   const img = document.createElement('img');
+   img.src = cover ? URL.createObjectURL(cover) : './assets/test.jpg';
+   img.alt = `Cover of ${metadata.title}`;
+   coverWrapper.append(img);
+
+   const meta = document.createElement('div');
+   meta.className = 'metadata';
+
+   const title = document.createElement('h3');
+   title.className = 'title';
    title.textContent = metadata.title;
 
-   const creator = document.createElement("p");
-   creator.classList.add("creator");
+   const creator = document.createElement('p');
+   creator.className = 'creator';
    creator.textContent = `by ${metadata.creator}`;
 
-   const language = document.createElement("div");
-   language.classList.add("language");
+   const language = document.createElement('p');
+   language.className = 'language';
    language.textContent = metadata.language;
 
-   const bookMetadata = document.createElement("div");
-   bookMetadata.classList.add("metadata");
-   bookMetadata.append(title, creator, language);
+   meta.append(title, creator, language);
 
-   // Book cover
-   const coverWrapper = document.createElement("div");
-   coverWrapper.classList.add("cover-wrapper");
+   const progress = document.createElement('div');
+   progress.className = 'progress-bar';
+   progress.textContent = '0%';
 
-   const cover = epub.getCover();
-   if (cover) {
-      const img = document.createElement("img");
-      const coverUrl = URL.createObjectURL(cover);
-
-      img.src = coverUrl;
-      img.alt = `${metadata.title} cover`;
-
-      img.onload = () => { URL.revokeObjectURL(coverUrl); };
-
-      coverWrapper.appendChild(img);
-   }
-
-   // Progress bar
-   const progressBar = document.createElement("div");
-   progressBar.classList.add("progress-bar");
-   progressBar.textContent = `${book.progress}%`
-   progressBar.style.setProperty("--progress", "42%"); // ! FIXME: Calculate progress based on reading position
-
-   const bookCard = document.createElement("article");
-   bookCard.classList.add("book-card");
-   bookCard.append(coverWrapper, bookMetadata, progressBar,);
-
-   return bookCard;
+   card.append(coverWrapper, meta, progress);
+   return card;
 }
+
 
 /**
  * Loads and renders all stored books.
@@ -67,30 +55,28 @@ async function renderBookCard(book) {
  * @returns {Promise<void>}
  */
 export default async function renderBookshelf() {
-   const books = await getBooks();
-   const categories = await getCategories();
+   const bookshelf = document.getElementById("bookshelf");
+   const categories = await getAllCategories();
 
    for (const category of categories) {
-      let shelf = document.getElementById(category.name);
+      console.log(`Rendering category: ${category.name} (ID: ${category.id})`);
 
-      if (!shelf) {
-         shelf = document.createElement("section");
-         shelf.classList.add("category");
-         shelf.id = category.name;
-         document.querySelector(".bookshelf").append(shelf);
-      }
-
-      shelf.replaceChildren();
+      const shelf = document.getElementById(category.name) || document.createElement("section");
+      shelf.id = category.name;
+      shelf.innerHTML = '';
 
       const categoryName = document.createElement("h2");
       categoryName.textContent = category.name;
       shelf.append(categoryName);
 
-      for (const book of books) {
-         if (book.categoryId !== category.id) continue;
+      const books = await getBooksByCategory(category.id);
 
+      for (const book of books) {
          const bookCard = await renderBookCard(book);
          shelf.append(bookCard);
+         console.log(`Rendered book: ${book.title} (ID: ${book.bookId}) in category: ${category.name}`);
       }
+
+      bookshelf.append(shelf);
    }
 }

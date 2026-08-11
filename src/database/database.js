@@ -1,28 +1,21 @@
-import {
-   DB_NAME,
-   DB_VERSION,
-   STORES,
-   createSchema,
-} from "./schema.js";
+import { BookRecord, CategoryRecord, DB_NAME, DB_VERSION, STORES, createSchemas } from "./schema.js";
 
-let database;
-
+let database = null;
 /**
- * Opens the HONOMI IndexedDB database.
- *
- * This should be called once when the application starts.
- * The resulting database connection is stored internally and reused
- * by the other database functions.
- *
+ * Opens the database, creating it if it does not exist.
+ * 
  * @returns {Promise<IDBDatabase>}
- * Resolves with the opened IndexedDB database.
  */
 export function openDatabase() {
+   if (database) return Promise.resolve(database);
+
    return new Promise((resolve, reject) => {
       const request = indexedDB.open(DB_NAME, DB_VERSION);
 
-      request.onupgradeneeded = () => {
-         createSchema(request.result, request.transaction);
+      request.onupgradeneeded = (event) => {
+         const db = event.target.result;
+         createSchemas(db, event.target.transaction);
+         console.log("Upgrade needed, version:", db.version);
       };
 
       request.onsuccess = () => {
@@ -30,240 +23,118 @@ export function openDatabase() {
          resolve(database);
       };
 
-      request.onerror = () => {
-         reject(request.error);
-      };
+      request.onerror = () => reject(request.error);
    });
 }
 
 /**
- * Returns the active IndexedDB connection.
- *
- * @returns {IDBDatabase}
- * @throws {Error} If openDatabase() has not been called yet.
+ * Adds a book to the database.
+ * 
+ * @param {BookRecord} bookRecord 
+ * @returns {Promise<number>} The ID of the newly added book.
  */
-function getDatabase() {
-   if (!database) {
-      throw new Error(
-         "Database has not been opened. Call openDatabase() first."
-      );
-   }
-
-   return database;
-}
-
-/**
- * Stores one book in IndexedDB.
- *
- * Example book shape:
- * {
- *   title: "コンビニ人間",
- *   author: "村田沙耶香",
- *   categoryId: 1,
- *   file: File,
- *   cover: Blob
- * }
- *
- * @param {Object} book
- * The book record to store.
- *
- * @param {string} book.title
- * Book title.
- *
- * @param {string} book.author
- * Book author.
- *
- * @param {IDBValidKey} book.categoryId
- * Primary key of the category this book belongs to.
- *
- * @param {File|Blob} book.file
- * Original EPUB file. After IndexedDB retrieval, this value is a Blob;
- * EpubBook accepts it as the EPUB file payload.
- *
- * @param {Blob|null} [book.cover]
- * Extracted cover image, if available.
- *
- * @returns {Promise<IDBValidKey>}
- * Resolves with the generated primary key.
- */
-export function addBook(book) {
+export async function addBook(bookRecord) {
+   const db = await openDatabase();
    return new Promise((resolve, reject) => {
-      const db = getDatabase();
-
       const transaction = db.transaction(STORES.BOOKS, "readwrite");
       const store = transaction.objectStore(STORES.BOOKS);
-
-      const request = store.add(book);
-
-      request.onsuccess = () => {
-         resolve(request.result);
-      };
-
-      request.onerror = () => {
-         reject(request.error);
-      };
-   });
-}
-
-/**
- * Returns the category ID for the given name, creating the category
- * first if it does not exist yet.
- *
- * @param {string} name - Category name (must be unique).
- * @returns {Promise<IDBValidKey>} Resolves with the category's primary key.
- */
-export function addCategory(name) {
-   return new Promise((resolve, reject) => {
-      const db = getDatabase();
-      const transaction = db.transaction(STORES.CATEGORIES, "readwrite");
-      const store = transaction.objectStore(STORES.CATEGORIES);
-      const existingRequest = store.index("name").getKey(name);
-
-      existingRequest.onsuccess = () => {
-         if (existingRequest.result !== undefined) {
-            resolve(existingRequest.result);
-            return;
-         }
-
-         const request = store.add({ name });
-
-         request.onsuccess = () => {
-            resolve(request.result);
-         };
-
-         request.onerror = () => {
-            reject(request.error);
-         };
-      };
-
-      existingRequest.onerror = () => {
-         reject(existingRequest.error);
-      };
-   });
-}
-
-/**
- * Deletes one category from IndexedDB.
- *
- * @param {IDBValidKey} id - Primary key of the category to delete.
- * @returns {Promise<void>} Resolves when the delete request succeeds.
- */
-export function deleteCategory(id) {
-   return new Promise((resolve, reject) => {
-      const db = getDatabase();
-      const transaction = db.transaction(STORES.CATEGORIES, "readwrite");
-      const store = transaction.objectStore(STORES.CATEGORIES);
-      const request = store.delete(id);
+      const request = store.add(bookRecord.toObject());
 
       request.onsuccess = () => {
-         resolve();
+         console.log("Book added with ID:", request.result);
+         resolve(request.result)
       };
-
-      request.onerror = () => {
-         reject(request.error);
-      };
+      request.onerror = () => reject(request.error);
    });
 }
 
 /**
- * Retrieves all categories stored in IndexedDB.
- *
- * @returns {Promise<Array<{ id: IDBValidKey, name: string }>>}
- * Resolves with all stored category records.
+ * Returns the ID of the category with the given name, creating it if it does not exist.
+ * 
+ * @param {Object} categoryRecord 
+ * @returns {Promise<number>} The ID of the category.
  */
-export function getCategories() {
+export async function addCategory(categoryRecord) {
+   const db = await openDatabase();
+
+   // * Check if the category already exists
+   const existingId = await new Promise((resolve, reject) => {
+      const tx = db.transaction(STORES.CATEGORIES, "readonly");
+      const store = tx.objectStore(STORES.CATEGORIES);
+      const index = store.index("by_name");
+
+      const req = index.get(categoryRecord.name);
+
+      req.onsuccess = () => {
+         console.log("Existing category ID:", req.result?.id);
+         resolve(req.result?.id ?? null);
+      }
+      req.onerror = () => reject(req.error);
+   });
+
+   if (existingId != null) return existingId;
+
    return new Promise((resolve, reject) => {
-      const db = getDatabase();
+      const tx = db.transaction(STORES.CATEGORIES, "readwrite");
+      const store = tx.objectStore(STORES.CATEGORIES);
+
+      const req = store.add(categoryRecord.toObject());
+
+      req.onsuccess = () => {
+         console.log("Category added with ID:", req.result);
+         resolve(req.result);
+      }
+      req.onerror = () => reject(req.error);
+   });
+}
+
+/**
+ * Returns all books stored in the database.
+ * 
+ * @returns {Promise<Array<BookRecord>>}
+ */
+export async function getAllBooks() {
+   const db = await openDatabase();
+   return new Promise((resolve, reject) => {
+      const transaction = db.transaction(STORES.BOOKS, "readonly");
+      const store = transaction.objectStore(STORES.BOOKS);
+      const request = store.getAll();
+
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+   });
+}
+
+/**
+ * Returns all categories stored in the database.
+ * @returns {Promise<Array<CategoryRecord>>}
+ */
+export async function getAllCategories() {
+   const db = await openDatabase();
+   return new Promise((resolve, reject) => {
       const transaction = db.transaction(STORES.CATEGORIES, "readonly");
       const store = transaction.objectStore(STORES.CATEGORIES);
       const request = store.getAll();
 
-      request.onsuccess = () => {
-         resolve(request.result);
-      };
-
-      request.onerror = () => {
-         reject(request.error);
-      };
-   });
-}
-
-export function getBookProgress(bookId) {
-   return new Promise((resolve, reject) => {
-      const db = getDatabase();
-      const transaction = db.transaction(STORES.BOOKS, "readonly");
-      const store = transaction.objectStore(STORES.BOOKS);
-      const request = store.get(bookId);
-
-      request.onsuccess = () => {
-         resolve(request.result?.progress ?? null);
-      };
-      
-      request.onerror = () => {
-         reject(request.error);
-      };
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
    });
 }
 
 /**
- * Retrieves all books stored in IndexedDB.
- *
- * Each book record contains its database ID, title, category ID,
- * and original EPUB archive as a Blob. EpubBook treats this Blob as the
- * EPUB file payload when parsing it.
- *
- * @returns {Promise<Array<{
- *   id: number,
- *   title: string,
- *   categoryId: IDBValidKey,
- *   file: Blob
- * }>>}
- * Resolves with all stored book records.
+ * Returns all books belonging to a category.
+ * @param {number} categoryId
+ * @returns {Promise<Array>}
  */
-export function getBooks() {
+export async function getBooksByCategory(categoryId) {
+   const db = await openDatabase();
    return new Promise((resolve, reject) => {
-      const db = getDatabase();
-
       const transaction = db.transaction(STORES.BOOKS, "readonly");
       const store = transaction.objectStore(STORES.BOOKS);
+      const index = store.index("by_category");
+      const request = index.getAll(categoryId);
 
-      const request = store.getAll();
-
-      request.onsuccess = () => {
-         resolve(request.result);
-      };
-
-      request.onerror = () => {
-         reject(request.error);
-      };
-   });
-}
-
-/**
- * Deletes one book from IndexedDB.
- *
- * @param {IDBValidKey} id
- * Primary key of the book to delete.
- * With the current auto-increment schema, this will normally be a number.
- *
- * @returns {Promise<void>}
- * Resolves when the delete request succeeds.
- */
-export function deleteBook(id) {
-   return new Promise((resolve, reject) => {
-      const db = getDatabase();
-
-      const transaction = db.transaction(STORES.BOOKS, "readwrite");
-      const store = transaction.objectStore(STORES.BOOKS);
-
-      const request = store.delete(id);
-
-      request.onsuccess = () => {
-         resolve();
-      };
-
-      request.onerror = () => {
-         reject(request.error);
-      };
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
    });
 }

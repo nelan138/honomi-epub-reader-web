@@ -9,7 +9,7 @@
 </head>
 
 <body>
-   <main class="bookshelf">
+   <main id="bookshelf">
       <header class="bookshelf-header">
          <input id="epub-file-input" type="file" accept=".epub,application/epub+zip" hidden>
 
@@ -18,22 +18,17 @@
          <button type="button" id="toggle-setting-btn">Settings</button>
       </header>
 
-      <section class="category" id="unorganised-bookshelf"></section>
-
       <section class="category">
-         <h2>Bookshelf</h2>
-
+         <h2>Categories will be rendered same as this</h2>
          <article class="book-card">
             <div class="cover-wrapper">
-               <img src="./assets/test.jpg" alt="Placeholder book cover">
+               <img src="./tests/fixture/majo_no_tabitabi_2.jpg" alt="Cover of 魔女の旅々２ (GAノベル)">
             </div>
-
             <div class="metadata">
-               <h3 class="title">コンビニ人間</h3>
-               <p class="creator">by 村田沙耶香</p>
-               <p class="language">Japanese</p>
+               <h3 class="title">魔女の旅々２ (GAノベル)</h3>
+               <p class="creator">by 白石 定規</p>
+               <p class="language">ja</p>
             </div>
-
             <div class="progress-bar">0%</div>
          </article>
       </section>
