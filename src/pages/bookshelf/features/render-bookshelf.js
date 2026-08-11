@@ -62,6 +62,7 @@ export default async function renderBookshelf() {
       console.log(`Rendering category: ${category.name} (ID: ${category.id})`);
 
       const shelf = document.getElementById(category.name) || document.createElement("section");
+      shelf.classList.add("category");
       shelf.id = category.name;
       shelf.innerHTML = '';
 
@@ -69,14 +70,17 @@ export default async function renderBookshelf() {
       categoryName.textContent = category.name;
       shelf.append(categoryName);
 
+      const bookCardList = document.createElement("div");
+      bookCardList.className = "book-card-list";
       const books = await getBooksByCategory(category.id);
 
       for (const book of books) {
          const bookCard = await renderBookCard(book);
-         shelf.append(bookCard);
+         bookCardList.append(bookCard);
          console.log(`Rendered book: ${book.title} (ID: ${book.bookId}) in category: ${category.name}`);
       }
 
+      shelf.append(bookCardList);
       bookshelf.append(shelf);
    }
 }

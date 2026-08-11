@@ -1,22 +1,181 @@
-/* ── Book card ───────────────────────────────── */
-.book-card {
-   display: grid;
-   grid-template-columns: 80px 1fr;
-   grid-template-areas:
-      "cover metadata"
-      "progress progress";
-   width: 280px;
-   gap: 0.75rem;
-   cursor: pointer;
+/* ─── Tokens ─────────────────────────────────────────────────── */
+:root {
+   --bg: #EAE4D8;
+   --surface: #F8F3E9;
+   --card: #FFFDF7;
+   --card-border: #D8CCBA;
+
+   --cover-bg: #DED5C6;
+   --metadata-bg: #E3E9DF;
+   --progress-bg: #E6DED0;
+
+   --text-primary: #3B342D;
+   --text-muted: #8A7E70;
+
+   --sage: #71866B;
+   --sage-light: #DDE6D8;
+
+   --terracotta: #B96F58;
+   --terracotta-light: #F0DDD5;
+
+   --gold: #B3945A;
+   --gold-light: #EEE4CC;
+
+   --radius: 7px;
+   --cover-w: 108px;
+   --card-gap: 12px;
 }
 
-/* ── Cover ───────────────────────────────────── */
+/* ─── Reset ──────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+   box-sizing: border-box;
+   margin: 0;
+   padding: 0;
+}
+
+/* ─── Base ───────────────────────────────────────────────────── */
+html,
+body {
+   height: 100%;
+}
+
+body {
+   background: var(--bg);
+   color: var(--text-primary);
+   font-family: "Georgia", serif;
+   font-size: 14px;
+   line-height: 1.5;
+}
+
+/* ─── Bookshelf ──────────────────────────────────────────────── */
+#bookshelf {
+   max-width: 1300px;
+   margin: 0 auto;
+   padding: 24px 32px 64px;
+   display: flex;
+   flex-direction: column;
+   gap: 48px;
+}
+
+/* ─── Header ─────────────────────────────────────────────────── */
+.bookshelf-header {
+   display: flex;
+   align-items: center;
+   gap: 8px;
+   padding-bottom: 16px;
+   border-bottom: 1px solid #D5CABB;
+}
+
+.bookshelf-header button {
+   background: var(--surface);
+   border: 1px solid #D5CABB;
+   border-radius: var(--radius);
+   color: var(--text-primary);
+   cursor: pointer;
+   font-family: inherit;
+   font-size: 13px;
+   padding: 5px 14px;
+   transition:
+      background 0.15s,
+      border-color 0.15s,
+      color 0.15s;
+}
+
+.bookshelf-header button:hover {
+   background: var(--card);
+   border-color: var(--sage);
+}
+
+/* Individual button identities */
+#import-book-btn {
+   background: var(--sage);
+   border-color: var(--sage);
+   color: #FFFDF7;
+}
+
+#import-book-btn:hover {
+   background: #60755A;
+   border-color: #60755A;
+}
+
+#edit-bookshelf-btn:hover {
+   background: var(--terracotta-light);
+   border-color: #D09A87;
+   color: #8F4F3E;
+}
+
+#toggle-setting-btn:hover {
+   background: var(--gold-light);
+   border-color: #CCB985;
+   color: #79643A;
+}
+
+/* ─── Category ───────────────────────────────────────────────── */
+.category {
+   display: flex;
+   flex-direction: column;
+   gap: 16px;
+}
+
+.category>h2 {
+   font-size: 13px;
+   font-family: system-ui, sans-serif;
+   font-weight: 600;
+   letter-spacing: 0.1em;
+   text-transform: uppercase;
+   color: #776B5D;
+}
+
+/* Cards row */
+.book-card-list {
+   display: flex;
+   flex-direction: row;
+   flex-wrap: wrap;
+   align-items: flex-start;
+   gap: var(--card-gap);
+}
+
+/* ─── Book card ──────────────────────────────────────────────── */
+.book-card {
+   background: var(--card);
+   border: 1px solid var(--card-border);
+   border-radius: var(--radius);
+   display: grid;
+   grid-template-columns: var(--cover-w) 1fr;
+   grid-template-rows: 1fr auto;
+   grid-template-areas:
+      "cover meta"
+      "progress progress";
+   width: 300px;
+   flex-shrink: 0;
+   overflow: hidden;
+   cursor: pointer;
+
+   box-shadow:
+      0 1px 1px rgba(76, 60, 40, 0.05),
+      0 4px 12px rgba(76, 60, 40, 0.06);
+
+   transition:
+      transform 0.15s,
+      box-shadow 0.15s,
+      border-color 0.15s;
+}
+
+.book-card:hover {
+   transform: translateY(-2px);
+   border-color: #C7B8A3;
+
+   box-shadow:
+      0 2px 3px rgba(76, 60, 40, 0.06),
+      0 8px 20px rgba(76, 60, 40, 0.12);
+}
+
+/* ─── Cover ──────────────────────────────────────────────────── */
 .cover-wrapper {
    grid-area: cover;
-   width: 80px;
-   height: 120px;
-   background: #f0f0f0;
-   border-radius: 4px;
+   background: var(--cover-bg);
    overflow: hidden;
 }
 
@@ -27,55 +186,71 @@
    display: block;
 }
 
-/* ── Metadata ────────────────────────────────── */
+/* ─── Metadata ───────────────────────────────────────────────── */
 .metadata {
-   grid-area: metadata;
+   grid-area: meta;
+   background: var(--metadata-bg);
+   padding: 14px 14px 14px 16px;
    display: flex;
    flex-direction: column;
-   justify-content: center;
-   gap: 0.25rem;
-   min-width: 0;
+   gap: 4px;
+   overflow: hidden;
+   min-height: 162px;
 }
 
 .metadata .title {
-   font-size: 0.85rem;
-   font-weight: 600;
-   line-height: 1.3;
-   margin: 0;
-
-   display: -webkit-box;
-   -webkit-line-clamp: 2;
-   -webkit-box-orient: vertical;
+   font-size: 14px;
+   font-weight: normal;
+   line-height: 1.35;
    overflow: hidden;
+   display: -webkit-box;
+   -webkit-line-clamp: 4;
+   -webkit-box-orient: vertical;
 }
 
-.metadata .creator,
-.metadata .language {
-   font-size: 0.75rem;
-   color: #666;
-   margin: 0;
-
+.metadata .creator {
+   font-size: 12px;
+   color: var(--text-muted);
+   font-family: system-ui, sans-serif;
    white-space: nowrap;
    overflow: hidden;
    text-overflow: ellipsis;
 }
 
-/* ── Progress bar ────────────────────────────── */
+.metadata .language {
+   margin-top: auto;
+   font-size: 11px;
+   font-family: system-ui, sans-serif;
+   color: var(--sage);
+   letter-spacing: 0.04em;
+   text-transform: uppercase;
+}
+
+/* ─── Progress bar ───────────────────────────────────────────── */
 .progress-bar {
    grid-area: progress;
-   height: 4px;
-   background: #e0e0e0;
-   border-radius: 2px;
-   font-size: 0;
-   /* hide the text content "0%" visually */
+   position: relative;
+   height: 24px;
+   background: var(--progress-bg);
+   border-top: 1px solid var(--card-border);
+
+   font-size: 11px;
+   font-family: system-ui, sans-serif;
+   color: #756A5D;
+
+   display: flex;
+   align-items: center;
+   padding: 0 10px;
    overflow: hidden;
 }
 
-.progress-bar::after {
+.progress-bar::before {
    content: "";
-   display: block;
-   height: 100%;
+   position: absolute;
+   inset: 0;
    width: var(--progress, 0%);
-   background: #555;
-   border-radius: 2px;
+   background: var(--sage);
+   opacity: 0.35;
+
+   transition: width 0.25s ease;
 }
