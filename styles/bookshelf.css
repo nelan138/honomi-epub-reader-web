@@ -123,7 +123,7 @@ body {
    gap: 16px;
 }
 
-/* ─── Category header ────────────────────────────────────────── */
+/* ─── Category header ───────────────────────────────────────── */
 .category-header {
    display: flex;
    align-items: center;
@@ -200,6 +200,7 @@ body {
    flex-flow: row wrap;
    align-items: flex-start;
    gap: var(--card-gap);
+   padding-bottom: 12px;
 }
 
 /* ─── Book card ──────────────────────────────────────────────── */
@@ -235,7 +236,9 @@ body {
 .book-card:focus-within {
    transform: translateY(-2px);
    border-color: #C7B8A3;
-   grid-template-columns: var(--cover-w) minmax(0, 1fr) var(--actions-w);
+
+   grid-template-columns:
+      var(--cover-w) minmax(0, 1fr) var(--actions-w);
 
    box-shadow:
       0 2px 3px rgba(76, 60, 40, 0.06),
@@ -247,6 +250,7 @@ body {
    grid-area: cover;
    min-width: 0;
    overflow: hidden;
+
    background: var(--cover-bg);
 }
 
@@ -331,6 +335,7 @@ body {
 /* ─── Book card actions ──────────────────────────────────────── */
 .book-card-actions {
    grid-area: actions;
+   min-width: 0;
    overflow: hidden;
 
    display: flex;
@@ -448,7 +453,8 @@ body {
 /* ─── Touchscreen fallback ───────────────────────────────────── */
 @media (hover: none) {
    .book-card {
-      grid-template-columns: var(--cover-w) minmax(0, 1fr) var(--actions-w);
+      grid-template-columns:
+         var(--cover-w) minmax(0, 1fr) var(--actions-w);
    }
 
    .category-actions {
@@ -458,6 +464,7 @@ body {
 
 /* ─── Reduced motion ─────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
+
    .book-card,
    .book-card-actions button,
    .progress-bar::before {
