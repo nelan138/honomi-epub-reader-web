@@ -1,4 +1,4 @@
-import { addCategory, getCategory, renameCategory, updateCategoryState } from "../../../database/database.js";
+import { addCategory, deleteCategory, getCategory, renameCategory, updateCategoryState } from "../../../database/database.js";
 import { CategoryRecord } from "../../../database/schema.js";
 import renderBookshelf from "./render-bookshelf.js";
 
@@ -38,6 +38,13 @@ export default function initCategoryActions() {
             await renderBookshelf();
          }
       });
+
+      deleteBtn.addEventListener(("click"), async() => {
+         if (askForUserConfirmation()) {
+            await deleteCategory(category.getAttribute("data-category-name"));
+            await renderBookshelf();
+         }
+      })
 
    })
 }

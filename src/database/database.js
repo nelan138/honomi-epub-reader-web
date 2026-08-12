@@ -199,11 +199,60 @@ export async function deleteBook(id) {
 }
 /**
  * Delete category from database, category can be either string or number
- * 
+ *
  * @param {Number | String} nameOrId
+ * @returns {Promise<Boolean>} true if deleted successfully
  */
 export async function deleteCategory(nameOrId) {
-   // TODO
+   const db = await openDatabase();
+
+   return new Promise((resolve, reject) => {
+      const store = db
+         .transaction(STORES.CATEGORIES, "readwrite")
+         .objectStore(STORES.CATEGORIES);
+
+      if (typeof nameOrId === "string") {
+         const index = store.index("by_name");
+         const getRequest = index.get(nameOrId);
+
+         getRequest.onsuccess = () => {
+            const category = getRequest.result;
+
+            if (!category) {
+               reject(new Error(`Category not found (Name: ${nameOrId})`));
+               return;
+            }
+
+            const deleteRequest = store.delete(category.id);
+
+            deleteRequest.onsuccess = () => {
+               console.log(`Deleted category (Name: ${nameOrId})`);
+               resolve(true);
+            };
+
+            deleteRequest.onerror = () => {
+               reject(deleteRequest.error);
+            };
+         };
+
+         getRequest.onerror = () => {
+            reject(getRequest.error);
+         };
+
+         return;
+      }
+
+      const deleteRequest = store.delete(nameOrId);
+
+      deleteRequest.onsuccess = () => {
+         console.log(`Deleted category (ID: ${nameOrId})`);
+         resolve(true);
+      };
+
+      deleteRequest.onerror = () => {
+         reject(deleteRequest.error);
+      };
+   });
 }
 
 /**
