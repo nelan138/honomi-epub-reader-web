@@ -23,6 +23,7 @@
 
    --radius: 7px;
    --cover-w: 108px;
+   --actions-w: 44px;
    --card-gap: 12px;
 }
 
@@ -54,6 +55,7 @@ body {
    max-width: 1300px;
    margin: 0 auto;
    padding: 24px 32px 64px;
+
    display: flex;
    flex-direction: column;
    gap: 48px;
@@ -64,19 +66,23 @@ body {
    display: flex;
    align-items: center;
    gap: 8px;
+
    padding-bottom: 16px;
    border-bottom: 1px solid #D5CABB;
 }
 
 .bookshelf-header button {
+   padding: 5px 14px;
+
    background: var(--surface);
    border: 1px solid #D5CABB;
    border-radius: var(--radius);
    color: var(--text-primary);
    cursor: pointer;
+
    font-family: inherit;
    font-size: 13px;
-   padding: 5px 14px;
+
    transition:
       background 0.15s,
       border-color 0.15s,
@@ -88,7 +94,12 @@ body {
    border-color: var(--sage);
 }
 
-/* Individual button identities */
+.bookshelf-header button:focus-visible {
+   outline: 2px solid var(--sage);
+   outline-offset: 2px;
+}
+
+/* Individual header buttons */
 #import-book-btn {
    background: var(--sage);
    border-color: var(--sage);
@@ -120,37 +131,38 @@ body {
 }
 
 .category>h2 {
-   font-size: 13px;
+   color: #776B5D;
    font-family: system-ui, sans-serif;
+   font-size: 13px;
    font-weight: 600;
    letter-spacing: 0.1em;
    text-transform: uppercase;
-   color: #776B5D;
 }
 
-/* Cards row */
+/* ─── Cards row ──────────────────────────────────────────────── */
 .book-card-list {
    display: flex;
-   flex-direction: row;
-   flex-wrap: wrap;
+   flex-flow: row wrap;
    align-items: flex-start;
    gap: var(--card-gap);
 }
 
 /* ─── Book card ──────────────────────────────────────────────── */
 .book-card {
-   background: var(--card);
-   border: 1px solid var(--card-border);
-   border-radius: var(--radius);
-   display: grid;
-   grid-template-columns: var(--cover-w) 1fr;
-   grid-template-rows: 1fr auto;
-   grid-template-areas:
-      "cover meta"
-      "progress progress";
    width: 300px;
    flex-shrink: 0;
    overflow: hidden;
+
+   display: grid;
+   grid-template-columns: var(--cover-w) minmax(0, 1fr) 0px;
+   grid-template-rows: 1fr auto;
+   grid-template-areas:
+      "cover meta actions"
+      "progress progress progress";
+
+   background: var(--card);
+   border: 1px solid var(--card-border);
+   border-radius: var(--radius);
    cursor: pointer;
 
    box-shadow:
@@ -158,14 +170,17 @@ body {
       0 4px 12px rgba(76, 60, 40, 0.06);
 
    transition:
-      transform 0.15s,
-      box-shadow 0.15s,
-      border-color 0.15s;
+      transform 0.15s ease,
+      box-shadow 0.15s ease,
+      border-color 0.15s ease,
+      grid-template-columns 0.18s ease;
 }
 
-.book-card:hover {
+.book-card:hover,
+.book-card:focus-within {
    transform: translateY(-2px);
    border-color: #C7B8A3;
+   grid-template-columns: var(--cover-w) minmax(0, 1fr) var(--actions-w);
 
    box-shadow:
       0 2px 3px rgba(76, 60, 40, 0.06),
@@ -175,82 +190,190 @@ body {
 /* ─── Cover ──────────────────────────────────────────────────── */
 .cover-wrapper {
    grid-area: cover;
-   background: var(--cover-bg);
+   min-width: 0;
    overflow: hidden;
+   background: var(--cover-bg);
 }
 
 .cover-wrapper img {
+   display: block;
    width: 100%;
    height: 100%;
    object-fit: cover;
-   display: block;
 }
 
 /* ─── Metadata ───────────────────────────────────────────────── */
 .metadata {
    grid-area: meta;
-   background: var(--metadata-bg);
-   padding: 14px 14px 14px 16px;
+   min-width: 0;
+   min-height: 162px;
+   overflow: hidden;
+
    display: flex;
    flex-direction: column;
    gap: 4px;
-   overflow: hidden;
-   min-height: 162px;
+
+   padding: 14px 14px 14px 16px;
+   background: var(--metadata-bg);
 }
 
 .metadata .title {
+   display: -webkit-box;
+   overflow: hidden;
+
    font-size: 14px;
    font-weight: normal;
    line-height: 1.35;
-   overflow: hidden;
-   display: -webkit-box;
-   -webkit-line-clamp: 4;
+
    -webkit-box-orient: vertical;
+   -webkit-line-clamp: 4;
 }
 
 .metadata .creator {
-   font-size: 12px;
+   overflow: hidden;
+
    color: var(--text-muted);
    font-family: system-ui, sans-serif;
-   white-space: nowrap;
-   overflow: hidden;
+   font-size: 12px;
    text-overflow: ellipsis;
+   white-space: nowrap;
 }
 
 .metadata .language {
    margin-top: auto;
-   font-size: 11px;
-   font-family: system-ui, sans-serif;
+
    color: var(--sage);
+   font-family: system-ui, sans-serif;
+   font-size: 11px;
    letter-spacing: 0.04em;
    text-transform: uppercase;
 }
 
 /* ─── Progress bar ───────────────────────────────────────────── */
 .progress-bar {
-   grid-area: progress;
    position: relative;
-   height: 24px;
-   background: var(--progress-bg);
-   border-top: 1px solid var(--card-border);
+   isolation: isolate;
+   grid-area: progress;
 
-   font-size: 11px;
-   font-family: system-ui, sans-serif;
-   color: #756A5D;
-
-   display: flex;
-   align-items: center;
-   padding: 0 10px;
+   height: 6px;
    overflow: hidden;
+
+   background: var(--sage-light);
+   border-top: 1px solid var(--card-border);
 }
 
 .progress-bar::before {
    content: "";
    position: absolute;
    inset: 0;
+
    width: var(--progress, 0%);
    background: var(--sage);
-   opacity: 0.35;
 
    transition: width 0.25s ease;
+}
+
+/* ─── Book card actions ──────────────────────────────────────── */
+.book-card-actions {
+   grid-area: actions;
+   overflow: hidden;
+
+   display: flex;
+   flex-direction: column;
+   align-items: stretch;
+
+   background: var(--surface);
+   border-left: 1px solid var(--card-border);
+   box-shadow: -3px 0 8px rgba(76, 60, 40, 0.08);
+}
+
+.book-card-actions button {
+   flex: 1;
+   min-width: var(--actions-w);
+   min-height: 48px;
+   padding: 10px 6px;
+
+   display: flex;
+   align-items: center;
+   justify-content: center;
+
+   appearance: none;
+   background: transparent;
+   border: 0;
+   border-bottom: 1px solid var(--card-border);
+   border-radius: 0;
+   color: var(--text-muted);
+   cursor: pointer;
+
+   font: inherit;
+   line-height: 1;
+
+   transition:
+      background 0.15s ease,
+      color 0.15s ease,
+      filter 0.1s ease;
+}
+
+.book-card-actions button:last-child {
+   border-bottom: 0;
+}
+
+.book-card-actions button i {
+   display: block;
+   width: 1.25em;
+   pointer-events: none;
+
+   font-size: 18px;
+   line-height: 1;
+   text-align: center;
+}
+
+.rename-book-btn:hover {
+   background: var(--gold-light);
+   color: #79643A;
+}
+
+.delete-book-btn:hover {
+   background: var(--terracotta-light);
+   color: #8F4F3E;
+}
+
+.book-card-actions button:focus-visible {
+   position: relative;
+   z-index: 1;
+
+   outline: 2px solid var(--sage);
+   outline-offset: -3px;
+}
+
+.book-card-actions button:active {
+   filter: brightness(0.94);
+}
+
+/* ─── Touchscreen fallback ───────────────────────────────────── */
+@media (hover: none) {
+   .book-card {
+      grid-template-columns: var(--cover-w) minmax(0, 1fr) var(--actions-w);
+   }
+}
+
+/* ─── Reduced motion ─────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+
+   .book-card,
+   .book-card-actions button,
+   .progress-bar::before {
+      transition: none;
+   }
+}
+
+/* ─── Responsive layout ──────────────────────────────────────── */
+@media (max-width: 480px) {
+   #bookshelf {
+      padding: 20px 16px 48px;
+   }
+
+   .book-card {
+      width: 100%;
+   }
 }

@@ -25,11 +25,16 @@ async function renderBookCard(bookRecord) {
          <p class="language">${metadata.language}</p>
       </div>
 
-      <div class="progress-bar">${(epubBook.getProgress())}%</div> 
+      <!-- FIXME: Will get rid of the random in the future, replace with (epubBook.getProgress() ?? 0) -->
+      <div class="progress-bar" style="--progress: ${Math.floor(Math.random() * 101)}%"></div>
 
       <div class="book-card-actions">
-         <button type="button" class="rename-book-btn">Rename</button>
-         <button type="button" class="delete-book-btn">Delete</button>
+         <button type="button" class="rename-book-btn">
+            <i class="fa-solid fa-pen-to-square"></i>
+         </button>
+         <button type="button" class="delete-book-btn">
+            <i class="fa-solid fa-trash"></i>
+         </button>
       </div>
    `
    return bookCard;
@@ -59,11 +64,12 @@ export default async function renderBookshelf() {
       for (const book of books) {
          const bookCard = await renderBookCard(book);
          bookCardList.append(bookCard);
-         console.log(`  Rendered book: ${book.title} (ID: ${book.id}) in category: ${category.name}`);
+         console.log(`  ー Rendered book: ${book.title} (ID: ${book.id}) in category: ${category.name}`);
       }
 
       shelf.append(bookCardList);
       bookshelf.append(shelf);
+      console.log("  Done")
    }
 
    initBookCardActions();
