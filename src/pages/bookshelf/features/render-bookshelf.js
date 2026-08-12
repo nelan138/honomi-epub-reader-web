@@ -2,6 +2,7 @@ import { getAllBooks, getAllCategories, addBook, addCategory, getBooksByCategory
 import { BookRecord } from "../../../database/schema.js";
 import EpubBook from "../../../epub/epub-book.js";
 import initBookCardActions from "./book-card-actions.js";
+import initCategoryActions from "./category-actions.js";
 
 /**
  * 
@@ -32,6 +33,9 @@ async function renderBookCard(bookRecord) {
          <button type="button" class="rename-book-btn">
             <i class="fa-solid fa-pen-to-square"></i>
          </button>
+         <button type="button" class="change-category-book-btn">
+            <i class="fa-solid fa-right-left"></i>
+         </button>
          <button type="button" class="delete-book-btn">
             <i class="fa-solid fa-trash"></i>
          </button>
@@ -46,16 +50,40 @@ async function renderBookCard(bookRecord) {
  * @returns {Promise<void>}
  */
 export default async function renderBookshelf() {
-   const bookshelf = document.getElementById("bookshelf");
-   const categories = await getAllCategories();
+   const categoryList = document.getElementById("category-list");
+   categoryList.replaceChildren();
 
+   const categories = await getAllCategories();
    for (const category of categories) {
       console.log(`Rendering category: ${category.name} (ID: ${category.id})`);
 
-      const shelf = document.getElementById(category.name) || document.createElement("section");
+      const shelf = document.createElement("section");
       shelf.classList.add("category");
-      shelf.id = category.name;
-      shelf.innerHTML = `<h2>${category.name}</h2>`;
+      shelf.setAttribute("data-category-name", category.name);
+      shelf.innerHTML = `
+         <header class="category-header">
+            <h2>${category.name}</h2>
+            <div class="category-actions">
+               <button type="button" class="rename-category-btn">
+                  <i class="fa-solid fa-pencil"></i>
+               </button>
+               <button type="button" class="toggle-category-btn">
+                  <i class="fa-solid fa-caret-down"></i>
+                  <!-- or <i class="fa-solid fa-caret-right"></i> -->
+               </button>
+               <button type="button" class="delete-category-btn">
+                  <i class="fa-solid fa-x"></i>
+               </button>
+            </div>
+         </header>
+      `;
+
+      if (!category.expanded) {
+         // ? TODO 
+         categoryList.append(shelf);
+         console.log("  Done (collapsed)")
+         continue;
+      }
 
       const bookCardList = document.createElement("div");
       bookCardList.className = "book-card-list";
@@ -68,9 +96,10 @@ export default async function renderBookshelf() {
       }
 
       shelf.append(bookCardList);
-      bookshelf.append(shelf);
+      categoryList.append(shelf);
       console.log("  Done")
    }
 
    initBookCardActions();
+   initCategoryActions();
 }

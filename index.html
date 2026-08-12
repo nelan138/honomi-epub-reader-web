@@ -15,40 +15,63 @@
       <header class="bookshelf-header">
          <input id="epub-file-input" type="file" accept=".epub,application/epub+zip" hidden>
 
-         <button type="button" id="import-book-btn">Import</button>
-         <button type="button" id="edit-bookshelf-btn">Edit</button>
-         <button type="button" id="toggle-setting-btn">Settings</button>
+         <button type="button" id="toggle-settings-btn">
+            <i class="fa-solid fa-gear"></i>
+         </button>
+
+         <button type="button" id="import-book-btn">
+            <i class="fa-solid fa-upload"></i>
+         </button>
       </header>
-   <!-- 
-      <section class="category">
-         <h2>Categories are like this</h2>
-
-         <div class="book-card-list">
-            <article class="book-card" data-book-id="67">
-               <div class="cover-wrapper">
-                  <img src="./tests/images/majo_no_tabitabi_2.jpg" alt="Cover of 魔女の旅々２ (GAノベル)">
-               </div>
-               <div class="metadata">
-                  <h3 class="title">魔女の旅々２ (GAノベル)</h3>
-                  <p class="creator">by 白石 定規</p>
-                  <p class="language">ja</p>
-               </div>
-               <div class="progress-bar">0%</div>
-               <div class="book-card-actions">
-                  <button type="button" class="rename-book-btn">
-                     <i class="fa-solid fa-pen-to-square"></i>
+      <div id="category-list">
+         <section class="category" data-category-name="testing-space">
+            <header class="category-header">
+               <h2>Categories are like this</h2>
+               <div class="category-actions">
+                  <button type="button" class="rename-category-btn">
+                     <i class="fa-solid fa-pencil"></i>
                   </button>
-                  <button type="button" class="delete-book-btn">
-                     <i class="fa-solid fa-trash"></i>
+                  <button type="button" class="toggle-category-btn">
+                     <i class="fa-solid fa-caret-down"></i>
+                     <!-- or <i class="fa-solid fa-caret-right"></i> -->
+                  </button>
+                  <button type="button" class="delete-category-btn">
+                     <i class="fa-solid fa-x"></i>
                   </button>
                </div>
-            </article>
+            </header>
 
-         </div>
-      </section>
-   -->
-
-      <!-- More categories here -->
+            <div class="book-card-list">
+               <article class="book-card" data-book-id="67">
+                  <div class="cover-wrapper">
+                     <img src="./tests/images/majo_no_tabitabi_2.jpg" alt="Cover of 魔女の旅々２ (GAノベル)">
+                  </div>
+                  <div class="metadata">
+                     <h3 class="title">魔女の旅々２ (GAノベル)</h3>
+                     <p class="creator">by 白石 定規</p>
+                     <p class="language">ja</p>
+                  </div>
+                  <div class="progress-bar">0%</div>
+                  <div class="book-card-actions">
+                     <button type="button" class="rename-book-btn">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                     </button>
+                     <button type="button" class="change-category-book-btn">
+                        <i class="fa-solid fa-right-left"></i>
+                     </button>
+                     <button type="button" class="delete-book-btn">
+                        <i class="fa-solid fa-trash"></i>
+                     </button>
+                  </div>
+               </article>
+            </div>
+         </section>
+         <!-- More categories here -->
+      </div>
+      <!-- This should always be at the end of bookshelf -->
+      <button type="button" id="add-category-btn">
+         <i class="fa-solid fa-plus"></i> Add category
+      </button>
    </main>
 
    <script type="module" src="./src/main.js"></script>

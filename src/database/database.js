@@ -197,3 +197,189 @@ export async function deleteBook(id) {
 
    })
 }
+/**
+ * Delete category from database, category can be either string or number
+ * 
+ * @param {Number | String} nameOrId
+ */
+export async function deleteCategory(nameOrId) {
+   // TODO
+}
+
+/**
+ * 
+ * @param {Number | String} nameOrId 
+ * @param {String} newCategoryName 
+ */
+export async function renameCategory(nameOrId, newCategoryName) {
+   const db = await openDatabase();
+
+   return new Promise((resolve, reject) => {
+      const store = db
+         .transaction(STORES.CATEGORIES, "readwrite")
+         .objectStore(STORES.CATEGORIES);
+
+      if (typeof nameOrId === "string") {
+         const index = store.index("by_name");
+         const getRequest = index.get(nameOrId);
+
+         getRequest.onsuccess = () => {
+            const category = getRequest.result;
+
+            if (!category) {
+               reject(new Error(`Category not found (Name: ${nameOrId})`));
+               return;
+            }
+
+            category.name = newCategoryName;
+
+            const putRequest = store.put(category);
+
+            putRequest.onsuccess = () => {
+               console.log(
+                  `Changed category's name (Name: ${nameOrId}) to ${newCategoryName}`
+               );
+               resolve(true);
+            };
+
+            putRequest.onerror = () => {
+               reject(putRequest.error);
+            };
+         };
+
+         getRequest.onerror = () => {
+            reject(getRequest.error);
+         };
+
+         return;
+      }
+
+      // * typeof nameOrId === "number"
+      const getRequest = store.get(nameOrId);
+
+      getRequest.onsuccess = () => {
+         const category = getRequest.result;
+
+         if (!category) {
+            reject(new Error(`Category not found (ID: ${nameOrId})`));
+            return;
+         }
+
+         category.name = newCategoryName;
+
+         const putRequest = store.put(category);
+
+         putRequest.onsuccess = () => {
+            console.log(
+               `Changed category's name (ID: ${nameOrId}) to ${newCategoryName}`
+            );
+            resolve(true);
+         };
+
+         putRequest.onerror = () => {
+            reject(putRequest.error);
+         };
+      };
+
+      getRequest.onerror = () => {
+         reject(getRequest.error);
+      };
+   });
+}
+
+/**
+ * 
+ * @param {String | Number} nameOrId 
+ * @param {Boolean} newState - 1: Expanded, 0: Collapsed
+ */
+export async function updateCategoryState(nameOrId, newState) {
+   const db = await openDatabase();
+
+   return new Promise((resolve, reject) => {
+      const store = db
+         .transaction(STORES.CATEGORIES, "readwrite")
+         .objectStore(STORES.CATEGORIES);
+
+      let getRequest;
+
+      if (typeof nameOrId === "string") {
+         const index = store.index("by_name");
+         getRequest = index.get(nameOrId);
+      } else {
+         // * typeof nameOrId === "number"
+         getRequest = store.get(nameOrId);
+      }
+
+      getRequest.onsuccess = () => {
+         const category = getRequest.result;
+
+         if (!category) {
+            reject(
+               new Error(
+                  typeof nameOrId === "string"
+                     ? `Category not found (Name: ${nameOrId})`
+                     : `Category not found (ID: ${nameOrId})`
+               )
+            );
+            return;
+         }
+
+         category.expanded = newState;
+
+         const putRequest = store.put(category);
+
+         putRequest.onsuccess = () => {
+            resolve(true);
+         };
+
+         putRequest.onerror = () => {
+            reject(putRequest.error);
+         };
+      };
+
+      getRequest.onerror = () => {
+         reject(getRequest.error);
+      };
+   });
+}
+
+export async function getCategory(nameOrId) {
+   const db = await openDatabase();
+
+   return new Promise((resolve, reject) => {
+      const store = db
+         .transaction(STORES.CATEGORIES, "readonly")
+         .objectStore(STORES.CATEGORIES);
+
+      let getRequest;
+
+      if (typeof nameOrId === "string") {
+         const index = store.index("by_name");
+         getRequest = index.get(nameOrId);
+      } else {
+         // * typeof nameOrId === "number"
+         getRequest = store.get(nameOrId);
+      }
+
+      getRequest.onsuccess = () => {
+         const category = getRequest.result;
+
+         if (!category) {
+            reject(
+               new Error(
+                  typeof nameOrId === "string"
+                     ? `Category not found (Name: ${nameOrId})`
+                     : `Category not found (ID: ${nameOrId})`
+               )
+            );
+            return;
+         }
+
+         resolve(category);
+      };
+
+      getRequest.onerror = () => {
+         reject(getRequest.error);
+      };
+   });
+}

@@ -1,7 +1,7 @@
 import EpubBook from "../epub/epub-book.js";
 
 export const DB_NAME = "Honomi";
-export const DB_VERSION = 1;
+export const DB_VERSION = 2;
 
 // Additional stores such as word banks can be added here as needed.
 export const STORES = {
@@ -60,11 +60,13 @@ export class CategoryRecord {
     */
    constructor(name) {
       this.name = name;
+      this.expanded = true;
    }
 
    toObject() {
       return {
          name: this.name,
+         expanded: this.expanded,
       }
    }
 }

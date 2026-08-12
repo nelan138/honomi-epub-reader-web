@@ -9,25 +9,30 @@ export default function initBookCardActions() {
       const renameButton = card.querySelector(".rename-book-btn");
       const deleteButton = card.querySelector(".delete-book-btn");
 
-      renameButton.addEventListener("click", () => {
+      renameButton.addEventListener("click", async() => {
          const title = askUserForNewBookTitle();
 
          if (title) {
-            renameBook(bookId, title);
-            renderBookshelf();
+            await renameBook(bookId, title);
+            await renderBookshelf();
          }
-      })
+      });
 
-      deleteButton.addEventListener("click", () => {
-         if (confirm("Do you want to delete this book?")) {
-            deleteBook(bookId);
-            renderBookshelf();
+      deleteButton.addEventListener("click", async () => {
+         if (askForUserConfirmation()) {
+            await deleteBook(bookId);
+            await renderBookshelf();
          }
-      })
+      });
    });
 }
 
-// ? TODO: ?
+// TODO
 function askUserForNewBookTitle() {
    return prompt("Rename to: ", "New Title");
+}
+
+// TODO
+function askForUserConfirmation() {
+   return confirm("Do you want to delete this book?");
 }

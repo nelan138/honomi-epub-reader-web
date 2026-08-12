@@ -52,7 +52,7 @@ body {
 
 /* ─── Bookshelf ──────────────────────────────────────────────── */
 #bookshelf {
-   max-width: 1300px;
+   max-width: 1000px;
    margin: 0 auto;
    padding: 24px 32px 64px;
 
@@ -65,7 +65,7 @@ body {
 .bookshelf-header {
    display: flex;
    align-items: center;
-   gap: 8px;
+   justify-content: space-between;
 
    padding-bottom: 16px;
    border-bottom: 1px solid #D5CABB;
@@ -99,7 +99,12 @@ body {
    outline-offset: 2px;
 }
 
-/* Individual header buttons */
+#toggle-settings-btn:hover {
+   background: var(--gold-light);
+   border-color: #CCB985;
+   color: #79643A;
+}
+
 #import-book-btn {
    background: var(--sage);
    border-color: var(--sage);
@@ -111,18 +116,6 @@ body {
    border-color: #60755A;
 }
 
-#edit-bookshelf-btn:hover {
-   background: var(--terracotta-light);
-   border-color: #D09A87;
-   color: #8F4F3E;
-}
-
-#toggle-setting-btn:hover {
-   background: var(--gold-light);
-   border-color: #CCB985;
-   color: #79643A;
-}
-
 /* ─── Category ───────────────────────────────────────────────── */
 .category {
    display: flex;
@@ -130,13 +123,75 @@ body {
    gap: 16px;
 }
 
-.category>h2 {
+/* ─── Category header ────────────────────────────────────────── */
+.category-header {
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   gap: 8px;
+}
+
+.category-header h2 {
    color: #776B5D;
    font-family: system-ui, sans-serif;
    font-size: 13px;
    font-weight: 600;
    letter-spacing: 0.1em;
    text-transform: uppercase;
+}
+
+.category-actions {
+   display: flex;
+   align-items: center;
+   gap: 2px;
+}
+
+.category-actions button {
+   display: flex;
+   align-items: center;
+   justify-content: center;
+
+   width: 26px;
+   height: 26px;
+   padding: 0;
+
+   appearance: none;
+   background: transparent;
+   border: 1px solid transparent;
+   border-radius: var(--radius);
+   color: var(--text-muted);
+   cursor: pointer;
+
+   font-size: 11px;
+   line-height: 1;
+
+   transition:
+      background 0.15s ease,
+      border-color 0.15s ease,
+      color 0.15s ease;
+}
+
+.category-actions button:hover {
+   background: var(--surface);
+   border-color: var(--card-border);
+   color: var(--text-primary);
+}
+
+.rename-category-btn:hover {
+   background: var(--gold-light) !important;
+   border-color: #CCB985 !important;
+   color: #79643A !important;
+}
+
+.delete-category-btn:hover {
+   background: var(--terracotta-light) !important;
+   border-color: #D09A87 !important;
+   color: #8F4F3E !important;
+}
+
+.category-actions button:focus-visible {
+   outline: 2px solid var(--sage);
+   outline-offset: 2px;
 }
 
 /* ─── Cards row ──────────────────────────────────────────────── */
@@ -290,7 +345,7 @@ body {
 .book-card-actions button {
    flex: 1;
    min-width: var(--actions-w);
-   min-height: 48px;
+   min-height: 40px;
    padding: 10px 6px;
 
    display: flex;
@@ -323,7 +378,7 @@ body {
    width: 1.25em;
    pointer-events: none;
 
-   font-size: 18px;
+   font-size: 14px;
    line-height: 1;
    text-align: center;
 }
@@ -350,16 +405,58 @@ body {
    filter: brightness(0.94);
 }
 
+/* ─── Add category button ────────────────────────────────────── */
+#add-category-btn {
+   align-self: flex-start;
+
+   display: flex;
+   align-items: center;
+   gap: 7px;
+
+   padding: 7px 16px;
+
+   appearance: none;
+   background: transparent;
+   border: 1px dashed #C4B8A8;
+   border-radius: var(--radius);
+   color: var(--text-muted);
+   cursor: pointer;
+
+   font-family: system-ui, sans-serif;
+   font-size: 13px;
+   line-height: 1;
+
+   transition:
+      background 0.15s ease,
+      border-color 0.15s ease,
+      color 0.15s ease;
+}
+
+#add-category-btn:hover {
+   background: var(--surface);
+   border-color: var(--sage);
+   border-style: solid;
+   color: var(--sage);
+}
+
+#add-category-btn:focus-visible {
+   outline: 2px solid var(--sage);
+   outline-offset: 2px;
+}
+
 /* ─── Touchscreen fallback ───────────────────────────────────── */
 @media (hover: none) {
    .book-card {
       grid-template-columns: var(--cover-w) minmax(0, 1fr) var(--actions-w);
    }
+
+   .category-actions {
+      opacity: 1;
+   }
 }
 
 /* ─── Reduced motion ─────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
-
    .book-card,
    .book-card-actions button,
    .progress-bar::before {
