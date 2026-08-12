@@ -12,8 +12,8 @@ fileInput.addEventListener("change", async () => {
    if (!file) return;
 
    console.log("Importing book:", file.name);
-   // ! Newly imported books always go to "Your Library"
-   const categoryId = await addCategory(new CategoryRecord("Your Library"));
+   // ! Newly imported books always go to "Your Books"
+   const categoryId = await addCategory(new CategoryRecord("Your Books"));
 
    const epub = await EpubBook.fromFile(file);
    epub.setCategoryId(categoryId);
