@@ -36,3 +36,9 @@ function askUserForNewBookTitle() {
 function askForUserConfirmation() {
    return confirm("Do you want to delete this book?");
 }
+
+// TODO
+function askUserForNewBookCategoryLocation() {
+   return prompt("Move book to: ", "Your Books");
+}
+

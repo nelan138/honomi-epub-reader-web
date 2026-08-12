@@ -50,10 +50,12 @@ async function renderBookCard(bookRecord) {
  * @returns {Promise<void>}
  */
 export default async function renderBookshelf() {
+   // const bookshelf = document.getElementById("bookshelf");
    const categoryList = document.getElementById("category-list");
-   categoryList.replaceChildren();
 
+   categoryList.replaceChildren();
    const categories = await getAllCategories();
+
    for (const category of categories) {
       console.log(`Rendering category: ${category.name} (ID: ${category.id})`);
 
@@ -64,22 +66,32 @@ export default async function renderBookshelf() {
          <header class="category-header">
             <h2>${category.name}</h2>
             <div class="category-actions">
-               <button type="button" class="rename-category-btn">
-                  <i class="fa-solid fa-pencil"></i>
-               </button>
-               <button type="button" class="toggle-category-btn">
-                  <i class="fa-solid fa-caret-down"></i>
-                  <!-- or <i class="fa-solid fa-caret-right"></i> -->
-               </button>
-               <button type="button" class="delete-category-btn">
-                  <i class="fa-solid fa-x"></i>
-               </button>
             </div>
          </header>
       `;
 
+      const categoryActions = shelf.querySelector(".category-actions");
+      if (category.name === "Your Books") {
+         categoryActions.innerHTML = `
+            <button type="button" class="toggle-category-btn">
+               <i class="fa-solid fa-caret-down"></i>
+            </button>
+         `
+      }
+      else categoryActions.innerHTML = `
+         <button type="button" class="rename-category-btn">
+            <i class="fa-solid fa-pencil"></i>
+         </button>
+         <button type="button" class="toggle-category-btn">
+            <i class="fa-solid fa-caret-down"></i>
+         </button>
+         <button type="button" class="delete-category-btn">
+            <i class="fa-solid fa-x"></i>
+         </button>
+      `
+
       if (!category.expanded) {
-         // ? TODO 
+         shelf.querySelector('.toggle-category-btn').innerHTML = `<i class="fa-solid fa-caret-right"></i>`;
          categoryList.append(shelf);
          console.log("  Done (collapsed)")
          continue;

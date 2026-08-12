@@ -383,3 +383,83 @@ export async function getCategory(nameOrId) {
       };
    });
 }
+
+/**
+ * Changes the category of a book.
+ *
+ * @param {Number} bookId
+ * @param {String | Number} categoryNameOrId
+ * @returns {Promise<Boolean>} Whether the category was changed successfully
+ */
+export async function changeBookCategory(bookId, categoryNameOrId) {
+   const db = await openDatabase();
+
+   return new Promise((resolve, reject) => {
+      const transaction = db.transaction(
+         [STORES.BOOKS, STORES.CATEGORIES],
+         "readwrite"
+      );
+
+      const bookStore = transaction.objectStore(STORES.BOOKS);
+      const categoryStore = transaction.objectStore(STORES.CATEGORIES);
+
+      const bookRequest = bookStore.get(bookId);
+
+      bookRequest.onsuccess = () => {
+         const book = bookRequest.result;
+
+         if (!book) {
+            reject(new Error(`Book not found (ID: ${bookId})`));
+            return;
+         }
+
+         let categoryRequest;
+
+         if (typeof categoryNameOrId === "string") {
+            const index = categoryStore.index("by_name");
+            categoryRequest = index.get(categoryNameOrId);
+         } else {
+            categoryRequest = categoryStore.get(categoryNameOrId);
+         }
+
+         categoryRequest.onsuccess = () => {
+            const category = categoryRequest.result;
+
+            if (!category) {
+               reject(
+                  new Error(
+                     typeof categoryNameOrId === "string"
+                        ? `Category not found (Name: ${categoryNameOrId})`
+                        : `Category not found (ID: ${categoryNameOrId})`
+                  )
+               );
+               return;
+            }
+
+            book.categoryId = category.id;
+
+            const putRequest = bookStore.put(book);
+
+            putRequest.onsuccess = () => {
+               console.log(
+                  `Changed book's category (Book ID: ${bookId}) to ${category.name}`
+               );
+
+               resolve(true);
+            };
+
+            putRequest.onerror = () => {
+               reject(putRequest.error);
+            };
+         };
+
+         categoryRequest.onerror = () => {
+            reject(categoryRequest.error);
+         };
+      };
+
+      bookRequest.onerror = () => {
+         reject(bookRequest.error);
+      };
+   });
+}
