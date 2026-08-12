@@ -1,6 +1,7 @@
 import { getAllBooks, getAllCategories, addBook, addCategory, getBooksByCategory } from "../../../database/database.js";
 import { BookRecord } from "../../../database/schema.js";
 import EpubBook from "../../../epub/epub-book.js";
+import initBookCardActions from "./book-card-actions.js";
 
 /**
  * 
@@ -13,6 +14,7 @@ async function renderBookCard(bookRecord) {
 
    const bookCard = document.createElement('article');
    bookCard.className = "book-card";
+   bookCard.setAttribute("data-book-id", epubBook.getId());
    bookCard.innerHTML = `
       <div class="cover-wrapper">
          <img src="${URL.createObjectURL(epubBook.getCover())}" alt="Book cover of ${metadata.title}">
@@ -22,7 +24,13 @@ async function renderBookCard(bookRecord) {
          <p class="creator">by ${metadata.creator}</p>
          <p class="language">${metadata.language}</p>
       </div>
+
       <div class="progress-bar">${(epubBook.getProgress())}%</div> 
+
+      <div class="book-card-actions">
+         <button type="button" class="rename-book-btn">Rename</button>
+         <button type="button" class="delete-book-btn">Delete</button>
+      </div>
    `
    return bookCard;
 }
@@ -57,4 +65,6 @@ export default async function renderBookshelf() {
       shelf.append(bookCardList);
       bookshelf.append(shelf);
    }
+
+   initBookCardActions();
 }

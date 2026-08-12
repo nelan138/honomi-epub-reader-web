@@ -138,3 +138,62 @@ export async function getBooksByCategory(categoryId) {
       request.onerror = () => reject(request.error);
    });
 }
+
+/**
+ * @param {number} id
+ * @param {string} newTitle
+ * @returns {Promise<boolean>} Whether the rename succeeded.
+ */
+export async function renameBook(id, newTitle) {
+   const db = await openDatabase();
+   return new Promise((resolve, reject) => {
+      const store = db.transaction(STORES.BOOKS, "readwrite").objectStore(STORES.BOOKS);
+      const request = store.get(id);
+      request.onsuccess = () => {
+         const book = request.result;
+
+         if (!book) {
+            reject(new Error(`Book not found (ID: ${id})`));
+            return;
+         }
+
+         book.title = newTitle;
+         const putRequest = store.put(book);
+
+         putRequest.onsuccess = () => {
+            console.log(`Changed book's title (ID: ${id}) to ${newTitle}`);
+            resolve(true);
+         };
+
+         putRequest.onerror = () => {
+            reject(putRequest.error);
+         };
+      }
+   });
+}
+
+/**
+ * 
+ * @param {Number} id 
+ * @returns {Boolean} success or not
+ */
+export async function deleteBook(id) {
+   const db = await openDatabase();
+   return new Promise((resolve, reject) => {
+      const store = db.transaction(STORES.BOOKS, "readwrite").objectStore(STORES.BOOKS);
+      const request = store.get(id);
+
+      request.onsuccess = () => {
+         const deleteRequest = store.delete(id);
+         deleteRequest.onsuccess = () => {
+            console.log(`Deleted book (ID: ${id}, Title: ${request.result.title})`);
+            resolve();
+         }
+
+         deleteRequest.onerror = () => { reject(deleteRequest.error) }
+      }
+
+      request.onerror = () => { reject(request.error) }
+
+   })
+}
