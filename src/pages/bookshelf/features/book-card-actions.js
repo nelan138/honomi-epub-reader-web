@@ -1,4 +1,4 @@
-import { renameBook, deleteBook } from "../../../database/database.js";
+import { renameBook, deleteBook, changeBookCategory } from "../../../database/database.js";
 import renderBookshelf from "./render-bookshelf.js";
 
 export default function initBookCardActions() {
@@ -7,16 +7,24 @@ export default function initBookCardActions() {
       const bookId = Number(card.getAttribute("data-book-id"));
 
       const renameButton = card.querySelector(".rename-book-btn");
+      const changeBookCategoryButton = card.querySelector(".change-book-category-btn");
       const deleteButton = card.querySelector(".delete-book-btn");
 
-      renameButton.addEventListener("click", async() => {
+      renameButton.addEventListener("click", async () => {
          const title = askUserForNewBookTitle();
-
          if (title) {
             await renameBook(bookId, title);
             await renderBookshelf();
          }
       });
+
+      changeBookCategoryButton.addEventListener(("click"), async () => {
+         const name = askUserForNewBookCategoryLocation();
+         if (name) {
+            await changeBookCategory(bookId, name)
+            await renderBookshelf();
+         }
+      })
 
       deleteButton.addEventListener("click", async () => {
          if (askForUserConfirmation()) {

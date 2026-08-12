@@ -33,7 +33,7 @@ async function renderBookCard(bookRecord) {
          <button type="button" class="rename-book-btn">
             <i class="fa-solid fa-pen-to-square"></i>
          </button>
-         <button type="button" class="change-category-book-btn">
+         <button type="button" class="change-book-category-btn">
             <i class="fa-solid fa-right-left"></i>
          </button>
          <button type="button" class="delete-book-btn">
@@ -109,7 +109,7 @@ export default async function renderBookshelf() {
 
       shelf.append(bookCardList);
       categoryList.append(shelf);
-      console.log("  Done")
+      console.log("  ー / Done")
    }
 
    initBookCardActions();

@@ -383,7 +383,8 @@ body {
    text-align: center;
 }
 
-.rename-book-btn:hover {
+.rename-book-btn:hover,
+.change-book-category-btn:hover {
    background: var(--gold-light);
    color: #79643A;
 }
