@@ -26,6 +26,7 @@ export class BookRecord {
 
       this.cover = epubBook.getCover() ?? null;
       this.progress = epubBook.getProgress() ?? 0;
+      console.log("AFGKSAHF", this.progress);
 
       this.epubFile = epubBook.getEpubFile() ?? null;
       this.opfPath = epubBook.getOpfPath() ?? null;

@@ -25,5 +25,6 @@ fileInput.addEventListener("change", async () => {
    await addBook(bookRecord);
    await renderBookshelf();
 
+   
    fileInput.value = "";
 });

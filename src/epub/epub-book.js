@@ -14,7 +14,7 @@ import { unzipSync, strFromU8 } from "../vendor/fflate.js";
  */
 export default class EpubBook {
    // * Identity
-   #bookId = null;
+   #id = null;
    #categoryId = null;
 
    // * Original data
@@ -31,7 +31,7 @@ export default class EpubBook {
    #metadata = null;
    #cover = null;
    progress = null;
-   constructor() {};
+   constructor() { };
 
    /**
     * Creates an EpubBook from an EPUB file (imported from <input>).
@@ -45,7 +45,7 @@ export default class EpubBook {
 
       const book = new EpubBook();
 
-      book.#bookId = null;
+      book.#id = null;
       book.#categoryId = null;
 
       book.#epubFile = file;
@@ -78,7 +78,7 @@ export default class EpubBook {
          subject: bookRecord.subject ?? []
       };
 
-      book.#bookId = bookRecord.id ?? null;
+      book.#id = bookRecord.id ?? null;
       book.#categoryId = bookRecord.categoryId ?? null;
       book.#epubFile = bookRecord.epubFile ?? null;
       book.#epubData = bookRecord.epubData ?? null;
@@ -87,20 +87,21 @@ export default class EpubBook {
       book.#spine = bookRecord.spine ?? [];
       book.#navigation = bookRecord.navigation ?? [];
       book.#cover = bookRecord.cover ?? null;
+      book.progress = bookRecord.progress ?? 0;
 
       return book;
    }
 
-   setBookId(id) {
-      this.#bookId = id;
+   setId(id) {
+      this.#id = id;
    }
 
    setCategoryId(id) {
       this.#categoryId = id;
    }
 
-   getBookId() {
-      return this.#bookId;
+   getId() {
+      return this.#id;
    }
 
    getCategoryId() {
@@ -112,6 +113,8 @@ export default class EpubBook {
     * @param {Number} progress 
     */
    setProgress(progress) {
+      if (!progress || progress < 0) progress = 0;
+      if (progress > 100) progress = 100;
       this.progress = progress;
    }
 
