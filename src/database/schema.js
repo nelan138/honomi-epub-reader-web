@@ -7,6 +7,7 @@ export const DB_VERSION = 2;
 export const STORES = {
    BOOKS: "books",
    CATEGORIES: "categories",
+   THEME: "theme",
 };
 
 export class BookRecord {
@@ -88,8 +89,14 @@ export function createSchemas(db, transaction) {
          keyPath: "id",
          autoIncrement: true,
       });
-
-      // ? idk what is this for ?
       categoryStore.createIndex("by_name", "name", { unique: true });
    }
+
+   // * THEME - Only has one record with key "current" and value either "dark" or "light"
+   if (!db.objectStoreNames.contains(STORES.THEME)) {
+      db.createObjectStore(STORES.THEME, {
+         keyPath: "id"
+      });
+   }
 }
+

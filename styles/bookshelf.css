@@ -27,6 +27,20 @@
    --card-gap: 12px;
 }
 
+@supports (backdrop-filter: blur(1px)) {
+   :root {
+      --header-bg: rgba(248, 243, 233, 0.92);
+      --header-backdrop: blur(8px);
+   }
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+   :root {
+      --header-bg: #F8F3E9;
+      --header-backdrop: none;
+   }
+}
+
 /* ─── Reset ──────────────────────────────────────────────────── */
 *,
 *::before,
@@ -61,37 +75,89 @@ body {
    gap: 48px;
 }
 
-/* ─── Header ─────────────────────────────────────────────────── */
+/* ─── Header action bar ──────────────────────────────────────── */
 .bookshelf-header {
+   position: sticky;
+   top: 0;
+   z-index: 100;
+   min-height: 52px;
+   padding: 12px 32px;
+
    display: flex;
    align-items: center;
    justify-content: space-between;
+   gap: 14px;
 
-   padding-bottom: 16px;
-   border-bottom: 1px solid #D5CABB;
+   background: transparent;
+   backdrop-filter: none;
+   border-bottom: none;
+   border-radius: 0;
+
+   box-shadow: none;
 }
 
-.bookshelf-header button {
-   padding: 5px 14px;
+.primary-actions,
+.more-actions {
+   display: flex;
+   align-items: center;
+}
 
-   background: var(--surface);
-   border: 1px solid #D5CABB;
-   border-radius: var(--radius);
-   color: var(--text-primary);
+.primary-actions {
+   gap: 8px;
+}
+
+.more-actions {
+   gap: 4px;
+}
+
+/* Shared header buttons */
+.bookshelf-header button {
+   width: 38px;
+   height: 38px;
+   padding: 0;
+   flex: 0 0 38px;
+
+   display: inline-flex;
+   align-items: center;
+   justify-content: center;
+
+   appearance: none;
+   background: transparent;
+   border: 1px solid transparent;
+   border-radius: 6px;
+   color: #8A7E70;
    cursor: pointer;
 
-   font-family: inherit;
-   font-size: 13px;
+   font-family: system-ui, sans-serif;
+   font-size: 16px;
+   line-height: 1;
 
    transition:
-      background 0.15s,
-      border-color 0.15s,
-      color 0.15s;
+      background 0.15s ease,
+      border-color 0.15s ease,
+      color 0.15s ease,
+      transform 0.1s ease;
+}
+
+.bookshelf-header button i {
+   display: block;
+   width: 1.25em;
+   pointer-events: none;
+
+   font-size: 16px;
+   line-height: 1;
+   text-align: center;
 }
 
 .bookshelf-header button:hover {
-   background: var(--card);
-   border-color: var(--sage);
+   background: rgba(113, 134, 107, 0.08);
+   border-color: transparent;
+   color: #3B342D;
+}
+
+.bookshelf-header button:active {
+   transform: translateY(1px);
+   background: rgba(113, 134, 107, 0.12);
 }
 
 .bookshelf-header button:focus-visible {
@@ -99,39 +165,55 @@ body {
    outline-offset: 2px;
 }
 
-#toggle-settings-btn:hover {
-   background: var(--gold-light);
-   border-color: #CCB985;
-   color: #79643A;
-}
-
+/* Primary import action */
 #import-book-btn {
-   background: var(--sage);
-   border-color: var(--sage);
-   color: #FFFDF7;
+   background: #FFFDF7;
+   border-color: #FFFDF7;
+   color: var(--sage);
+   box-shadow: 0 2px 6px rgba(113, 134, 107, 0.15);
 }
 
 #import-book-btn:hover {
-   background: #60755A;
-   border-color: #60755A;
+   background: var(--sage-light);
+   border-color: var(--sage-light);
+   color: #52664D;
+   box-shadow: 0 3px 10px rgba(113, 134, 107, 0.22);
 }
 
-/* ─── Category ───────────────────────────────────────────────── */
-/* Make the parent a flex container */
+/* Secondary header actions */
+#find-book-btn:hover {
+   background: rgba(179, 148, 90, 0.08);
+   color: #3B342D;
+}
+
+#sort-books-btn:hover,
+#toggle-settings-btn:hover {
+   background: rgba(185, 111, 88, 0.08);
+   color: #3B342D;
+}
+
+#add-category-btn {
+   align-self: auto;
+}
+
+#add-category-btn:hover {
+   background: rgba(113, 134, 107, 0.1);
+   color: #3B342D;
+}
+
+/* ─── Category list ──────────────────────────────────────────── */
 #category-list {
    display: flex;
    flex-direction: column;
    gap: 16px;
 }
 
-/* ? Remove flex from .category (it's now a flex item, not container) */
-
-/* ! Push this category first */
+/* Keep "Your Books" first */
 .category[data-category-name="Your Books"] {
    order: -1;
 }
 
-/* ─── Category header ───────────────────────────────────────── */
+/* ─── Category header ────────────────────────────────────────── */
 .category-header {
    display: flex;
    align-items: center;
@@ -155,13 +237,13 @@ body {
 }
 
 .category-actions button {
-   display: flex;
-   align-items: center;
-   justify-content: center;
-
    width: 26px;
    height: 26px;
    padding: 0;
+
+   display: flex;
+   align-items: center;
+   justify-content: center;
 
    appearance: none;
    background: transparent;
@@ -218,7 +300,7 @@ body {
    overflow: hidden;
 
    display: grid;
-   grid-template-columns: var(--cover-w) minmax(0, 1fr) 0px;
+   grid-template-columns: var(--cover-w) minmax(0, 1fr) 0;
    grid-template-rows: 1fr auto;
    grid-template-areas:
       "cover meta actions"
@@ -240,13 +322,17 @@ body {
       grid-template-columns 0.18s ease;
 }
 
+/*
+ * The actions column expands toward the right. The metadata column
+ * contracts to make room, so the action buttons do not cover it.
+ */
 .book-card:hover,
 .book-card:focus-within {
-   transform: translateY(-2px);
-   border-color: #C7B8A3;
-
    grid-template-columns:
       var(--cover-w) minmax(0, 1fr) var(--actions-w);
+
+   transform: translateY(-2px);
+   border-color: #C7B8A3;
 
    box-shadow:
       0 2px 3px rgba(76, 60, 40, 0.06),
@@ -258,7 +344,6 @@ body {
    grid-area: cover;
    min-width: 0;
    overflow: hidden;
-
    background: var(--cover-bg);
 }
 
@@ -293,6 +378,7 @@ body {
    line-height: 1.35;
 
    -webkit-box-orient: vertical;
+   line-clamp: 4;
    -webkit-line-clamp: 4;
 }
 
@@ -343,7 +429,8 @@ body {
 /* ─── Book card actions ──────────────────────────────────────── */
 .book-card-actions {
    grid-area: actions;
-   min-width: 0;
+   width: var(--actions-w);
+   min-width: var(--actions-w);
    overflow: hidden;
 
    display: flex;
@@ -353,6 +440,32 @@ body {
    background: var(--surface);
    border-left: 1px solid var(--card-border);
    box-shadow: -3px 0 8px rgba(76, 60, 40, 0.08);
+
+   opacity: 0;
+   visibility: hidden;
+   pointer-events: none;
+   transform: translateX(-100%);
+
+   transition:
+      transform 0.18s ease,
+      opacity 0.15s ease,
+      visibility 0s linear 0.18s;
+}
+
+/*
+ * The bar moves from left to right into its newly expanded column.
+ */
+.book-card:hover .book-card-actions,
+.book-card:focus-within .book-card-actions {
+   opacity: 1;
+   visibility: visible;
+   pointer-events: auto;
+   transform: translateX(0);
+
+   transition:
+      transform 0.18s ease,
+      opacity 0.15s ease,
+      visibility 0s;
 }
 
 .book-card-actions button {
@@ -419,50 +532,18 @@ body {
    filter: brightness(0.94);
 }
 
-/* ─── Add category button ────────────────────────────────────── */
-#add-category-btn {
-   align-self: flex-start;
-
-   display: flex;
-   align-items: center;
-   gap: 7px;
-
-   padding: 7px 16px;
-
-   appearance: none;
-   background: transparent;
-   border: 1px dashed #C4B8A8;
-   border-radius: var(--radius);
-   color: var(--text-muted);
-   cursor: pointer;
-
-   font-family: system-ui, sans-serif;
-   font-size: 13px;
-   line-height: 1;
-
-   transition:
-      background 0.15s ease,
-      border-color 0.15s ease,
-      color 0.15s ease;
-}
-
-#add-category-btn:hover {
-   background: var(--surface);
-   border-color: var(--sage);
-   border-style: solid;
-   color: var(--sage);
-}
-
-#add-category-btn:focus-visible {
-   outline: 2px solid var(--sage);
-   outline-offset: 2px;
-}
-
 /* ─── Touchscreen fallback ───────────────────────────────────── */
 @media (hover: none) {
    .book-card {
       grid-template-columns:
          var(--cover-w) minmax(0, 1fr) var(--actions-w);
+   }
+
+   .book-card-actions {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateX(0);
    }
 
    .category-actions {
@@ -474,6 +555,7 @@ body {
 @media (prefers-reduced-motion: reduce) {
 
    .book-card,
+   .book-card-actions,
    .book-card-actions button,
    .progress-bar::before {
       transition: none;
@@ -486,14 +568,31 @@ body {
       padding: 20px 16px 48px;
    }
 
+   .bookshelf-header {
+      min-height: 48px;
+      padding: 6px 7px 6px 9px;
+      gap: 8px;
+   }
+
+   .bookshelf-header button {
+      width: 36px;
+      height: 36px;
+      flex-basis: 36px;
+   }
+
+   .more-actions {
+      gap: 1px;
+   }
+
    .book-card {
       width: 100%;
    }
 }
 
-/* ─── Input wrapper & char count ──────────────────────────────── */
+/* ─── Input wrapper and character count ──────────────────────── */
 .form-input-wrapper {
    position: relative;
+
    display: flex;
    flex-direction: column;
    gap: 4px;
@@ -501,9 +600,11 @@ body {
 
 .form-char-count {
    align-self: flex-end;
+
    color: var(--text-muted);
    font-family: system-ui, sans-serif;
    font-size: 11px;
+
    transition: color 0.15s ease;
 }
 
@@ -515,9 +616,10 @@ body {
    color: var(--terracotta);
 }
 
-/* ─── Inline error message ────────────────────────────────────── */
+/* ─── Inline error message ───────────────────────────────────── */
 .form-error-msg {
    min-height: 1em;
+
    color: var(--terracotta);
    font-family: system-ui, sans-serif;
    font-size: 12px;

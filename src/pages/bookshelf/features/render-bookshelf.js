@@ -1,13 +1,10 @@
-import { getAllBooks, getAllCategories, addBook, addCategory, getBooksByCategory } from "../../../database/database.js";
+import { getAllBooks, addBook, getBooksByCategory } from "../../../database/book-repository.js";
+import { addCategory, getAllCategories } from "../../../database/category-repository.js";
 import { BookRecord } from "../../../database/schema.js";
 import EpubBook from "../../../epub/epub-book.js";
-import initBookCardActions from "../button-actions/book-card-actions.js";
-import initCategoryActions from "../button-actions/category-actions.js";
-
-const STRING_FORM_RULES = {
-   maxLength: 20,
-   pattern: /^[^\p{C}/<>\\]+$/u, // no control chars or common injection chars
-};
+import bindBookCardEvents from "../events/book-card-events.js";
+import bindCategoryEvents from "../events/category-events.js";
+import { STRING_FORM_RULES } from "./open-forms.js";
 
 /**
  * 
@@ -55,10 +52,9 @@ async function renderBookCard(bookRecord) {
  * @returns {Promise<void>}
  */
 export default async function renderBookshelf() {
-   // const bookshelf = document.getElementById("bookshelf");
-   const categoryList = document.getElementById("category-list");
+   const bookshelf = document.getElementById("bookshelf");
 
-   categoryList.replaceChildren();
+   bookshelf.replaceChildren();
    const categories = await getAllCategories();
 
    for (const category of categories) {
@@ -97,7 +93,7 @@ export default async function renderBookshelf() {
 
       if (!category.expanded) {
          shelf.querySelector('.toggle-category-btn').innerHTML = `<i class="fa-solid fa-caret-right"></i>`;
-         categoryList.append(shelf);
+         bookshelf.append(shelf);
          console.log("  / Done (collapsed)")
          continue;
       }
@@ -117,12 +113,12 @@ export default async function renderBookshelf() {
       }
 
       shelf.append(bookCardList);
-      categoryList.append(shelf);
+      bookshelf.append(shelf);
       console.log("  / Done")
    }
 
-   initBookCardActions();
-   initCategoryActions();
+   bindBookCardEvents();
+   bindCategoryEvents();
 }
 
 

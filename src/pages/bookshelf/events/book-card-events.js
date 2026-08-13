@@ -1,8 +1,8 @@
-import { renameBook, deleteBook, changeBookCategory } from "../../../database/database.js";
+import { renameBook, deleteBook, changeBookCategory } from "../../../database/book-repository.js";
 import renderBookshelf from "../features/render-bookshelf.js";
-import openFormFor from "../overlays/forms.js";
+import openFormFor from "../features/open-forms.js";
 
-export default function initBookCardActions() {
+export default function bindBookCardEvents() {
    const bookCards = document.querySelectorAll('.book-card');
    bookCards.forEach(card => {
       const bookId = Number(card.getAttribute("data-book-id"));

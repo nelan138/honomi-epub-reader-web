@@ -1,4 +1,9 @@
-import { getAllCategories } from "../../../database/database.js";
+import { getAllCategories } from "../../../database/category-repository.js";
+
+export const STRING_FORM_RULES = {
+   maxLength: 20,
+   pattern: /^[^\p{C}/<>\\]+$/u, // no control chars or common injection chars
+};
 
 /**
  * Opens a modal form.
@@ -22,11 +27,11 @@ export default async function openFormFor(type) {
 }
 
 function getNewBookNameForm() {
-   return getStringForm("Rename to", "New name");
+   return getStringForm("Rename to", "new name");
 }
 
 function getNewCategoryNameForm() {
-   return getStringForm("Rename to", "New name");
+   return getStringForm("New category", "category name");
 }
 
 async function selectCategoryForm() {
@@ -34,11 +39,6 @@ async function selectCategoryForm() {
    const options = categories.map((category) => category.name);
    return getOptionForm("Move to", options);
 }
-
-const STRING_FORM_RULES = {
-   maxLength: 20,
-   pattern: /^[^\p{C}/<>\\]+$/u, // no control chars or common injection chars
-};
 
 /**
  * Shows a modal with a text input.

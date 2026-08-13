@@ -1,20 +1,23 @@
-import { addCategory, deleteCategory, getCategory, renameCategory, updateCategoryState } from "../../../database/database.js";
+import { addCategory, deleteCategory, getCategory, renameCategory, updateCategoryState } from "../../../database/category-repository.js";
 import { CategoryRecord } from "../../../database/schema.js";
 import renderBookshelf from "../features/render-bookshelf.js";
-import openFormFor from "../overlays/forms.js";
+import openFormFor from "../features/open-forms.js";
 
-export default function initCategoryActions() {
+export default function bindCategoryEvents() {
    const bookshelf = document.getElementById('bookshelf');
 
    const addCategoryBtn = document.getElementById("add-category-btn");
-   addCategoryBtn.addEventListener(("click"), async () => {
-      const name = await openFormFor("category-name");
-      if (name) {
-         const record = new CategoryRecord(name);
-         await addCategory(record);
-         await renderBookshelf();
-      }
-   })
+   if (!addCategoryBtn._hasAddCategoryListener) {
+      addCategoryBtn._hasAddCategoryListener = true;
+      addCategoryBtn.addEventListener("click", async () => {
+         const name = await openFormFor("category-name");
+         if (name) {
+            const record = new CategoryRecord(name);
+            await addCategory(record);
+            await renderBookshelf();
+         }
+      });
+   }
 
    const categories = bookshelf.querySelectorAll('.category');
 
