@@ -1,8 +1,13 @@
 import { getAllBooks, getAllCategories, addBook, addCategory, getBooksByCategory } from "../../../database/database.js";
 import { BookRecord } from "../../../database/schema.js";
 import EpubBook from "../../../epub/epub-book.js";
-import initBookCardActions from "./book-card-actions.js";
-import initCategoryActions from "./category-actions.js";
+import initBookCardActions from "../button-actions/book-card-actions.js";
+import initCategoryActions from "../button-actions/category-actions.js";
+
+const STRING_FORM_RULES = {
+   maxLength: 20,
+   pattern: /^[^\p{C}/<>\\]+$/u, // no control chars or common injection chars
+};
 
 /**
  * 
@@ -102,6 +107,10 @@ export default async function renderBookshelf() {
       const books = await getBooksByCategory(category.id);
 
       for (const book of books) {
+         book.title = book.title.length > STRING_FORM_RULES.maxLength
+            ? book.title.slice(0, STRING_FORM_RULES.maxLength - 3) + "..."
+            : book.title;
+
          const bookCard = await renderBookCard(book);
          bookCardList.append(bookCard);
          console.log(`  ー Rendered book: ${book.title} (ID: ${book.id}) in category: ${category.name}`);

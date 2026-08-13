@@ -490,3 +490,35 @@ body {
       width: 100%;
    }
 }
+
+/* ─── Input wrapper & char count ──────────────────────────────── */
+.form-input-wrapper {
+   position: relative;
+   display: flex;
+   flex-direction: column;
+   gap: 4px;
+}
+
+.form-char-count {
+   align-self: flex-end;
+   color: var(--text-muted);
+   font-family: system-ui, sans-serif;
+   font-size: 11px;
+   transition: color 0.15s ease;
+}
+
+.form-char-count--near {
+   color: var(--gold);
+}
+
+.form-char-count--over {
+   color: var(--terracotta);
+}
+
+/* ─── Inline error message ────────────────────────────────────── */
+.form-error-msg {
+   min-height: 1em;
+   color: var(--terracotta);
+   font-family: system-ui, sans-serif;
+   font-size: 12px;
+}

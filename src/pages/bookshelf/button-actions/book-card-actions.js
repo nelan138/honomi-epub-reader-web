@@ -1,5 +1,6 @@
 import { renameBook, deleteBook, changeBookCategory } from "../../../database/database.js";
-import renderBookshelf from "./render-bookshelf.js";
+import renderBookshelf from "../features/render-bookshelf.js";
+import openFormFor from "../overlays/forms.js";
 
 export default function initBookCardActions() {
    const bookCards = document.querySelectorAll('.book-card');
@@ -11,7 +12,8 @@ export default function initBookCardActions() {
       const deleteButton = card.querySelector(".delete-book-btn");
 
       renameButton.addEventListener("click", async () => {
-         const title = askUserForNewBookTitle();
+         const title = await openFormFor("book-name");
+         console.log("New book title:", title);
          if (title) {
             await renameBook(bookId, title);
             await renderBookshelf();
@@ -19,34 +21,18 @@ export default function initBookCardActions() {
       });
 
       changeBookCategoryButton.addEventListener(("click"), async () => {
-         const name = askUserForNewBookCategoryLocation();
-         if (name) {
-            await changeBookCategory(bookId, name)
+         const selectedCategory = await openFormFor("category-selection");
+         if (selectedCategory) {
+            await changeBookCategory(bookId, selectedCategory)
             await renderBookshelf();
          }
       })
 
       deleteButton.addEventListener("click", async () => {
-         if (askForUserConfirmation()) {
+         if (await openFormFor("confirmation")) {
             await deleteBook(bookId);
             await renderBookshelf();
          }
       });
    });
 }
-
-// TODO
-function askUserForNewBookTitle() {
-   return prompt("Rename to: ", "New Title");
-}
-
-// TODO
-function askForUserConfirmation() {
-   return confirm("Do you want to delete this book?");
-}
-
-// TODO
-function askUserForNewBookCategoryLocation() {
-   return prompt("Move book to: ", "Your Books");
-}
-
