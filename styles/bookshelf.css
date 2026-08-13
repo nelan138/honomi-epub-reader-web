@@ -117,10 +117,18 @@ body {
 }
 
 /* ─── Category ───────────────────────────────────────────────── */
-.category {
+/* Make the parent a flex container */
+#category-list {
    display: flex;
    flex-direction: column;
    gap: 16px;
+}
+
+/* ? Remove flex from .category (it's now a flex item, not container) */
+
+/* ! Push this category first */
+.category[data-category-name="Your Books"] {
+   order: -1;
 }
 
 /* ─── Category header ───────────────────────────────────────── */

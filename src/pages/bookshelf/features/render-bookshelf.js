@@ -93,7 +93,7 @@ export default async function renderBookshelf() {
       if (!category.expanded) {
          shelf.querySelector('.toggle-category-btn').innerHTML = `<i class="fa-solid fa-caret-right"></i>`;
          categoryList.append(shelf);
-         console.log("  Done (collapsed)")
+         console.log("  / Done (collapsed)")
          continue;
       }
 
@@ -109,7 +109,7 @@ export default async function renderBookshelf() {
 
       shelf.append(bookCardList);
       categoryList.append(shelf);
-      console.log("  ー / Done")
+      console.log("  / Done")
    }
 
    initBookCardActions();
