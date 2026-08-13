@@ -58,8 +58,6 @@ export default async function renderBookshelf() {
    const categories = await getAllCategories();
 
    for (const category of categories) {
-      console.log(`Rendering category: ${category.name} (ID: ${category.id})`);
-
       const shelf = document.createElement("section");
       shelf.classList.add("category");
       shelf.setAttribute("data-category-name", category.name);
@@ -94,7 +92,6 @@ export default async function renderBookshelf() {
       if (!category.expanded) {
          shelf.querySelector('.toggle-category-btn').innerHTML = `<i class="fa-solid fa-caret-right"></i>`;
          bookshelf.append(shelf);
-         console.log("  / Done (collapsed)")
          continue;
       }
 
@@ -109,12 +106,10 @@ export default async function renderBookshelf() {
 
          const bookCard = await renderBookCard(book);
          bookCardList.append(bookCard);
-         console.log(`  ー Rendered book: ${book.title} (ID: ${book.id}) in category: ${category.name}`);
       }
 
       shelf.append(bookCardList);
       bookshelf.append(shelf);
-      console.log("  / Done")
    }
 
    bindBookCardEvents();

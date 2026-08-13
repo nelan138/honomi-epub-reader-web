@@ -5,6 +5,5 @@ import bindBookImportEvents from "./pages/bookshelf/features/import-books.js";
 
 await openDatabase();
 await bindBookImportEvents();
+await bindThemeEvents();
 await renderBookshelf();
-
-bindThemeEvents();

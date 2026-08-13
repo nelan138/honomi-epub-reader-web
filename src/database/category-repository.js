@@ -22,7 +22,6 @@ export async function addCategory(categoryRecord) {
       const req = index.get(categoryRecord.name);
 
       req.onsuccess = () => {
-         console.log("Existing category ID:", req.result?.id);
          resolve(req.result?.id ?? null);
       };
       req.onerror = () => reject(req.error);
@@ -37,7 +36,6 @@ export async function addCategory(categoryRecord) {
       const req = store.add(categoryRecord.toObject());
 
       req.onsuccess = () => {
-         console.log("Category added with ID:", req.result);
          resolve(req.result);
       };
       req.onerror = () => reject(req.error);
@@ -115,9 +113,6 @@ export async function deleteCategory(nameOrId) {
       categoryStore.delete(categoryId);
 
       transaction.oncomplete = () => {
-         console.log(
-            `Deleted category and ${books.length} book(s) (ID: ${categoryId})`
-         );
          resolve(true);
       };
 
@@ -161,9 +156,6 @@ export async function renameCategory(nameOrId, newCategoryName) {
             const putRequest = store.put(category);
 
             putRequest.onsuccess = () => {
-               console.log(
-                  `Changed category's name (Name: ${nameOrId}) to ${newCategoryName}`
-               );
                resolve(true);
             };
 
@@ -195,9 +187,6 @@ export async function renameCategory(nameOrId, newCategoryName) {
          const putRequest = store.put(category);
 
          putRequest.onsuccess = () => {
-            console.log(
-               `Changed category's name (ID: ${nameOrId}) to ${newCategoryName}`
-            );
             resolve(true);
          };
 

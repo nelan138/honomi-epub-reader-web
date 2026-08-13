@@ -1,25 +1,36 @@
 /* ─── Tokens ─────────────────────────────────────────────────── */
 :root {
-   --bg: #EAE4D8;
-   --surface: #F8F3E9;
-   --card: #FFFDF7;
-   --card-border: #D8CCBA;
+   --bg: #EEECE7;
+   --surface: #F8F5EE;
+   --card: #FFFCF5;
+   --card-border: #D8D2C4;
 
-   --cover-bg: #DED5C6;
-   --metadata-bg: #E3E9DF;
-   --progress-bg: #E6DED0;
+   --cover-bg: #DDD6C8;
+   --metadata-bg: #E7EBE2;
+   --progress-bg: #E3DBCD;
 
-   --text-primary: #3B342D;
-   --text-muted: #8A7E70;
+   --text-primary: #342F29;
+   --text-muted: #847A6D;
 
-   --sage: #71866B;
-   --sage-light: #DDE6D8;
+   --sage: #6E7F69;
+   --sage-light: #DCE4D7;
 
-   --terracotta: #B96F58;
-   --terracotta-light: #F0DDD5;
+   --terracotta: #AA6A58;
+   --terracotta-light: #ECD8D1;
 
-   --gold: #B3945A;
-   --gold-light: #EEE4CC;
+   --gold: #A58A57;
+   --gold-light: #EBE0C6;
+
+   --header-bg: rgba(255, 252, 245, 0.9);
+   --header-border: #DDD6C8;
+   --header-text: #6F665A;
+   --header-btn-bg: #E4DCCB;
+   --header-btn-border: transparent;
+   --header-btn-hover-bg: #D8CEBA;
+   --header-btn-hover-border: transparent;
+
+   --hover-neutral-bg: #ECE5D7;
+   --hover-neutral-text: #342F29;
 
    --radius: 7px;
    --cover-w: 108px;
@@ -27,17 +38,64 @@
    --card-gap: 12px;
 }
 
+:root[data-theme="light"] {
+   color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+   color-scheme: dark;
+   --bg: #1A1A18;
+   --surface: #22211E;
+   --card: #2B2925;
+   --card-border: #474238;
+
+   --cover-bg: #3A342C;
+   --metadata-bg: #242A24;
+   --progress-bg: #2D2B24;
+
+   --text-primary: #E9E2D5;
+   --text-muted: #B0A697;
+
+   --sage: #9DB696;
+   --sage-light: #334035;
+
+   --terracotta: #C88773;
+   --terracotta-light: #4D332E;
+
+   --gold: #CFB06C;
+   --gold-light: #4B422C;
+
+   --header-bg: rgba(34, 33, 30, 0.9);
+   --header-border: #4C4539;
+   --header-text: #C8BEAE;
+   --header-btn-bg: #3A352D;
+   --header-btn-border: transparent;
+   --header-btn-hover-bg: #4B4338;
+   --header-btn-hover-border: transparent;
+
+   --hover-neutral-bg: #3A342D;
+   --hover-neutral-text: #F4EEDF;
+}
+
 @supports (backdrop-filter: blur(1px)) {
    :root {
-      --header-bg: rgba(248, 243, 233, 0.92);
+      --header-bg: rgba(255, 252, 245, 0.88);
       --header-backdrop: blur(8px);
+   }
+
+   :root[data-theme="dark"] {
+      --header-bg: rgba(34, 33, 30, 0.86);
    }
 }
 
 @supports not (backdrop-filter: blur(1px)) {
    :root {
-      --header-bg: #F8F3E9;
+      --header-bg: #FFFCF5;
       --header-backdrop: none;
+   }
+
+   :root[data-theme="dark"] {
+      --header-bg: #22211E;
    }
 }
 
@@ -59,7 +117,7 @@ body {
 body {
    background: var(--bg);
    color: var(--text-primary);
-   font-family: "Georgia", serif;
+   font-family: "Spectral", "Georgia", serif;
    font-size: 14px;
    line-height: 1.5;
 }
@@ -81,19 +139,19 @@ body {
    top: 0;
    z-index: 100;
    min-height: 52px;
-   padding: 12px 32px;
+   padding: 10px max(32px, calc((100vw - 1000px) / 2 + 32px));
 
    display: flex;
    align-items: center;
    justify-content: space-between;
    gap: 14px;
 
-   background: transparent;
-   backdrop-filter: none;
-   border-bottom: none;
+   background: var(--header-bg);
+   backdrop-filter: var(--header-backdrop);
+   border-bottom: 1px solid var(--header-border);
    border-radius: 0;
 
-   box-shadow: none;
+   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);
 }
 
 .primary-actions,
@@ -112,10 +170,10 @@ body {
 
 /* Shared header buttons */
 .bookshelf-header button {
-   width: 38px;
-   height: 38px;
+   width: 34px;
+   height: 34px;
    padding: 0;
-   flex: 0 0 38px;
+   flex: 0 0 34px;
 
    display: inline-flex;
    align-items: center;
@@ -123,20 +181,23 @@ body {
 
    appearance: none;
    background: transparent;
-   border: 1px solid transparent;
-   border-radius: 6px;
-   color: #8A7E70;
+   border: none;
+   border-radius: 4px;
+   color: var(--text-primary);
    cursor: pointer;
 
    font-family: system-ui, sans-serif;
-   font-size: 16px;
+   font-size: 14px;
    line-height: 1;
 
    transition:
       background 0.15s ease,
       border-color 0.15s ease,
       color 0.15s ease,
-      transform 0.1s ease;
+      transform 0.1s ease,
+      box-shadow 0.15s ease;
+
+   box-shadow: none;
 }
 
 .bookshelf-header button i {
@@ -144,20 +205,22 @@ body {
    width: 1.25em;
    pointer-events: none;
 
-   font-size: 16px;
+   font-size: 14px;
    line-height: 1;
    text-align: center;
 }
 
 .bookshelf-header button:hover {
-   background: rgba(113, 134, 107, 0.08);
-   border-color: transparent;
-   color: #3B342D;
+   background: transparent;
+   border-color: var(--header-btn-hover-border);
+   color: var(--sage);
+   transform: scale(1.06);
+   box-shadow: none;
 }
 
 .bookshelf-header button:active {
    transform: translateY(1px);
-   background: rgba(113, 134, 107, 0.12);
+   background: transparent;
 }
 
 .bookshelf-header button:focus-visible {
@@ -167,38 +230,21 @@ body {
 
 /* Primary import action */
 #import-book-btn {
-   background: #FFFDF7;
-   border-color: #FFFDF7;
+   background: transparent;
+   border: none;
    color: var(--sage);
-   box-shadow: 0 2px 6px rgba(113, 134, 107, 0.15);
+   box-shadow: none;
 }
 
 #import-book-btn:hover {
-   background: var(--sage-light);
-   border-color: var(--sage-light);
-   color: #52664D;
-   box-shadow: 0 3px 10px rgba(113, 134, 107, 0.22);
-}
-
-/* Secondary header actions */
-#find-book-btn:hover {
-   background: rgba(179, 148, 90, 0.08);
-   color: #3B342D;
-}
-
-#sort-books-btn:hover,
-#toggle-settings-btn:hover {
-   background: rgba(185, 111, 88, 0.08);
-   color: #3B342D;
+   background: transparent;
+   border-color: var(--header-btn-hover-border);
+   color: var(--sage);
+   box-shadow: none;
 }
 
 #add-category-btn {
    align-self: auto;
-}
-
-#add-category-btn:hover {
-   background: rgba(113, 134, 107, 0.1);
-   color: #3B342D;
 }
 
 /* ─── Category list ──────────────────────────────────────────── */
@@ -222,11 +268,11 @@ body {
 }
 
 .category-header h2 {
-   color: #776B5D;
-   font-family: system-ui, sans-serif;
-   font-size: 13px;
-   font-weight: 600;
-   letter-spacing: 0.1em;
+   color: var(--text-muted);
+   font-family: "IBM Plex Sans", system-ui, sans-serif;
+   font-size: 11px;
+   font-weight: 500;
+   letter-spacing: 0.18em;
    text-transform: uppercase;
 }
 
@@ -247,7 +293,7 @@ body {
 
    appearance: none;
    background: transparent;
-   border: 1px solid transparent;
+   border: none;
    border-radius: var(--radius);
    color: var(--text-muted);
    cursor: pointer;
@@ -262,9 +308,8 @@ body {
 }
 
 .category-actions button:hover {
-   background: var(--surface);
-   border-color: var(--card-border);
-   color: var(--text-primary);
+   background: var(--hover-neutral-bg);
+   color: var(--hover-neutral-text);
 }
 
 .rename-category-btn:hover {
@@ -511,13 +556,13 @@ body {
 
 .rename-book-btn:hover,
 .change-book-category-btn:hover {
-   background: var(--gold-light);
-   color: #79643A;
+   background: var(--hover-neutral-bg);
+   color: var(--hover-neutral-text);
 }
 
 .delete-book-btn:hover {
    background: var(--terracotta-light);
-   color: #8F4F3E;
+   color: var(--terracotta);
 }
 
 .book-card-actions button:focus-visible {
@@ -570,14 +615,14 @@ body {
 
    .bookshelf-header {
       min-height: 48px;
-      padding: 6px 7px 6px 9px;
+      padding: 7px 16px;
       gap: 8px;
    }
 
    .bookshelf-header button {
-      width: 36px;
-      height: 36px;
-      flex-basis: 36px;
+      width: 32px;
+      height: 32px;
+      flex-basis: 32px;
    }
 
    .more-actions {

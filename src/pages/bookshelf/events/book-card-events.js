@@ -13,7 +13,6 @@ export default function bindBookCardEvents() {
 
       renameButton.addEventListener("click", async () => {
          const title = await openFormFor("book-name");
-         console.log("New book title:", title);
          if (title) {
             await renameBook(bookId, title);
             await renderBookshelf();

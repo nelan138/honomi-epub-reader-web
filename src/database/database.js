@@ -15,7 +15,6 @@ export default function openDatabase() {
       request.onupgradeneeded = (event) => {
          const db = event.target.result;
          createSchemas(db, event.target.transaction);
-         console.log("Upgrade needed, version:", db.version);
       };
 
       request.onsuccess = () => {

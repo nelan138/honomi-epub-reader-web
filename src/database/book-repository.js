@@ -15,7 +15,6 @@ export async function addBook(bookRecord) {
       const request = store.add(bookRecord.toObject());
 
       request.onsuccess = () => {
-         console.log("Book added with ID:", request.result);
          resolve(request.result);
       };
       request.onerror = () => reject(request.error);
@@ -79,7 +78,6 @@ export async function renameBook(id, newTitle) {
          const putRequest = store.put(book);
 
          putRequest.onsuccess = () => {
-            console.log(`Changed book's title (ID: ${id}) to ${newTitle}`);
             resolve(true);
          };
 
@@ -104,7 +102,6 @@ export async function deleteBook(id) {
       request.onsuccess = () => {
          const deleteRequest = store.delete(id);
          deleteRequest.onsuccess = () => {
-            console.log(`Deleted book (ID: ${id}, Title: ${request.result.title})`);
             resolve();
          };
 
@@ -173,10 +170,6 @@ export async function changeBookCategory(bookId, categoryNameOrId) {
             const putRequest = bookStore.put(book);
 
             putRequest.onsuccess = () => {
-               console.log(
-                  `Changed book's category (Book ID: ${bookId}) to ${category.name}`
-               );
-
                resolve(true);
             };
 

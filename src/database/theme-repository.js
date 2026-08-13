@@ -43,11 +43,11 @@ export async function setTheme(theme) {
       const request = store.put({ id: "current", value: theme });
 
       request.onsuccess = () => {
-         console.log(`Theme set to ${theme}`);
          resolve(true);
       };
 
       request.onerror = () => {
+         console.error(`Failed to set theme to ${theme}:`, request.error);
          reject(request.error);
       };
    });
