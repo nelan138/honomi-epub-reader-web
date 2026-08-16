@@ -38,6 +38,10 @@
    --card-gap: 12px;
 }
 
+[hidden] {
+   display: none !important;
+}
+
 :root[data-theme="light"] {
    color-scheme: light;
 }

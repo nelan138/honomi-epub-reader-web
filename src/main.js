@@ -1,9 +1,22 @@
 import openDatabase from "./database/database.js";
+import { getTheme } from "./database/theme-repository.js";
+
 import bindThemeEvents from "./pages/bookshelf/events/bookshelf-header-events.js";
-import renderBookshelf from "./pages/bookshelf/features/render-bookshelf.js";
 import bindBookImportEvents from "./pages/bookshelf/features/import-books.js";
+import bindCategoryEvents from "./pages/bookshelf/events/category-events.js";
+import bindBookCardEvents from "./pages/bookshelf/events/book-card-events.js";
+
+import renderBookshelf from "./pages/bookshelf/features/render-bookshelf.js";
 
 await openDatabase();
-await bindBookImportEvents();
-await bindThemeEvents();
 await renderBookshelf();
+
+const currentTheme = await getTheme();
+document.documentElement.setAttribute('data-theme', currentTheme);
+
+bindThemeEvents();
+bindCategoryEvents();
+bindBookCardEvents();
+bindBookImportEvents();
+
+

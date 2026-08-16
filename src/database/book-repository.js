@@ -2,52 +2,45 @@ import openDatabase from "./database.js";
 import { STORES } from "./schema.js";
 
 /**
- * Adds a book to the database.
  *
  * @param {BookRecord} bookRecord
- * @returns {Promise<number>} The ID of the newly added book.
+ * @returns {Promise<number> | Error} The ID of the newly added book.
  */
 export async function addBook(bookRecord) {
    const db = await openDatabase();
    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(STORES.BOOKS, "readwrite");
-      const store = transaction.objectStore(STORES.BOOKS);
+      const store = db.transaction(STORES.BOOKS, "readwrite").objectStore(STORES.BOOKS);
       const request = store.add(bookRecord.toObject());
 
-      request.onsuccess = () => {
-         resolve(request.result);
-      };
+      request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error);
    });
 }
 
 /**
- * Returns all books stored in the database.
  *
- * @returns {Promise<Array<BookRecord>>}
+ * @returns {Promise<Array<BookRecord>> | Error} All books in the database.
  */
 export async function getAllBooks() {
    const db = await openDatabase();
    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(STORES.BOOKS, "readonly");
-      const store = transaction.objectStore(STORES.BOOKS);
+      const store = db.transaction(STORES.BOOKS, "readonly").objectStore(STORES.BOOKS);
       const request = store.getAll();
 
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error);
    });
 }
+
 /**
  * Returns all books belonging to a category.
  * @param {number} categoryId
- * @returns {Promise<Array>}
+ * @returns {Promise<Array<BookRecord>> | Error} All books in the specified category.
  */
-
 export async function getBooksByCategory(categoryId) {
    const db = await openDatabase();
    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(STORES.BOOKS, "readonly");
-      const store = transaction.objectStore(STORES.BOOKS);
+      const store = db.transaction(STORES.BOOKS, "readonly").objectStore(STORES.BOOKS);
       const index = store.index("by_category");
       const request = index.getAll(categoryId);
 
@@ -55,12 +48,12 @@ export async function getBooksByCategory(categoryId) {
       request.onerror = () => reject(request.error);
    });
 }
+
 /**
  * @param {number} id
  * @param {string} newTitle
- * @returns {Promise<boolean>} Whether the rename succeeded.
+ * @returns {Promise<boolean> | Error} Whether the rename succeeded.
  */
-
 export async function renameBook(id, newTitle) {
    const db = await openDatabase();
    return new Promise((resolve, reject) => {
@@ -90,9 +83,8 @@ export async function renameBook(id, newTitle) {
 /**
  *
  * @param {Number} id
- * @returns {Boolean} success or not
+ * @returns {Promise<Boolean> | Error} success or not
  */
-
 export async function deleteBook(id) {
    const db = await openDatabase();
    return new Promise((resolve, reject) => {
@@ -102,7 +94,7 @@ export async function deleteBook(id) {
       request.onsuccess = () => {
          const deleteRequest = store.delete(id);
          deleteRequest.onsuccess = () => {
-            resolve();
+            resolve(true);
          };
 
          deleteRequest.onerror = () => { reject(deleteRequest.error); };
@@ -117,17 +109,14 @@ export async function deleteBook(id) {
  *
  * @param {Number} bookId
  * @param {String | Number} categoryNameOrId
- * @returns {Promise<Boolean>} Whether the category was changed successfully
+ * @returns {Promise<Boolean> | Error} Whether the category was changed successfully
  */
 
 export async function changeBookCategory(bookId, categoryNameOrId) {
    const db = await openDatabase();
 
    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(
-         [STORES.BOOKS, STORES.CATEGORIES],
-         "readwrite"
-      );
+      const transaction = db.transaction([STORES.BOOKS, STORES.CATEGORIES], "readwrite");
 
       const bookStore = transaction.objectStore(STORES.BOOKS);
       const categoryStore = transaction.objectStore(STORES.CATEGORIES);

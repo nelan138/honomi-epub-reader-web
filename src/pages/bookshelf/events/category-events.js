@@ -1,56 +1,34 @@
-import { addCategory, deleteCategory, getCategory, renameCategory, updateCategoryState } from "../../../database/category-repository.js";
-import { CategoryRecord } from "../../../database/schema.js";
+import { addCategory, deleteCategory, renameCategory, updateCategoryState } from "../../../database/category-repository.js";
 import renderBookshelf from "../features/render-bookshelf.js";
 import openFormFor from "../features/open-forms.js";
 
 export default function bindCategoryEvents() {
    const bookshelf = document.getElementById('bookshelf');
+   bookshelf.addEventListener("click", async (event) => {
+      const clickedButton = event.target.closest('.category button');
+      if (!clickedButton) return;
 
-   const addCategoryBtn = document.getElementById("add-category-btn");
-   if (!addCategoryBtn._hasAddCategoryListener) {
-      addCategoryBtn._hasAddCategoryListener = true;
-      addCategoryBtn.addEventListener("click", async () => {
-         const name = await openFormFor("category-name");
-         if (name) {
-            const record = new CategoryRecord(name);
-            await addCategory(record);
-            await renderBookshelf();
-         }
-      });
-   }
+      const clickedCategory = clickedButton.closest('.category');
+      const clickedCategoryName = clickedCategory.getAttribute('data-category-name');
 
-   const categories = bookshelf.querySelectorAll('.category');
+      if (clickedButton.matches('.expand-category-btn') && !clickedButton.hidden) {
+         await updateCategoryState(clickedCategoryName, 0);
+      }
 
-   categories.forEach(category => {
-      const toggleBtn = category.querySelector('.toggle-category-btn');
+      else if (clickedButton.matches('.collapse-category-btn') && !clickedButton.hidden) {
+         await updateCategoryState(clickedCategoryName, 1);
+      }
 
-      toggleBtn.addEventListener(("click"), async () => {
-         const categoryRecord = await getCategory(category.getAttribute("data-category-name"));
-         await updateCategoryState(Number(categoryRecord.id), !categoryRecord.expanded);
-         await renderBookshelf();
-      })
+      else if (clickedButton.matches('.rename-category-btn')) {
+         await renameCategory(clickedCategoryName, await openFormFor('category-name', clickedCategoryName));
+      }
 
-      if (category.getAttribute("data-category-name") === "Your Books") return;
+      else if (clickedButton.matches('.delete-category-btn')) {
+         if (await openFormFor('confirmation')) await deleteCategory(clickedCategoryName);
+      }
 
-      const renameBtn = category.querySelector('.rename-category-btn');
-      const deleteBtn = category.querySelector('.delete-category-btn');
-
-      renameBtn.addEventListener(("click"), async () => {
-         const name = await openFormFor("category-name");
-         if (name) {
-            await renameCategory(category.getAttribute("data-category-name"), name);
-            await renderBookshelf();
-         }
-      });
-
-      deleteBtn.addEventListener(("click"), async () => {
-         if (await openFormFor("confirmation")) {
-            await deleteCategory(category.getAttribute("data-category-name"));
-            await renderBookshelf();
-         }
-      })
-
-   })
+      await renderBookshelf();
+   });
 }
 
 

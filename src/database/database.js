@@ -4,7 +4,7 @@ let database = null;
 /**
  * Opens the database, creating it if it does not exist.
  * 
- * @returns {Promise<IDBDatabase>}
+ * @returns {Promise<IDBDatabase> | Error} The opened database.
  */
 export default function openDatabase() {
    if (database) return Promise.resolve(database);

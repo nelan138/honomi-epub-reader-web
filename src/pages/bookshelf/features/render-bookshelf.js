@@ -15,35 +15,20 @@ async function renderBookCard(bookRecord) {
    const epubBook = await EpubBook.fromRecord(bookRecord);
    const metadata = epubBook.getMetadata();
 
-   const bookCard = document.createElement('article');
-   bookCard.className = "book-card";
-   bookCard.setAttribute("data-book-id", epubBook.getId());
-   bookCard.innerHTML = `
-      <div class="cover-wrapper">
-         <img src="${URL.createObjectURL(epubBook.getCover())}" alt="Book cover of ${metadata.title}">
-      </div>
-      <div class="metadata">
-         <h3 class="title">${metadata.title}</h3>
-         <p class="creator">by ${metadata.creator}</p>
-         <p class="language">${metadata.language}</p>
-      </div>
+   const template = document.getElementById("book-card-template");
+   const container = template.content.cloneNode(true).querySelector(".book-card");
+   container.setAttribute("data-book-id", bookRecord.id);
 
-      <!-- FIXME: Will get rid of the random in the future, replace with (epubBook.getProgress() ?? 0) -->
-      <div class="progress-bar" style="--progress: ${Math.floor(Math.random() * 101)}%"></div>
+   const coverElement = container.querySelector(".cover-wrapper > img");
+   coverElement.src = URL.createObjectURL(epubBook.getCover());
+   coverElement.setAttribute("alt", `Book cover of ${metadata.title}`);
 
-      <div class="book-card-actions">
-         <button type="button" class="rename-book-btn">
-            <i class="fa-solid fa-pen-to-square"></i>
-         </button>
-         <button type="button" class="change-book-category-btn">
-            <i class="fa-solid fa-right-left"></i>
-         </button>
-         <button type="button" class="delete-book-btn">
-            <i class="fa-solid fa-trash"></i>
-         </button>
-      </div>
-   `
-   return bookCard;
+   const metadataElement = container.querySelector(".metadata");
+   metadataElement.querySelector(".title").textContent = metadata.title;
+   metadataElement.querySelector(".creator").textContent = metadata.creator;
+   metadataElement.querySelector(".language").textContent = metadata.language;
+
+   return container;
 }
 
 /**
@@ -53,67 +38,57 @@ async function renderBookCard(bookRecord) {
  */
 export default async function renderBookshelf() {
    const bookshelf = document.getElementById("bookshelf");
-
    bookshelf.replaceChildren();
-   const categories = await getAllCategories();
 
+   let categories;
+   try { categories = await getAllCategories(); }
+   catch (error) {
+      // todo: implement a better way to show errors to users.
+      console.error("Error fetching categories:", error);
+      return;
+   }
+
+   const categoryElementArray = [];
    for (const category of categories) {
-      const shelf = document.createElement("section");
-      shelf.classList.add("category");
-      shelf.setAttribute("data-category-name", category.name);
-      shelf.innerHTML = `
-         <header class="category-header">
-            <h2>${category.name}</h2>
-            <div class="category-actions">
-            </div>
-         </header>
-      `;
+      const categoryElement = document.getElementById("category-template")
+         .content.cloneNode(true)
+         .querySelector(".category");
+      categoryElement.setAttribute("data-category-name", category.name);
 
-      const categoryActions = shelf.querySelector(".category-actions");
+      const categoryHeaderElement = categoryElement.querySelector(".category-header");
+      categoryHeaderElement.querySelector("h2").textContent = category.name;
+
+      const categoryActionsElement = categoryHeaderElement.querySelector(".category-actions");
       if (category.name === "Your Books") {
-         categoryActions.innerHTML = `
-            <button type="button" class="toggle-category-btn">
-               <i class="fa-solid fa-caret-down"></i>
-            </button>
-         `
+         categoryActionsElement.querySelector(".rename-category-btn")?.remove();
+         categoryActionsElement.querySelector(".delete-category-btn")?.remove();
       }
-      else categoryActions.innerHTML = `
-         <button type="button" class="rename-category-btn">
-            <i class="fa-solid fa-pencil"></i>
-         </button>
-         <button type="button" class="toggle-category-btn">
-            <i class="fa-solid fa-caret-down"></i>
-         </button>
-         <button type="button" class="delete-category-btn">
-            <i class="fa-solid fa-x"></i>
-         </button>
-      `
 
+      const isExpanded = category.expanded;
+      categoryElement.classList.toggle("expanded", isExpanded);
+      categoryElement.classList.toggle("collapsed", !isExpanded);
+      categoryActionsElement.querySelector(".expand-category-btn").hidden = !isExpanded;
+      categoryActionsElement.querySelector(".collapse-category-btn").hidden = isExpanded;
+      
       if (!category.expanded) {
-         shelf.querySelector('.toggle-category-btn').innerHTML = `<i class="fa-solid fa-caret-right"></i>`;
-         bookshelf.append(shelf);
+         categoryElementArray.push(categoryElement);
          continue;
       }
 
-      const bookCardList = document.createElement("div");
-      bookCardList.className = "book-card-list";
-      const books = await getBooksByCategory(category.id);
+      const bookCardListElement = categoryElement.querySelector(".book-card-list");
+      let books;
+      try { books = await getBooksByCategory(category.id); }
+      catch (error) { console.error(`Error fetching books for category ${category.name}:`, error); }
 
       for (const book of books) {
-         book.title = book.title.length > STRING_FORM_RULES.maxLength
-            ? book.title.slice(0, STRING_FORM_RULES.maxLength - 3) + "..."
-            : book.title;
-
          const bookCard = await renderBookCard(book);
-         bookCardList.append(bookCard);
+         bookCardListElement.appendChild(bookCard);
       }
 
-      shelf.append(bookCardList);
-      bookshelf.append(shelf);
+      categoryElementArray.push(categoryElement);
    }
 
-   bindBookCardEvents();
-   bindCategoryEvents();
+   bookshelf.replaceChildren(...categoryElementArray);
 }
 
 

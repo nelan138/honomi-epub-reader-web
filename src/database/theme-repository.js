@@ -2,11 +2,9 @@ import openDatabase from "./database.js";
 import { STORES } from "./schema.js";
 
 /**
- * Get the current theme from the database, or set it to "light" if it doesn't exist.
  *
- * @returns idk?
+ * @returns {Promise<string> | Error} The current theme.
  */
-
 export async function getTheme() {
    const db = await openDatabase();
    return new Promise((resolve, reject) => {
@@ -28,12 +26,13 @@ export async function getTheme() {
       request.onerror = () => reject(request.error);
    });
 }
+
 /**
  * Set the current theme in the database.
  *
  * @param {"dark" | "light"} theme
+ * @returns {Promise<boolean> | Error} Whether the theme was set successfully.
  */
-
 export async function setTheme(theme) {
    const db = await openDatabase();
 
@@ -47,7 +46,6 @@ export async function setTheme(theme) {
       };
 
       request.onerror = () => {
-         console.error(`Failed to set theme to ${theme}:`, request.error);
          reject(request.error);
       };
    });

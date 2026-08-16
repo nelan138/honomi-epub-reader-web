@@ -42,8 +42,67 @@
          </button>
       </div>
    </header>
-   
-   <main id="bookshelf"></main>
+
+   <main id="bookshelf">
+      <!-- Categories go here -->
+   </main>
+
+   <!-- Category -->
+   <template id="category-template">
+      <section class="category" data-category-name="">
+         <header class="category-header">
+            <h2></h2>
+
+            <div class="category-actions">
+               <button type="button" class="rename-category-btn">
+                  <i class="fa-solid fa-pencil"></i>
+               </button>
+               <button type="button" class="collapse-category-btn">
+                  <i class="fa-solid fa-caret-right"></i>
+               </button>
+               <button type="button" class="expand-category-btn">
+                  <i class="fa-solid fa-caret-down"></i>
+               </button>
+               <button type="button" class="delete-category-btn">
+                  <i class="fa-solid fa-x"></i>
+               </button>
+            </div>
+         </header>
+
+         <div class="book-card-list">
+            <!-- Book cards go here -->
+         </div>
+      </section>
+   </template>
+
+   <!-- Book card -->
+   <template id="book-card-template">
+      <article class="book-card" data-book-id="">
+         <div class="cover-wrapper">
+            <img src="" alt="">
+         </div>
+
+         <div class="metadata">
+            <h3 class="title"></h3>
+            <p class="creator"></p>
+            <p class="language"></p>
+         </div>
+
+         <div class="book-card-actions">
+            <button type="button" class="rename-book-btn">
+               <i class="fa-solid fa-pen-to-square"></i>
+            </button>
+            <button type="button" class="change-book-category-btn">
+               <i class="fa-solid fa-right-left"></i>
+            </button>
+            <button type="button" class="delete-book-btn">
+               <i class="fa-solid fa-trash"></i>
+            </button>
+         </div>
+
+         <div class="progress-bar"> </div>
+      </article>
+   </template>
 
    <script type="module" src="./src/main.js"></script>
 </body>

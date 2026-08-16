@@ -3,35 +3,28 @@ import renderBookshelf from "../features/render-bookshelf.js";
 import openFormFor from "../features/open-forms.js";
 
 export default function bindBookCardEvents() {
-   const bookCards = document.querySelectorAll('.book-card');
-   bookCards.forEach(card => {
-      const bookId = Number(card.getAttribute("data-book-id"));
+   const bookshelf = document.getElementById("bookshelf");
+   bookshelf.addEventListener("click", async (event) => {
+      const clickedButton = event.target.closest(".book-card button");
+      if (!clickedButton) return;
 
-      const renameButton = card.querySelector(".rename-book-btn");
-      const changeBookCategoryButton = card.querySelector(".change-book-category-btn");
-      const deleteButton = card.querySelector(".delete-book-btn");
+      const clickedBookCard = clickedButton.closest(".book-card");
+      const bookId = Number(clickedBookCard.getAttribute("data-book-id"));
 
-      renameButton.addEventListener("click", async () => {
+      if (clickedButton.matches(".rename-book-btn")) {
          const title = await openFormFor("book-name");
-         if (title) {
-            await renameBook(bookId, title);
-            await renderBookshelf();
-         }
-      });
+         if (title) await renameBook(bookId, title);
+      }
 
-      changeBookCategoryButton.addEventListener(("click"), async () => {
+      else if (clickedButton.matches(".change-book-category-btn")) {
          const selectedCategory = await openFormFor("category-selection");
-         if (selectedCategory) {
-            await changeBookCategory(bookId, selectedCategory)
-            await renderBookshelf();
-         }
-      })
+         if (selectedCategory) await changeBookCategory(bookId, selectedCategory)
+      }
 
-      deleteButton.addEventListener("click", async () => {
-         if (await openFormFor("confirmation")) {
-            await deleteBook(bookId);
-            await renderBookshelf();
-         }
-      });
+      else if (clickedButton.matches(".delete-book-btn")) {
+         if (await openFormFor("confirmation")) await deleteBook(bookId);
+      }
+
+      await renderBookshelf();
    });
 }

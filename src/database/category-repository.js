@@ -2,12 +2,11 @@ import openDatabase from "./database.js";
 import { getBooksByCategory } from "./book-repository.js";
 import { STORES } from "./schema.js";
 
-
 /**
  * Returns the ID of the category with the given name, creating it if it does not exist.
  *
  * @param {Object} categoryRecord
- * @returns {Promise<number>} The ID of the category.
+ * @returns {Promise<number> | Error } The ID of the category.
  */
 
 export async function addCategory(categoryRecord) {
@@ -41,12 +40,11 @@ export async function addCategory(categoryRecord) {
       req.onerror = () => reject(req.error);
    });
 }
+
 /**
  * Returns all categories stored in the database.
- * @returns {Promise<Array<CategoryRecord>>}
+ * @returns {Promise<Array<CategoryRecord>> | Error} All categories in the database.
  */
-
-
 export async function getAllCategories() {
    const db = await openDatabase();
    return new Promise((resolve, reject) => {
@@ -58,16 +56,15 @@ export async function getAllCategories() {
       request.onerror = () => reject(request.error);
    });
 }
+
 /**
  * Delete category from database, including all books belonging to it.
  *
  * Category can be either a string name or a number ID.
  *
  * @param {Number | String} nameOrId
- * @returns {Promise<Boolean>} true if deleted successfully
+ * @returns {Promise<Boolean> | Error} true if deleted successfully
  */
-
-
 export async function deleteCategory(nameOrId) {
    const db = await openDatabase();
 
@@ -125,12 +122,13 @@ export async function deleteCategory(nameOrId) {
       };
    });
 }
+
 /**
  *
  * @param {Number | String} nameOrId
  * @param {String} newCategoryName
+ * @returns {Promise<Boolean> | Error} Whether the rename succeeded.
  */
-
 export async function renameCategory(nameOrId, newCategoryName) {
    const db = await openDatabase();
 
@@ -204,6 +202,7 @@ export async function renameCategory(nameOrId, newCategoryName) {
  *
  * @param {String | Number} nameOrId
  * @param {Boolean} newState - 1: Expanded, 0: Collapsed
+ * @returns {Promise<Boolean> | Error} Whether the category state was updated successfully.
  */
 
 export async function updateCategoryState(nameOrId, newState) {
@@ -257,6 +256,11 @@ export async function updateCategoryState(nameOrId, newState) {
    });
 }
 
+/**
+ * 
+ * @param {String | Number} nameOrId 
+ * @returns {Promise<CategoryRecord> | Error} The category record if found.
+ */
 export async function getCategory(nameOrId) {
    const db = await openDatabase();
 
