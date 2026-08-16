@@ -8,35 +8,39 @@ import { STORES, CategoryRecord } from "./schema.js";
  * @param {Object} categoryRecord
  * @returns {Promise<number> | Error } The ID of the category.
  */
-
 export async function addCategory(categoryRecord) {
    const db = await openDatabase();
 
-   // * Check if the category already exists
    const existingId = await new Promise((resolve, reject) => {
       const tx = db.transaction(STORES.CATEGORIES, "readonly");
       const store = tx.objectStore(STORES.CATEGORIES);
-      const index = store.index("by_name");
-
-      const req = index.get(categoryRecord.name);
-
-      req.onsuccess = () => {
-         resolve(req.result?.id ?? null);
-      };
+      const req = store.index("by_name").get(categoryRecord.name);
+      req.onsuccess = () => resolve(req.result?.id ?? null);
       req.onerror = () => reject(req.error);
    });
 
    if (existingId != null) return existingId;
 
+   const { maxOrder, minOrder } = await new Promise((resolve, reject) => {
+      const tx = db.transaction(STORES.CATEGORIES, "readonly");
+      const store = tx.objectStore(STORES.CATEGORIES);
+      const req = store.getAll();
+      req.onsuccess = () => {
+         const all = req.result;
+         const maxOrder = all.reduce((max, c) => Math.max(max, c.displayOrder ?? -1), -1);
+         const minOrder = all.find(c => c.name === "Your Books")?.displayOrder ?? 0;
+         resolve({ maxOrder, minOrder });
+      };
+      req.onerror = () => reject(req.error);
+   });
+
+   categoryRecord.displayOrder = Math.max(maxOrder + 1, minOrder + 1);
+
    return new Promise((resolve, reject) => {
       const tx = db.transaction(STORES.CATEGORIES, "readwrite");
       const store = tx.objectStore(STORES.CATEGORIES);
-
       const req = store.add(categoryRecord.toObject());
-
-      req.onsuccess = () => {
-         resolve(req.result);
-      };
+      req.onsuccess = () => resolve(req.result);
       req.onerror = () => reject(req.error);
    });
 }
@@ -299,5 +303,43 @@ export async function getCategory(nameOrId) {
       getRequest.onerror = () => {
          reject(getRequest.error);
       };
+   });
+}
+
+export async function shiftCategoryDisplayOrder(nameOrId, delta) {
+   const db = await openDatabase();
+
+   const { category, neighbor, yourBooksOrder, maxOrder } = await new Promise((resolve, reject) => {
+      const store = db.transaction(STORES.CATEGORIES, "readonly").objectStore(STORES.CATEGORIES);
+      const req = store.getAll();
+      req.onsuccess = () => {
+         const all = req.result;
+         const category = typeof nameOrId === "string"
+            ? all.find(c => c.name === nameOrId)
+            : all.find(c => c.id === nameOrId);
+         if (!category) { reject(new Error(`Category not found (Name or ID: ${nameOrId})`)); return; }
+         const newOrder = (category.displayOrder ?? 0) + delta;
+         const neighbor = all.find(c => c.displayOrder === newOrder);
+         const yourBooksOrder = all.find(c => c.name === "Your Books")?.displayOrder ?? 0;
+         const maxOrder = Math.max(...all.map(c => c.displayOrder ?? 0));
+         resolve({ category, neighbor, yourBooksOrder, maxOrder });
+      };
+      req.onerror = () => reject(req.error);
+   });
+
+   const newOrder = (category.displayOrder ?? 0) + delta;
+   if (newOrder <= yourBooksOrder) return;
+   if (newOrder > maxOrder) return;
+
+   return new Promise((resolve, reject) => {
+      const store = db.transaction(STORES.CATEGORIES, "readwrite").objectStore(STORES.CATEGORIES);
+      if (neighbor) {
+         neighbor.displayOrder = category.displayOrder;
+         store.put(neighbor);
+      }
+      category.displayOrder = newOrder;
+      const req = store.put(category);
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
    });
 }

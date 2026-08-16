@@ -61,12 +61,14 @@ export class CategoryRecord {
    constructor(name) {
       this.name = name;
       this.expanded = true;
+      this.displayOrder = null; // Will be set when saving to the database
    }
 
    toObject() {
       return {
          name: this.name,
          expanded: this.expanded,
+         displayOrder: this.displayOrder,
       }
    }
 }

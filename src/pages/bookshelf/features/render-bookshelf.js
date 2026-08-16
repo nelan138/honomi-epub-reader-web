@@ -43,12 +43,16 @@ export default async function renderBookshelf(searchText = "", sortOrder = "titl
    bookshelf.replaceChildren();
 
    let categories;
-   try { categories = await getAllCategories(); }
+   try { 
+      categories = await getAllCategories(); 
+   }
    catch (error) {
       // todo: implement a better way to show errors to users.
       console.error("Error fetching categories:", error);
       return;
    }
+
+   categories = categories.sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0));
 
    const categoryElementArray = [];
    for (const category of categories) {
@@ -64,6 +68,8 @@ export default async function renderBookshelf(searchText = "", sortOrder = "titl
       if (category.name === "Your Books") {
          categoryActionsElement.querySelector(".rename-category-btn")?.remove();
          categoryActionsElement.querySelector(".delete-category-btn")?.remove();
+         categoryActionsElement.querySelector(".move-category-up-btn")?.remove();
+         categoryActionsElement.querySelector(".move-category-down-btn")?.remove();
       }
 
       const isExpanded = category.expanded;

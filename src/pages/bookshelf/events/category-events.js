@@ -1,4 +1,4 @@
-import { addCategory, deleteCategory, renameCategory, updateCategoryState } from "../../../database/category-repository.js";
+import { addCategory, deleteCategory, renameCategory, updateCategoryState, shiftCategoryDisplayOrder } from "../../../database/category-repository.js";
 import renderBookshelf from "../features/render-bookshelf.js";
 import openFormFor from "../features/open-forms.js";
 
@@ -25,6 +25,14 @@ export default function bindCategoryEvents() {
 
       else if (clickedButton.matches('.delete-category-btn')) {
          if (await openFormFor('confirmation')) await deleteCategory(clickedCategoryName);
+      }
+
+      else if (clickedButton.matches('.move-category-up-btn') && !clickedButton.hidden) {
+         await shiftCategoryDisplayOrder(clickedCategoryName, -1);
+      }
+
+      else if (clickedButton.matches('.move-category-down-btn') && !clickedButton.hidden) {
+         await shiftCategoryDisplayOrder(clickedCategoryName, 1);
       }
 
       await renderBookshelf();
