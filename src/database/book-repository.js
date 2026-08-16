@@ -1,5 +1,5 @@
 import openDatabase from "./database.js";
-import { STORES } from "./schema.js";
+import { STORES, BookRecord } from "./schema.js";
 
 /**
  *

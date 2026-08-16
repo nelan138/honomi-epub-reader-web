@@ -1,13 +1,12 @@
 import EpubBook from "../epub/epub-book.js";
 
 export const DB_NAME = "Honomi";
-export const DB_VERSION = 2;
+export const DB_VERSION = 3;
 
-// Additional stores such as word banks can be added here as needed.
 export const STORES = {
    BOOKS: "books",
    CATEGORIES: "categories",
-   THEME: "theme",
+   PREFERENCES: "userPreferences",
 };
 
 export class BookRecord {
@@ -72,6 +71,25 @@ export class CategoryRecord {
    }
 }
 
+export class UserPreferencesRecord {
+   /**
+    * 
+    * @param {"light" | "dark" | null} theme 
+    * @param {"title-asc" | "title-desc" | null} titleSortOrder 
+    */
+   constructor(theme = "light", titleSortOrder = "title-asc") {
+      this.theme = theme;
+      this.titleSortOrder = titleSortOrder;
+   }
+
+   toObject() {
+      return {
+         theme: this.theme,
+         titleSortOrder: this.titleSortOrder,
+      }
+   }
+}
+
 export function createSchemas(db, transaction) {
    // * BOOKS
    if (!db.objectStoreNames.contains(STORES.BOOKS)) {
@@ -92,11 +110,9 @@ export function createSchemas(db, transaction) {
       categoryStore.createIndex("by_name", "name", { unique: true });
    }
 
-   // * THEME - Only has one record with key "current" and value either "dark" or "light"
-   if (!db.objectStoreNames.contains(STORES.THEME)) {
-      db.createObjectStore(STORES.THEME, {
-         keyPath: "id"
-      });
+   // * USER PREFERENCES: Only one record exists, fixed id of "user-preferences"
+   if (!db.objectStoreNames.contains(STORES.PREFERENCES)) {
+      db.createObjectStore(STORES.PREFERENCES);
    }
 }
 

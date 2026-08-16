@@ -21,6 +21,8 @@ export default async function openFormFor(type) {
          return selectCategoryForm();
       case "confirmation":
          return askForUserConfirmation();
+      case "search-book":
+         return getStringForm("Search books", "Enter title, author, or language");
       default:
          throw new Error(`Unknown form type: ${type}`);
    }

@@ -1,5 +1,6 @@
 import openDatabase from "./database/database.js";
-import { getTheme } from "./database/theme-repository.js";
+import { getUserPreferences } from "./database/user-preference-repository.js";
+import { CategoryRecord, UserPreferencesRecord } from "./database/schema.js";
 
 import bindThemeEvents from "./pages/bookshelf/events/bookshelf-header-events.js";
 import bindBookImportEvents from "./pages/bookshelf/features/import-books.js";
@@ -11,8 +12,8 @@ import renderBookshelf from "./pages/bookshelf/features/render-bookshelf.js";
 await openDatabase();
 await renderBookshelf();
 
-const currentTheme = await getTheme();
-document.documentElement.setAttribute('data-theme', currentTheme);
+const userPreferences = await getUserPreferences();
+document.documentElement.setAttribute('data-theme', userPreferences.theme);
 
 bindThemeEvents();
 bindCategoryEvents();

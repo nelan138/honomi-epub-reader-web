@@ -7,11 +7,11 @@ import renderBookshelf from "./render-bookshelf.js";
 const defaultCategoryName = "Your Books";
 
 export default function bindBookImportEvents() {
-   document.getElementById("import-book-btn").addEventListener("click", () => {
-      fileInput.click()
-   });
-   
-   document.getElementById("epub-file-input").addEventListener("change", async () => {
+   const importBtn = document.getElementById("import-book-btn");
+   const fileInput = document.getElementById("epub-file-input");
+
+   importBtn.addEventListener("click", () => { fileInput.click() });
+   fileInput.addEventListener("change", async () => {
       for (const file of fileInput.files) {
          if (!file) continue;
 

@@ -34,9 +34,11 @@ async function renderBookCard(bookRecord) {
 /**
  * Loads and renders all stored books.
  *
+ * @param {string | null} searchText - The text to filter books by title, creator, or language.
+ * @param {string | null} sortOrder - The order to sort books. Can be "title-asc" or "title-desc".
  * @returns {Promise<void>}
  */
-export default async function renderBookshelf() {
+export default async function renderBookshelf(searchText = "", sortOrder = "title-asc") {
    const bookshelf = document.getElementById("bookshelf");
    bookshelf.replaceChildren();
 
@@ -69,7 +71,7 @@ export default async function renderBookshelf() {
       categoryElement.classList.toggle("collapsed", !isExpanded);
       categoryActionsElement.querySelector(".expand-category-btn").hidden = !isExpanded;
       categoryActionsElement.querySelector(".collapse-category-btn").hidden = isExpanded;
-      
+
       if (!category.expanded) {
          categoryElementArray.push(categoryElement);
          continue;
@@ -79,6 +81,30 @@ export default async function renderBookshelf() {
       let books;
       try { books = await getBooksByCategory(category.id); }
       catch (error) { console.error(`Error fetching books for category ${category.name}:`, error); }
+
+      if (searchText) {
+         const lowerSearchText = searchText.toLowerCase();
+         books = books.filter(book => {
+            return book.title.toLowerCase().includes(lowerSearchText) ||
+               book.creator.toLowerCase().includes(lowerSearchText) ||
+               book.language.toLowerCase().includes(lowerSearchText);
+         });
+      }
+
+      if (sortOrder === "title-asc") {
+         books.sort((a, b) => {
+            const titleA = a.title.toLowerCase();
+            const titleB = b.title.toLowerCase();
+            return titleA.localeCompare(titleB);
+         });
+      }
+      else if (sortOrder === "title-desc") {
+         books.sort((a, b) => {
+            const titleA = a.title.toLowerCase();
+            const titleB = b.title.toLowerCase();
+            return titleB.localeCompare(titleA);
+         });
+      }
 
       for (const book of books) {
          const bookCard = await renderBookCard(book);

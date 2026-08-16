@@ -1,6 +1,6 @@
 import openDatabase from "./database.js";
 import { getBooksByCategory } from "./book-repository.js";
-import { STORES } from "./schema.js";
+import { STORES, CategoryRecord } from "./schema.js";
 
 /**
  * Returns the ID of the category with the given name, creating it if it does not exist.
