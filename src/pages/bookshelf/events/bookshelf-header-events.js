@@ -4,7 +4,10 @@ import { CategoryRecord, UserPreferencesRecord } from "../../../database/schema.
 import { addCategory } from "../../../database/category-repository.js";
 import renderBookshelf from "../features/render-bookshelf.js";
 
-export default function bindThemeEvents() {
+export default function bindBookshelfHeaderEvents() {
+   document.getElementById('open-github-repo-btn').addEventListener('click', () => {
+      window.open('https://github.com/nelan138/honomi-epub-reader-web', '_blank');
+   });
    document.getElementById('find-book-btn').addEventListener('click', async () => {
       const searchText = await openFormFor("search-book");
       if (searchText) {
