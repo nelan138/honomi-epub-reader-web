@@ -1,0 +1,170 @@
+import openDatabase from './database.js';
+import { STORES, type BookRecord, type CategoryIdentifier, type CategoryRecord } from './schema.js';
+
+export async function addBook(bookRecord: BookRecord): Promise<number> {
+   const db = await openDatabase();
+   return new Promise((resolve, reject) => {
+      const store = db
+         .transaction(STORES.BOOKS, 'readwrite')
+         .objectStore(STORES.BOOKS) as IDBObjectStore;
+      const request = store.add(bookRecord) as IDBRequest<number>;
+
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+   });
+}
+
+export async function getAllBooks(): Promise<BookRecord[]> {
+   const db = await openDatabase();
+
+   return new Promise((resolve, reject) => {
+      const store = db
+         .transaction(STORES.BOOKS, 'readonly')
+         .objectStore(STORES.BOOKS) as IDBObjectStore;
+
+      const request = store.getAll();
+
+      request.onsuccess = () => {
+         const result = request.result as BookRecord[] | undefined;
+         resolve(result ?? []);
+      };
+
+      request.onerror = () => {
+         reject(request.error);
+      };
+   });
+}
+
+export async function getBooksByCategory(id: CategoryIdentifier): Promise<BookRecord[]> {
+   const db = await openDatabase();
+   return new Promise((resolve, reject) => {
+      const tx = db.transaction([STORES.BOOKS, STORES.CATEGORIES], 'readonly');
+
+      if (typeof id === "string") {
+         const categoryStore = tx.objectStore(STORES.CATEGORIES);
+         const index = categoryStore.index('by_name');
+         const getCategoryRequest = index.get(id) as IDBRequest<CategoryRecord>;
+
+         getCategoryRequest.onsuccess = () => {
+            if (!getCategoryRequest.result) {
+               resolve([]);
+               return;
+            }
+            id = Number(getCategoryRequest.result.id);
+            const bookStore = tx.objectStore(STORES.BOOKS);
+            const index = bookStore.index('by_category');
+            const request = index.getAll(id) as IDBRequest<BookRecord[]>;
+
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+         };
+         getCategoryRequest.onerror = () => reject(getCategoryRequest.error);
+      }
+
+      else {
+         const bookStore = tx.objectStore(STORES.BOOKS);
+         const index = bookStore.index('by_category');
+         const request = index.getAll(id) as IDBRequest<BookRecord[]>;
+
+         request.onsuccess = () => resolve(request.result);
+         request.onerror = () => reject(request.error);
+      }
+   });
+}
+
+export async function renameBook(id: number, newTitle: string): Promise<void> {
+   const db = await openDatabase();
+   return new Promise((resolve, reject) => {
+      const store = db.transaction(STORES.BOOKS, 'readwrite').objectStore(STORES.BOOKS);
+      const request = store.get(id) as IDBRequest<BookRecord>;
+      request.onsuccess = () => {
+         const book = request.result;
+         if (!book) {
+            reject(new Error(`Book not found (ID: ${id})`));
+            return;
+         }
+
+         if (!book.metadata) book.metadata = { title: newTitle };
+         else { book.metadata.title = newTitle }
+
+         const putRequest = store.put(book);
+
+         putRequest.onsuccess = () => resolve();
+         putRequest.onerror = () => reject(putRequest.error);
+      };
+   });
+}
+
+export async function deleteBook(id: number): Promise<void> {
+   const db = await openDatabase();
+   return new Promise((resolve, reject) => {
+      const store = db.transaction(STORES.BOOKS, 'readwrite').objectStore(STORES.BOOKS);
+      const request = store.get(id) as IDBRequest<BookRecord>;
+
+      request.onsuccess = () => {
+         const deleteRequest = store.delete(id);
+
+         deleteRequest.onsuccess = () => resolve();
+         deleteRequest.onerror = () => reject(deleteRequest.error);
+      };
+
+      request.onerror = () => reject(request.error);
+   });
+}
+
+export async function changeBookCategory(bookId: number, categoryNameOrId: CategoryIdentifier): Promise<void> {
+   const db = await openDatabase();
+
+   return new Promise((resolve, reject) => {
+      const transaction = db.transaction([STORES.BOOKS, STORES.CATEGORIES], 'readwrite');
+
+      const bookStore = transaction.objectStore(STORES.BOOKS);
+      const categoryStore = transaction.objectStore(STORES.CATEGORIES);
+
+      const bookRequest = bookStore.get(bookId) as IDBRequest<BookRecord>;
+
+      bookRequest.onsuccess = () => {
+         const book = bookRequest.result;
+
+         if (!book) {
+            reject(new Error(`Book not found (ID: ${bookId})`));
+            return;
+         }
+
+         let categoryRequest;
+
+         if (typeof categoryNameOrId === 'string') {
+            const index = categoryStore.index('by_name');
+            categoryRequest = index.get(categoryNameOrId) as IDBRequest<CategoryRecord>;
+         } else categoryRequest = categoryStore.get(categoryNameOrId);
+
+         categoryRequest.onsuccess = () => {
+            const category = categoryRequest.result;
+
+            if (!category) {
+               reject(new Error(
+                  typeof categoryNameOrId === 'string'
+                     ? `Category not found (Name: ${categoryNameOrId})`
+                     : `Category not found (ID: ${categoryNameOrId})`
+               ));
+               return;
+            }
+
+            book.categoryId = category.id;
+            const putRequest = bookStore.put(book);
+
+            putRequest.onsuccess = () => resolve();
+            putRequest.onerror = () => reject(putRequest.error);
+         };
+
+
+         categoryRequest.onerror = () => {
+            reject(categoryRequest.error);
+         };
+      };
+
+      bookRequest.onerror = () => {
+         reject(bookRequest.error);
+      };
+   });
+}

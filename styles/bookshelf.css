@@ -259,7 +259,7 @@ body {
 }
 
 /* Keep "Your Books" first */
-.category[data-category-name="Your Books"] {
+.category[data-category-name="Your Library"] {
    order: -1;
 }
 

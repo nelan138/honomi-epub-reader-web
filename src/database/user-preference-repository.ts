@@ -1,13 +1,9 @@
 import openDatabase from "./database.js";
-import { STORES, UserPreferencesRecord } from "./schema.js";
+import { STORES, type UserPreferences } from "./schema.js";
 
 const PREFERENCES_KEY = "user-preferences";
 
-/**
- * 
- * @returns {Promise<UserPreferencesRecord>}
- */
-export async function getUserPreferences() {
+export async function getUserPreferences(): Promise<UserPreferences> {
    const db = await openDatabase();
 
    return new Promise((resolve, reject) => {
@@ -15,15 +11,18 @@ export async function getUserPreferences() {
          .transaction(STORES.PREFERENCES, "readonly")
          .objectStore(STORES.PREFERENCES);
 
-      const request = store.get(PREFERENCES_KEY);
+      const request = store.get(PREFERENCES_KEY) as IDBRequest<UserPreferences>;
 
       request.onsuccess = async () => {
          if (request.result) {
-            resolve(new UserPreferencesRecord(request.result.theme, request.result.titleSortOrder));
+            resolve(request.result);
             return;
          }
 
-         const defaultPreferences = new UserPreferencesRecord("light", "title-asc");
+         const defaultPreferences: UserPreferences = {
+            theme: "light",
+            titleSortOrder: "title-asc"
+         };
 
          try {
             await setUserPreferences(defaultPreferences);
@@ -37,19 +36,11 @@ export async function getUserPreferences() {
    });
 }
 
-/**
- * 
- * @param { {theme: "light" | "dark", titleSortOrder: "title-asc" | "title-desc"} | UserPreferencesRecord} userPreferencesRecord 
- * @returns {Promise<void>}
- */
-export async function setUserPreferences(userPreferencesRecord) {
+export async function setUserPreferences(record: UserPreferences): Promise<void> {
    const db = await openDatabase();
    return new Promise((resolve, reject) => {
       const store = db.transaction(STORES.PREFERENCES, "readwrite").objectStore(STORES.PREFERENCES);
-      const record = userPreferencesRecord instanceof UserPreferencesRecord
-         ? userPreferencesRecord
-         : new UserPreferencesRecord(userPreferencesRecord.theme, userPreferencesRecord.titleSortOrder);
-      const request = store.put(record.toObject(), PREFERENCES_KEY);
+      const request = store.put(record, PREFERENCES_KEY);
       request.onsuccess = () => resolve();
       request.onerror = () => reject(request.error);
    });

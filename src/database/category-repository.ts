@@ -1,45 +1,45 @@
 import openDatabase from "./database.js";
 import { getBooksByCategory } from "./book-repository.js";
-import { STORES, CategoryRecord } from "./schema.js";
+import { STORES, defaultCategoryName, type CategoryIdentifier, type CategoryRecord, type CategoryState } from "./schema.js";
 
-/**
- * Returns the ID of the category with the given name, creating it if it does not exist.
- *
- * @param {Object} categoryRecord
- * @returns {Promise<number> | Error } The ID of the category.
- */
-export async function addCategory(categoryRecord) {
+export async function addCategory(categoryRecord: CategoryRecord): Promise<number> {
    const db = await openDatabase();
 
-   const existingId = await new Promise((resolve, reject) => {
+   const existingId = await new Promise<number | undefined>((resolve, reject) => {
       const tx = db.transaction(STORES.CATEGORIES, "readonly");
       const store = tx.objectStore(STORES.CATEGORIES);
-      const req = store.index("by_name").get(categoryRecord.name);
-      req.onsuccess = () => resolve(req.result?.id ?? null);
+
+      const req = store.index("by_name").get(categoryRecord.name) as IDBRequest<CategoryRecord>;
+
+      req.onsuccess = () => {
+         if (req.result) resolve(req.result.id);
+         else resolve(undefined);
+      }
       req.onerror = () => reject(req.error);
    });
 
-   if (existingId != null) return existingId;
+   if (existingId) return Number(existingId);
 
-   const { maxOrder, minOrder } = await new Promise((resolve, reject) => {
+   const { maxOrder, minOrder } = await new Promise<{ maxOrder: number; minOrder: number }>((resolve, reject) => {
       const tx = db.transaction(STORES.CATEGORIES, "readonly");
       const store = tx.objectStore(STORES.CATEGORIES);
       const req = store.getAll();
       req.onsuccess = () => {
-         const all = req.result;
+         const all = req.result as CategoryRecord[];
          const maxOrder = all.reduce((max, c) => Math.max(max, c.displayOrder ?? -1), -1);
-         const minOrder = all.find(c => c.name === "Your Books")?.displayOrder ?? 0;
+         const minOrder = all.find(c => c.name === defaultCategoryName)?.displayOrder ?? 0;
          resolve({ maxOrder, minOrder });
       };
       req.onerror = () => reject(req.error);
    });
 
    categoryRecord.displayOrder = Math.max(maxOrder + 1, minOrder + 1);
+   categoryRecord.expanded = true;
 
    return new Promise((resolve, reject) => {
       const tx = db.transaction(STORES.CATEGORIES, "readwrite");
       const store = tx.objectStore(STORES.CATEGORIES);
-      const req = store.add(categoryRecord.toObject());
+      const req = store.add(categoryRecord) as IDBRequest<number>;
       req.onsuccess = () => resolve(req.result);
       req.onerror = () => reject(req.error);
    });
@@ -49,7 +49,7 @@ export async function addCategory(categoryRecord) {
  * Returns all categories stored in the database.
  * @returns {Promise<Array<CategoryRecord>> | Error} All categories in the database.
  */
-export async function getAllCategories() {
+export async function getAllCategories(): Promise<CategoryRecord[]> {
    const db = await openDatabase();
    return new Promise((resolve, reject) => {
       const transaction = db.transaction(STORES.CATEGORIES, "readonly");
@@ -61,60 +61,49 @@ export async function getAllCategories() {
    });
 }
 
-/**
- * Delete category from database, including all books belonging to it.
- *
- * Category can be either a string name or a number ID.
- *
- * @param {Number | String} nameOrId
- * @returns {Promise<Boolean> | Error} true if deleted successfully
- */
-export async function deleteCategory(nameOrId) {
+export async function deleteCategory(identifier: CategoryIdentifier): Promise<void> {
    const db = await openDatabase();
-
    let categoryId;
 
-   // Find category ID if a name was provided.
-   if (typeof nameOrId === "string") {
-      const category = await new Promise((resolve, reject) => {
+   if (typeof identifier === "string") {
+      const category = await new Promise<CategoryRecord>((resolve, reject) => {
          const transaction = db.transaction(STORES.CATEGORIES, "readonly");
          const store = transaction.objectStore(STORES.CATEGORIES);
          const index = store.index("by_name");
-         const request = index.get(nameOrId);
+         const request = index.get(identifier) as IDBRequest<CategoryRecord>;
 
          request.onsuccess = () => resolve(request.result);
          request.onerror = () => reject(request.error);
       });
 
       if (!category) {
-         throw new Error(`Category not found (Name: ${nameOrId})`);
+         throw new Error(`Category not found (Name: ${identifier})`);
       }
 
       categoryId = category.id;
    } else {
-      categoryId = nameOrId;
+      categoryId = identifier;
    }
+
+   if (!categoryId) return;
 
    // Get all books before starting the delete transaction.
    const books = await getBooksByCategory(categoryId);
 
    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(
-         [STORES.CATEGORIES, STORES.BOOKS],
-         "readwrite"
-      );
+      const transaction = db.transaction([STORES.CATEGORIES, STORES.BOOKS], "readwrite");
 
       const categoryStore = transaction.objectStore(STORES.CATEGORIES);
       const bookStore = transaction.objectStore(STORES.BOOKS);
 
       for (const book of books) {
-         bookStore.delete(book.id);
+         if (book.id) bookStore.delete(book.id);
       }
 
       categoryStore.delete(categoryId);
 
       transaction.oncomplete = () => {
-         resolve(true);
+         resolve();
       };
 
       transaction.onerror = () => {
@@ -127,13 +116,7 @@ export async function deleteCategory(nameOrId) {
    });
 }
 
-/**
- *
- * @param {Number | String} nameOrId
- * @param {String} newCategoryName
- * @returns {Promise<Boolean> | Error} Whether the rename succeeded.
- */
-export async function renameCategory(nameOrId, newCategoryName) {
+export async function renameCategory(identifier: CategoryIdentifier, newCategoryName: string): Promise<void> {
    const db = await openDatabase();
 
    return new Promise((resolve, reject) => {
@@ -141,15 +124,15 @@ export async function renameCategory(nameOrId, newCategoryName) {
          .transaction(STORES.CATEGORIES, "readwrite")
          .objectStore(STORES.CATEGORIES);
 
-      if (typeof nameOrId === "string") {
+      if (typeof identifier === "string") {
          const index = store.index("by_name");
-         const getRequest = index.get(nameOrId);
+         const getRequest = index.get(identifier);
 
          getRequest.onsuccess = () => {
             const category = getRequest.result;
 
             if (!category) {
-               reject(new Error(`Category not found (Name: ${nameOrId})`));
+               reject(new Error(`Category not found (Name: ${identifier})`));
                return;
             }
 
@@ -158,7 +141,7 @@ export async function renameCategory(nameOrId, newCategoryName) {
             const putRequest = store.put(category);
 
             putRequest.onsuccess = () => {
-               resolve(true);
+               resolve();
             };
 
             putRequest.onerror = () => {
@@ -173,14 +156,14 @@ export async function renameCategory(nameOrId, newCategoryName) {
          return;
       }
 
-      // * typeof nameOrId === "number"
-      const getRequest = store.get(nameOrId);
+      // * typeof identifier === "number"
+      const getRequest = store.get(identifier);
 
       getRequest.onsuccess = () => {
          const category = getRequest.result;
 
          if (!category) {
-            reject(new Error(`Category not found (ID: ${nameOrId})`));
+            reject(new Error(`Category not found (ID: ${identifier})`));
             return;
          }
 
@@ -189,7 +172,7 @@ export async function renameCategory(nameOrId, newCategoryName) {
          const putRequest = store.put(category);
 
          putRequest.onsuccess = () => {
-            resolve(true);
+            resolve();
          };
 
          putRequest.onerror = () => {
@@ -202,14 +185,8 @@ export async function renameCategory(nameOrId, newCategoryName) {
       };
    });
 }
-/**
- *
- * @param {String | Number} nameOrId
- * @param {Boolean} newState - 1: Expanded, 0: Collapsed
- * @returns {Promise<Boolean> | Error} Whether the category state was updated successfully.
- */
 
-export async function updateCategoryState(nameOrId, newState) {
+export async function updateCategoryState(identifier: CategoryIdentifier, newState: CategoryState): Promise<void> {
    const db = await openDatabase();
 
    return new Promise((resolve, reject) => {
@@ -219,12 +196,12 @@ export async function updateCategoryState(nameOrId, newState) {
 
       let getRequest;
 
-      if (typeof nameOrId === "string") {
+      if (typeof identifier === "string") {
          const index = store.index("by_name");
-         getRequest = index.get(nameOrId);
+         getRequest = index.get(identifier);
       } else {
-         // * typeof nameOrId === "number"
-         getRequest = store.get(nameOrId);
+         // * typeof identifier === "number"
+         getRequest = store.get(identifier);
       }
 
       getRequest.onsuccess = () => {
@@ -233,9 +210,9 @@ export async function updateCategoryState(nameOrId, newState) {
          if (!category) {
             reject(
                new Error(
-                  typeof nameOrId === "string"
-                     ? `Category not found (Name: ${nameOrId})`
-                     : `Category not found (ID: ${nameOrId})`
+                  typeof identifier === "string"
+                     ? `Category not found (Name: ${identifier})`
+                     : `Category not found (ID: ${identifier})`
                )
             );
             return;
@@ -246,7 +223,7 @@ export async function updateCategoryState(nameOrId, newState) {
          const putRequest = store.put(category);
 
          putRequest.onsuccess = () => {
-            resolve(true);
+            resolve();
          };
 
          putRequest.onerror = () => {
@@ -260,12 +237,7 @@ export async function updateCategoryState(nameOrId, newState) {
    });
 }
 
-/**
- * 
- * @param {String | Number} nameOrId 
- * @returns {Promise<CategoryRecord> | Error} The category record if found.
- */
-export async function getCategory(nameOrId) {
+export async function getCategory(identifier: CategoryIdentifier): Promise<void> {
    const db = await openDatabase();
 
    return new Promise((resolve, reject) => {
@@ -275,12 +247,12 @@ export async function getCategory(nameOrId) {
 
       let getRequest;
 
-      if (typeof nameOrId === "string") {
+      if (typeof identifier === "string") {
          const index = store.index("by_name");
-         getRequest = index.get(nameOrId);
+         getRequest = index.get(identifier);
       } else {
-         // * typeof nameOrId === "number"
-         getRequest = store.get(nameOrId);
+         // * typeof identifier === "number"
+         getRequest = store.get(identifier);
       }
 
       getRequest.onsuccess = () => {
@@ -289,9 +261,9 @@ export async function getCategory(nameOrId) {
          if (!category) {
             reject(
                new Error(
-                  typeof nameOrId === "string"
-                     ? `Category not found (Name: ${nameOrId})`
-                     : `Category not found (ID: ${nameOrId})`
+                  typeof identifier === "string"
+                     ? `Category not found (Name: ${identifier})`
+                     : `Category not found (ID: ${identifier})`
                )
             );
             return;
@@ -306,21 +278,28 @@ export async function getCategory(nameOrId) {
    });
 }
 
-export async function shiftCategoryDisplayOrder(nameOrId, delta) {
+type CategoryData = {
+   category: CategoryRecord;
+   neighbor: CategoryRecord | undefined;
+   yourBooksOrder: number;
+   maxOrder: number;
+};
+
+export async function shiftCategoryDisplayOrder(identifier: CategoryIdentifier, delta: number): Promise<void> {
    const db = await openDatabase();
 
-   const { category, neighbor, yourBooksOrder, maxOrder } = await new Promise((resolve, reject) => {
+   const { category, neighbor, yourBooksOrder, maxOrder } = await new Promise<CategoryData>((resolve, reject) => {
       const store = db.transaction(STORES.CATEGORIES, "readonly").objectStore(STORES.CATEGORIES);
       const req = store.getAll();
       req.onsuccess = () => {
          const all = req.result;
-         const category = typeof nameOrId === "string"
-            ? all.find(c => c.name === nameOrId)
-            : all.find(c => c.id === nameOrId);
-         if (!category) { reject(new Error(`Category not found (Name or ID: ${nameOrId})`)); return; }
+         const category = typeof identifier === "string"
+            ? all.find(c => c.name === identifier)
+            : all.find(c => c.id === identifier);
+         if (!category) { reject(new Error(`Category not found (Name or ID: ${identifier})`)); return; }
          const newOrder = (category.displayOrder ?? 0) + delta;
          const neighbor = all.find(c => c.displayOrder === newOrder);
-         const yourBooksOrder = all.find(c => c.name === "Your Books")?.displayOrder ?? 0;
+         const yourBooksOrder = all.find(c => c.name === defaultCategoryName)?.displayOrder ?? 0;
          const maxOrder = Math.max(...all.map(c => c.displayOrder ?? 0));
          resolve({ category, neighbor, yourBooksOrder, maxOrder });
       };

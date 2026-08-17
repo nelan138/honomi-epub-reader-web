@@ -8,7 +8,7 @@ export const STRING_FORM_RULES = {
 /**
  * Opens a modal form.
  *
- * @param {"book-name" | "category-name" | "category-selection" | "confirmation"} type
+ * @param {"book-name" | "category-name" | "category-selection" | "confirmation" | "search-book"} type
  * @returns {Promise<string | boolean>}
  */
 export default async function openFormFor(type) {
