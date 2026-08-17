@@ -1,6 +1,7 @@
 import { addBook, getBooksByCategory } from "../../../database/book-repository.js";
 import { addCategory, getAllCategories } from "../../../database/category-repository.js";
 import { BookRecord } from "../../../database/schema.js";
+import { STRING_FORM_RULES } from "./open-forms.js";
 import { getUserPreferences } from "../../../database/user-preference-repository.js";
 
 /**
@@ -13,14 +14,24 @@ function renderBookCard(bookRecord) {
    const container = template.content.cloneNode(true).querySelector(".book-card");
    container.setAttribute("data-book-id", bookRecord.id);
 
+   const title = bookRecord.title ?? "Unknown Title";
+   const creator = bookRecord.creator ?? "Unknown Author";
+   const language = bookRecord.language ?? "Unknown Language";
+   const progress = bookRecord.progress ?? 0;
+   const coverUrl = URL.createObjectURL(bookRecord.cover);
+
    const coverElement = container.querySelector(".cover-wrapper > img");
-   coverElement.src = URL.createObjectURL(bookRecord.cover);
-   coverElement.setAttribute("alt", `Book cover of ${bookRecord.title}`);
+   coverElement.src = coverUrl;
+   coverElement.setAttribute("alt", `Book cover of ${title}`);
+   coverElement.setAttribute("title", title);
 
    const metadataElement = container.querySelector(".metadata");
-   metadataElement.querySelector(".title").textContent = bookRecord.title;
-   metadataElement.querySelector(".creator").textContent = bookRecord.creator;
-   metadataElement.querySelector(".language").textContent = bookRecord.language;
+   metadataElement.querySelector(".title").textContent = title;
+   metadataElement.querySelector(".creator").textContent = creator;
+   metadataElement.querySelector(".language").textContent = language;
+
+   const progressBarElement = container.querySelector(".progress-bar");
+   progressBarElement.style.setProperty("--progress", `${Math.random() * 100}%`); // todo: replace with actual progress value later
 
    return container;
 }
@@ -61,7 +72,11 @@ function sortAndFilterBooks(books, searchText, sortOrder) {
 }
 
 function renderCategory(categoryRecord, bookRecords) {
-   const categoryName = categoryRecord.name;
+   // Only shows category name within word limit
+   const categoryName = categoryRecord.name.length > STRING_FORM_RULES.maxLength
+      ? categoryRecord.name.slice(0, STRING_FORM_RULES.maxLength - 3) + "..."
+      : categoryRecord.name;
+      
    const categoryElement = document.getElementById("category-template")
       .content.cloneNode(true)
       .querySelector(".category");

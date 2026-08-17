@@ -1,7 +1,7 @@
 import EpubBook from "../epub/epub-book.js";
 
 export const DB_NAME = "Honomi";
-export const DB_VERSION = 3;
+export const DB_VERSION = 1;
 
 export const STORES = {
    BOOKS: "books",

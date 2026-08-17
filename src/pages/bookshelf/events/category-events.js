@@ -13,32 +13,39 @@ export default function bindCategoryEvents() {
 
       if (clickedButton.matches('.expand-category-btn') && !clickedButton.hidden) {
          await updateCategoryState(clickedCategoryName, 0);
+         await renderBookshelf();
       }
 
       else if (clickedButton.matches('.collapse-category-btn') && !clickedButton.hidden) {
          await updateCategoryState(clickedCategoryName, 1);
+         await renderBookshelf();
       }
 
       else if (clickedButton.matches('.rename-category-btn')) {
-         await renameCategory(clickedCategoryName, await openFormFor('category-name', clickedCategoryName));
+         const newCategoryName = await openFormFor('category-name');
+         if (newCategoryName && newCategoryName !== clickedCategoryName) {
+            await renameCategory(clickedCategoryName, newCategoryName);
+            await renderBookshelf();
+         }
       }
 
       else if (clickedButton.matches('.delete-category-btn')) {
          const confirmation = await openFormFor('confirmation');
          if (confirmation) {
             await deleteCategory(clickedCategoryName);
+            await renderBookshelf();
          }
       }
 
       else if (clickedButton.matches('.move-category-up-btn') && !clickedButton.hidden) {
          await shiftCategoryDisplayOrder(clickedCategoryName, -1);
+         await renderBookshelf();
       }
 
       else if (clickedButton.matches('.move-category-down-btn') && !clickedButton.hidden) {
          await shiftCategoryDisplayOrder(clickedCategoryName, 1);
+         await renderBookshelf();
       }
-
-      await renderBookshelf();
    });
 }
 
