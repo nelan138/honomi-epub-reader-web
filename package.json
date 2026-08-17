@@ -7,9 +7,9 @@
     "test": "tests"
   },
   "scripts": {
-      "dev": "vite",
-  "build": "vite build",
-  "preview": "vite preview"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "repository": {
     "type": "git",
@@ -24,6 +24,8 @@
   },
   "homepage": "https://github.com/huyh-lmv/honomi-epub-reader-web#readme",
   "devDependencies": {
+    "@types/node": "^26.2.0",
+    "typescript": "^7.0.2",
     "vite": "^8.2.1"
   }
 }
