@@ -2,15 +2,20 @@ import { unzipSync, strFromU8 } from "../vendor/fflate.js";
 
 /**
  * Represents an EPUB book.
- * @property {string} bookId
- * @property {string} categoryId
- * @property {File | Blob} epubFile - The original EPUB file (imported from <input>) or Blob (pulled from DB).
- * @property {string} opfPath - The path to the EPUB package document (OPF).
- * @property {Array<{id: string, href: string, path: string, mediaType: string, properties: string}>} manifest.
- * @property {Array<{idref: string | null, linear: boolean}>} spine
- * @property {Array<{label: string, href: string, path: string, children: Array}>} navigation
- * @property {Object[{title: string, creator: string, language: string, identifier: string, publisher: string, description: string, subject: string[]}]} metadata
- * @property {Blob} cover - The cover image declared by the EPUB.
+ * @method fromFile(File): Promise<EpubBook> - Creates an EpubBook from an EPUB file.
+ * @method fromRecord(Object): EpubBook - Creates an EpubBook from a record object.
+ * @method getId(): string | null - Gets the book's ID.
+ * @method getCategoryId(): string | null - Gets the book's category ID.
+ * @method setId(string): void - Sets the book's ID.
+ * @method setCategoryId(string): void - Sets the book's category ID.
+ * @method getEpubFile(): File | null - Gets the original EPUB file.
+ * @method getOpfPath(): string - Gets the path to the EPUB package document (OPF).
+ * @method getManifest(): Array<Object> - Gets the EPUB manifest.
+ * @method getManifestItem(string): Object | undefined - Gets a manifest item by its ID.
+ * @method getSpine(): Array<Object> - Gets the EPUB spine.
+ * @method getNavigation(): Array<Object> - Gets the EPUB navigation.
+ * @method getMetadata(): Object - Gets the EPUB metadata.
+ * @method getCover(): Blob | null - Gets the EPUB cover.
  */
 export default class EpubBook {
    // * Identity
@@ -64,6 +69,12 @@ export default class EpubBook {
       return book;
    }
 
+   /**
+    * Creates an EpubBook from a BookRecord.
+    *
+    * @param {BookRecord} bookRecord
+    * @returns {EpubBook}
+    */
    static fromRecord(bookRecord) {
       if (typeof bookRecord !== "object" || bookRecord === null) throw new TypeError("bookRecord must be an object");
       const book = new EpubBook();

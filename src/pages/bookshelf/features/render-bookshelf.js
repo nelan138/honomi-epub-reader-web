@@ -3,6 +3,7 @@ import { addCategory, getAllCategories } from "../../../database/category-reposi
 import { BookRecord } from "../../../database/schema.js";
 import { STRING_FORM_RULES } from "./open-forms.js";
 import { getUserPreferences } from "../../../database/user-preference-repository.js";
+import EpubBook from "../../../epub/epub-book.js";
 
 /**
  * 
@@ -10,15 +11,19 @@ import { getUserPreferences } from "../../../database/user-preference-repository
  * @returns {HTMLElement} The rendered book card element.
  */
 function renderBookCard(bookRecord) {
+   const epub = EpubBook.fromRecord(bookRecord);
+
    const template = document.getElementById("book-card-template");
    const container = template.content.cloneNode(true).querySelector(".book-card");
-   container.setAttribute("data-book-id", bookRecord.id);
+   container.setAttribute("data-book-id", epub.getId());
 
-   const title = bookRecord.title ?? "Unknown Title";
-   const creator = bookRecord.creator ?? "Unknown Author";
-   const language = bookRecord.language ?? "Unknown Language";
-   const progress = bookRecord.progress ?? 0;
-   const coverUrl = URL.createObjectURL(bookRecord.cover);
+   const metadata = epub.getMetadata();
+   const title = metadata.title > STRING_FORM_RULES.maxLength
+      ? metadata.title.slice(0, STRING_FORM_RULES.maxLength - 3) + "..."
+      : metadata.title;
+   const coverUrl = URL.createObjectURL(epub.getCover());
+   const creator = metadata.creator ?? "Unknown Creator";
+   const language = metadata.language ?? "Unknown Language";
 
    const coverElement = container.querySelector(".cover-wrapper > img");
    coverElement.src = coverUrl;
@@ -41,7 +46,7 @@ function renderBookCard(bookRecord) {
  * @param {BookRecord} books 
  * @param {string | null} searchText 
  * @param {"title-asc" | "tile-desc"} sortOrder 
- * @returns 
+ * @returns {BookRecord[]}
  */
 function sortAndFilterBooks(books, searchText, sortOrder) {
    if (searchText) {
