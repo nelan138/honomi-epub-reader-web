@@ -8,6 +8,7 @@ export default function bindBookshelfHeaderEvents() {
    document.getElementById('open-github-repo-btn').addEventListener('click', () => {
       window.open('https://github.com/nelan138/honomi-epub-reader-web', '_blank');
    });
+   
    document.getElementById('find-book-btn').addEventListener('click', async () => {
       const searchText = await openFormFor("search-book");
       if (searchText) {

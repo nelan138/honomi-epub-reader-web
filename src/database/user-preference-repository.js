@@ -19,17 +19,11 @@ export async function getUserPreferences() {
 
       request.onsuccess = async () => {
          if (request.result) {
-            resolve(new UserPreferencesRecord(
-               request.result.theme,
-               request.result.titleSortOrder
-            ));
+            resolve(new UserPreferencesRecord(request.result.theme, request.result.titleSortOrder));
             return;
          }
 
-         const defaultPreferences = new UserPreferencesRecord(
-            "light",
-            "title-asc"
-         );
+         const defaultPreferences = new UserPreferencesRecord("light", "title-asc");
 
          try {
             await setUserPreferences(defaultPreferences);

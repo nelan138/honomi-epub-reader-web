@@ -24,7 +24,10 @@ export default function bindCategoryEvents() {
       }
 
       else if (clickedButton.matches('.delete-category-btn')) {
-         if (await openFormFor('confirmation')) await deleteCategory(clickedCategoryName);
+         const confirmation = await openFormFor('confirmation');
+         if (confirmation) {
+            await deleteCategory(clickedCategoryName);
+         }
       }
 
       else if (clickedButton.matches('.move-category-up-btn') && !clickedButton.hidden) {

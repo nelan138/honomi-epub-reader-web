@@ -9,6 +9,21 @@ export const STORES = {
    PREFERENCES: "userPreferences",
 };
 
+/**
+ * @property {number | null} categoryId
+ * @property {string | null} title
+ * @property {string | null} creator
+ * @property {string | null} language
+ * @property {string | null} publisher
+ * @property {string | null} identifier
+ * @property {Blob | null} cover
+ * @property {number} progress
+ * @property {Blob | null} epubFile
+ * @property {string | null} opfPath
+ * @property {Object | null} manifest
+ * @property {Object | null} navigation
+ * @property {Array | null} spine
+ */
 export class BookRecord {
    /**
     * Represents a book record in the database.
@@ -53,6 +68,11 @@ export class BookRecord {
    }
 }
 
+/**
+ * @property {string} name
+ * @property {boolean} expanded
+ * @property {number | null} displayOrder
+ */
 export class CategoryRecord {
    /**
     * Represents a category record in the database.
@@ -73,6 +93,10 @@ export class CategoryRecord {
    }
 }
 
+/**
+ * @property {"light" | "dark" | null} theme
+ * @property {"title-asc" | "title-desc" | null
+ */
 export class UserPreferencesRecord {
    /**
     * 
