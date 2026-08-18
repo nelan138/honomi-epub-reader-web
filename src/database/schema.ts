@@ -26,11 +26,11 @@ export interface BookRecord {
    spine: SpineItem[];
 }
 
-export type CategoryState = false | true | 1 | 0;
+export type CategoryState = false | true;
 export interface CategoryRecord {
    id?: number;
    name: string;
-   expanded?: CategoryState;
+   expanded: CategoryState;
    displayOrder?: number;
 }
 

@@ -15,12 +15,12 @@ export default function bindCategoryEvents() {
       const categoryId = parseInt(clickedCategory.getAttribute('data-category-id')!);
 
       if (clickedButton.matches('.expand-category-btn') && !clickedButton.hidden) {
-         await updateCategoryState(categoryId, 0);
+         await updateCategoryState(categoryId, true);
          await renderBookshelf();
       }
 
       else if (clickedButton.matches('.collapse-category-btn') && !clickedButton.hidden) {
-         await updateCategoryState(categoryId, 1);
+         await updateCategoryState(categoryId, false);
          await renderBookshelf();
       }
 

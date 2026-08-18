@@ -109,14 +109,14 @@ function renderCategory(categoryRecord: CategoryRecord, bookRecords: BookRecord[
    }
 
    const isExpanded = categoryRecord.expanded;
-   categoryElement.classList.toggle("expanded", Boolean(isExpanded));
+   categoryElement.classList.toggle("expanded", isExpanded);
    categoryElement.classList.toggle("collapsed", !isExpanded);
 
    const expandBtn = categoryActionsElement.querySelector(".expand-category-btn")! as HTMLElement;
-   expandBtn.hidden = !isExpanded;
+   expandBtn.hidden = isExpanded;
 
    const collapseBtn = categoryActionsElement.querySelector(".collapse-category-btn")! as HTMLElement;
-   collapseBtn.hidden = Boolean(isExpanded);
+   collapseBtn.hidden = !isExpanded;
 
    if (!isExpanded) return categoryElement;
 
