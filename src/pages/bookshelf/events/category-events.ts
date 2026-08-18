@@ -1,15 +1,18 @@
-import { addCategory, deleteCategory, renameCategory, updateCategoryState, shiftCategoryDisplayOrder } from "../../../database/category-repository.js";
+import { deleteCategory, renameCategory, updateCategoryState, shiftCategoryDisplayOrder } from "../../../database/category-repository.js";
 import renderBookshelf from "../features/render-bookshelf.js";
 import openFormFor from "../features/open-forms.js";
 
 export default function bindCategoryEvents() {
-   const bookshelf = document.getElementById('bookshelf');
-   bookshelf.addEventListener("click", async (event) => {
-      const clickedButton = event.target.closest('.category button');
+   const bookshelf = document.getElementById('bookshelf')!;
+   bookshelf.addEventListener("click", async (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target) return;
+
+      const clickedButton = target.closest('.category button') as HTMLButtonElement;
       if (!clickedButton) return;
 
-      const clickedCategory = clickedButton.closest('.category');
-      const clickedCategoryName = clickedCategory.getAttribute('data-category-name');
+      const clickedCategory = clickedButton.closest('.category')! as HTMLElement;
+      const clickedCategoryName = clickedCategory.getAttribute('data-category-name')!;
 
       if (clickedButton.matches('.expand-category-btn') && !clickedButton.hidden) {
          await updateCategoryState(clickedCategoryName, 0);
@@ -22,7 +25,7 @@ export default function bindCategoryEvents() {
       }
 
       else if (clickedButton.matches('.rename-category-btn')) {
-         const newCategoryName = await openFormFor('category-name');
+         const newCategoryName = await openFormFor('category-name') as string;
          if (newCategoryName && newCategoryName !== clickedCategoryName) {
             await renameCategory(clickedCategoryName, newCategoryName);
             await renderBookshelf();
@@ -30,7 +33,7 @@ export default function bindCategoryEvents() {
       }
 
       else if (clickedButton.matches('.delete-category-btn')) {
-         const confirmation = await openFormFor('confirmation');
+         const confirmation = await openFormFor('confirmation') as boolean;
          if (confirmation) {
             await deleteCategory(clickedCategoryName);
             await renderBookshelf();

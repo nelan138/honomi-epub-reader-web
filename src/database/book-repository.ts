@@ -1,6 +1,11 @@
 import openDatabase from './database.js';
 import { STORES, type BookRecord, type CategoryIdentifier, type CategoryRecord } from './schema.js';
 
+/**
+ * Adds a new book to the database
+ * @param bookRecord
+ * @returns the added book's id
+ */
 export async function addBook(bookRecord: BookRecord): Promise<number> {
    const db = await openDatabase();
    return new Promise((resolve, reject) => {
@@ -14,6 +19,10 @@ export async function addBook(bookRecord: BookRecord): Promise<number> {
    });
 }
 
+/**
+ * Retrieves all books from the database
+ * @returns Array of all books
+ */
 export async function getAllBooks(): Promise<BookRecord[]> {
    const db = await openDatabase();
 

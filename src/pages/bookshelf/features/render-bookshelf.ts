@@ -14,9 +14,12 @@ function renderBookCard(record: BookRecord): HTMLElement {
    container.setAttribute("data-book-id", String(epub.getId()));
 
    const metadata = epub.getMetadata();
-   const title = metadata.title.length > STRING_FORM_RULES.maxLength
+   metadata.title = metadata.title ?? "Unknown Title";
+   metadata.title = metadata.title.length > STRING_FORM_RULES.maxLength
       ? metadata.title.slice(0, STRING_FORM_RULES.maxLength - 3) + "..."
       : metadata.title;
+
+   const title = metadata.title;
    const cover = epub.getCover();
    const coverUrl = cover ? URL.createObjectURL(cover) : `cover of ${title} not found`;
    const creator = metadata.creator ?? "Unknown Creator";
@@ -42,7 +45,12 @@ function sortAndFilterBooks(books: BookRecord[], searchText: string | null, sort
    if (searchText) {
       const lowerSearchText = searchText.toLowerCase();
       books = books.filter(book => {
-         const metadata = book.metadata;
+         const metadata = book.metadata; 
+         if (!metadata) return false;
+         metadata.title = metadata.title ?? "";
+         metadata.creator = metadata.creator ?? "";
+         metadata.language = metadata.language ?? "";
+
          return metadata?.title.toLowerCase().includes(lowerSearchText) ||
             metadata?.creator.toLowerCase().includes(lowerSearchText) ||
             metadata?.language.toLowerCase().includes(lowerSearchText);
@@ -51,6 +59,10 @@ function sortAndFilterBooks(books: BookRecord[], searchText: string | null, sort
 
    if (sortOrder === "title-asc" || !sortOrder) {
       books.sort((a, b) => {
+         if (!a.metadata || !b.metadata) return 0;
+         a.metadata.title = a.metadata.title ?? "";
+         b.metadata.title = b.metadata.title ?? "";
+
          const titleA = a.metadata?.title.toLowerCase() ?? "";
          const titleB = b.metadata?.title.toLowerCase() ?? "";
 
@@ -59,6 +71,10 @@ function sortAndFilterBooks(books: BookRecord[], searchText: string | null, sort
    }
    else if (sortOrder === "title-desc") {
       books.sort((a, b) => {
+         if (!a.metadata || !b.metadata) return 0;
+         a.metadata.title = a.metadata.title ?? "";
+         b.metadata.title = b.metadata.title ?? "";
+
          const titleA = a.metadata?.title.toLowerCase() ?? "";
          const titleB = b.metadata?.title.toLowerCase() ?? "";
 

@@ -22,13 +22,13 @@ export interface NavigationItem {
 }
 
 export interface Metadata {
-   title: string;
-   creator: string;
-   language: string;
-   publisher: string;
-   identifier: string;
-   description: string;
-   subject: string[];
+   title?: string;
+   creator?: string;
+   language?: string;
+   publisher?: string;
+   identifier?: string;
+   description?: string;
+   subject?: string[];
 }
 
 export default class EpubBook {
