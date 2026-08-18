@@ -1,10 +1,9 @@
 import EpubBook from "../../../epub/epub-book.js";
 import { addBook } from "../../../database/book-repository.js";
-import { addCategory } from "../../../database/category-repository.js";
+import { addCategory, defaultCategoryName } from "../../../database/category-repository.js";
 import renderBookshelf from "./render-bookshelf.js";
-import type { BookRecord, CategoryRecord } from "../../../database/schema.js";
-
-const defaultCategoryName = "Your Library";
+import type { CategoryRecord } from "../../../database/category-repository.js";
+import type { BookRecord } from "../../../database/book-repository.js";
 
 export default function bindBookImportEvents() {
    const importBtn = document.getElementById("import-book-btn")!;
@@ -17,7 +16,8 @@ export default function bindBookImportEvents() {
          if (!file) continue;
 
          const categoryRecord: CategoryRecord = {
-            name: defaultCategoryName
+            name: defaultCategoryName,
+            expanded: true,
          }
          await addCategory(categoryRecord);
          const categoryId = await addCategory(categoryRecord);

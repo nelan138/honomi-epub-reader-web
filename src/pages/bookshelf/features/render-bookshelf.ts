@@ -3,7 +3,8 @@ import { getAllCategories } from "../../../database/category-repository.js";
 import { STRING_FORM_RULES } from "./open-forms.js";
 import { getUserPreferences } from "../../../database/user-preference-repository.js";
 import EpubBook from "../../../epub/epub-book.js";
-import { defaultCategoryName, type BookRecord, type CategoryRecord } from "../../../database/schema.js";
+import { defaultCategoryName, type CategoryRecord } from "../../../database/category-repository.js";
+import { type BookRecord } from "../../../database/book-repository.js";
 
 function renderBookCard(record: BookRecord): HTMLElement {
    const epub = EpubBook.fromRecord(record);
@@ -45,7 +46,7 @@ function sortAndFilterBooks(books: BookRecord[], searchText: string | null, sort
    if (searchText) {
       const lowerSearchText = searchText.toLowerCase();
       books = books.filter(book => {
-         const metadata = book.metadata; 
+         const metadata = book.metadata;
          if (!metadata) return false;
          metadata.title = metadata.title ?? "";
          metadata.creator = metadata.creator ?? "";

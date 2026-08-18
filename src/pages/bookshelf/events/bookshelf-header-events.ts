@@ -2,7 +2,7 @@ import { getUserPreferences, setUserPreferences } from "../../../database/user-p
 import openFormFor from "../features/open-forms.js";
 import { addCategory } from "../../../database/category-repository.js";
 import renderBookshelf from "../features/render-bookshelf.js";
-import type { CategoryRecord } from "../../../database/schema.js";
+import type { CategoryRecord } from "../../../database/category-repository.js";
 
 export default function bindBookshelfHeaderEvents() {
    document.getElementById('open-github-repo-btn')!.addEventListener('click', () => {
