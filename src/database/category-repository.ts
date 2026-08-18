@@ -230,10 +230,7 @@ export async function shiftCategoryDisplayOrder(id: number, delta: 1 | -1): Prom
       const maxOrder = Math.max(...categories.map(c => c.displayOrder ?? 0));
       const minOrder = categories.find(c => c.name === defaultCategoryName)?.displayOrder ?? 0;
 
-      if (newOrder <= minOrder || newOrder > maxOrder) {
-         reject(new Error(`Cannot shift category display order beyond the allowed range (min: ${minOrder}, max: ${maxOrder})`));
-         return;
-      }
+      if (newOrder <= minOrder || newOrder > maxOrder) return;
 
       // If there's no neighbor category to swap with, just resolve without making changes.
       if (!neighbor) {

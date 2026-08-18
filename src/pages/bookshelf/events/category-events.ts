@@ -26,7 +26,8 @@ export default function bindCategoryEvents() {
 
       else if (clickedButton.matches('.rename-category-btn')) {
          const newCategoryName = await openFormFor('category-name') as string;
-         const clickedCategoryName = clickedCategory.querySelector('.category-name')!.textContent!;
+         const clickedCategoryName = clickedCategory.getAttribute('data-category-name')!;
+
          if (newCategoryName && newCategoryName !== clickedCategoryName) {
             await renameCategory(categoryId, newCategoryName);
             await renderBookshelf();

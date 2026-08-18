@@ -5,26 +5,21 @@ export const STRING_FORM_RULES = {
    pattern: /^[^\p{C}/<>\\]+$/u, // no control chars or common injection chars
 };
 
-/**
- * Opens a modal form.
- *
- * @param {"book-name" | "category-name" | "category-selection" | "confirmation" | "search-book"} type
- * @returns {Promise<string | boolean>}
- */
-export default async function openFormFor(type) {
+type FormType = "book-name" | "category-name" | "category-selection" | "confirmation" | "search-book";
+export default async function openFormFor(type: FormType): Promise<string | boolean | null> {
    switch (type) {
       case "book-name":
-         return getNewBookNameForm();
+         return await getNewBookNameForm();
       case "category-name":
-         return getNewCategoryNameForm();
+         return await getNewCategoryNameForm();
       case "category-selection":
-         return selectCategoryForm();
+         return await selectCategoryForm();
       case "confirmation":
-         return askForUserConfirmation();
+         return await askForUserConfirmation();
       case "search-book":
-         return getStringForm("Search books", "Enter title, author, or language");
+         return await getStringForm("Search book", "Enter book name");
       default:
-         throw new Error(`Unknown form type: ${type}`);
+         return null;
    }
 }
 
@@ -42,15 +37,8 @@ async function selectCategoryForm() {
    return getOptionForm("Move to", options);
 }
 
-/**
- * Shows a modal with a text input.
- *
- * @param {string} title
- * @param {string} placeholder
- * @returns {Promise<string | null>} Resolves with the entered string, or null if cancelled.
- */
-function getStringForm(title, placeholder) {
-   return new Promise((resolve) => {
+function getStringForm(title: string, placeholder = "Enter text here"): Promise<string | null> {
+   return new Promise((resolve, reject) => {
       const { overlay, modal } = createModal();
 
       modal.innerHTML = `
@@ -73,22 +61,22 @@ function getStringForm(title, placeholder) {
          </div>
       `;
 
-      const input = modal.querySelector(".form-input");
-      const charCount = modal.querySelector(".form-char-count");
-      const errorMsg = modal.querySelector(".form-error-msg");
-      const submitBtn = modal.querySelector(".form-btn--submit");
-      const cancelBtn = modal.querySelector(".form-btn--cancel");
+      const input = modal.querySelector(".form-input")! as HTMLInputElement;
+      const charCount = modal.querySelector(".form-char-count")!;
+      const errorMsg = modal.querySelector(".form-error-msg")!;
+      const submitBtn = modal.querySelector(".form-btn--submit")!;
+      const cancelBtn = modal.querySelector(".form-btn--cancel")!;
 
       requestAnimationFrame(() => input.focus());
 
-      function validate(value) {
+      function validate(value: string): string | null {
          if (!value) return "Name cannot be empty.";
          if (value.length > STRING_FORM_RULES.maxLength) return `Must be ${STRING_FORM_RULES.maxLength} characters or fewer.`;
          if (!STRING_FORM_RULES.pattern.test(value)) return "Name contains invalid characters.";
          return null;
       }
 
-      function showError(message) {
+      function showError(message: string) {
          errorMsg.textContent = message;
          input.classList.add("form-input--error");
          input.focus();
@@ -130,14 +118,7 @@ function getStringForm(title, placeholder) {
    });
 }
 
-/**
- * Shows a modal with a list of selectable options.
- *
- * @param {string} title
- * @param {string[]} options
- * @returns {Promise<string | null>} Resolves with the chosen option, or null if cancelled.
- */
-function getOptionForm(title, options) {
+function getOptionForm(title: string, options: string[]): Promise<string | null> {
    return new Promise((resolve) => {
       const { overlay, modal } = createModal();
 
@@ -165,7 +146,7 @@ function getOptionForm(title, options) {
          });
       });
 
-      modal.querySelector(".form-btn--cancel").addEventListener("click", cancel);
+      modal.querySelector(".form-btn--cancel")!.addEventListener("click", cancel);
       overlay.addEventListener("click", (e) => {
          if (e.target === overlay) cancel();
       });
@@ -177,13 +158,7 @@ function getOptionForm(title, options) {
    });
 }
 
-/**
- * Shows a confirmation modal.
- *
- * @param {string} [message="Are you sure?"]
- * @returns {Promise<boolean>} Resolves with true if confirmed, false if cancelled.
- */
-function askForUserConfirmation(message = "Are you sure?") {
+function askForUserConfirmation(message = "Are you sure?"): Promise<boolean> {
    return new Promise((resolve) => {
       const { overlay, modal } = createModal();
 
@@ -195,8 +170,8 @@ function askForUserConfirmation(message = "Are you sure?") {
          </div>
       `;
 
-      const confirmBtn = modal.querySelector(".form-btn--danger");
-      const cancelBtn = modal.querySelector(".form-btn--cancel");
+      const confirmBtn = modal.querySelector(".form-btn--danger")! as HTMLButtonElement;
+      const cancelBtn = modal.querySelector(".form-btn--cancel")! as HTMLButtonElement;
 
       requestAnimationFrame(() => confirmBtn.focus());
 
@@ -229,7 +204,7 @@ function createModal() {
    return { overlay, modal };
 }
 
-function closeModal(overlay, callback) {
+function closeModal(overlay: HTMLDivElement, callback?: () => void) {
    overlay.classList.add("form-overlay--closing");
    overlay.addEventListener("animationend", () => {
       overlay.remove();
