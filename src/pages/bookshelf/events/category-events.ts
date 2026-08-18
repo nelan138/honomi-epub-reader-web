@@ -1,6 +1,6 @@
-import { deleteCategory, renameCategory, updateCategoryState, shiftCategoryDisplayOrder } from "../../../database/category-repository.js";
-import renderBookshelf from "../features/render-bookshelf.js";
-import openFormFor from "../features/open-forms.js";
+import { deleteCategory, renameCategory, updateCategoryState, shiftCategoryDisplayOrder } from "../../../database/category-repository.ts";
+import renderBookshelf from "../features/render-bookshelf.ts";
+import openFormFor from "../features/open-forms.ts";
 
 export default function bindCategoryEvents() {
    const bookshelf = document.getElementById('bookshelf')!;

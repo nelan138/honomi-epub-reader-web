@@ -1,9 +1,10 @@
-import EpubBook from "../../../epub/epub-book.js";
-import { addBook } from "../../../database/book-repository.js";
-import { addCategory, defaultCategoryName } from "../../../database/category-repository.js";
-import renderBookshelf from "./render-bookshelf.js";
-import type { CategoryRecord } from "../../../database/category-repository.js";
-import type { BookRecord } from "../../../database/book-repository.js";
+import EpubBook from "../../../epub/epub-book.ts";
+import { addBook } from "../../../database/book-repository.ts";
+import { addCategory } from "../../../database/category-repository.ts";
+import renderBookshelf from "./render-bookshelf.ts";
+import  { type CategoryRecord, getCategoryByName } from "../../../database/category-repository.ts";
+import type { BookRecord } from "../../../database/book-repository.ts";
+import { defaultCategory } from "../../../database/database.ts";
 
 export default function bindBookImportEvents() {
    const importBtn = document.getElementById("import-book-btn")!;
@@ -15,19 +16,11 @@ export default function bindBookImportEvents() {
       for (const file of files) {
          if (!file) continue;
 
-         const categoryRecord: CategoryRecord = {
-            name: defaultCategoryName,
-            expanded: true,
-         }
-         await addCategory(categoryRecord);
-         const categoryId = await addCategory(categoryRecord);
+         const category = await getCategoryByName(defaultCategory.name);
 
          const epub = await EpubBook.fromFile(file);
-         epub.setCategoryId(categoryId);
-         epub.setProgress(0);
-
          const bookRecord: BookRecord = {
-            categoryId: epub.getCategoryId(),
+            categoryId: category.id!,
             progress: 0,
             cover: epub.getCover() ?? undefined,
             metadata: epub.getMetadata(),
@@ -35,12 +28,11 @@ export default function bindBookImportEvents() {
             opfPath: epub.getOpfPath(),
             manifest: epub.getManifest(),
             navigation: epub.getNavigation(),
-            spine: epub.getSpine()
+            spine: epub.getSpine(),
          }
 
          await addBook(bookRecord);
       }
-
       await renderBookshelf();
       fileInput.value = "";
    });

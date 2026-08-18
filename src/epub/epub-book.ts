@@ -1,4 +1,4 @@
-import type { BookRecord } from "../database/book-repository.js";
+import type { BookRecord } from "../database/book-repository.ts";
 import { unzipSync, strFromU8 } from "../vendor/fflate.js";
 
 export interface ManifestItem {

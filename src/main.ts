@@ -1,6 +1,5 @@
-import { openDatabase } from "./database/database.js";
-import { addCategory } from "./database/category-repository.js";
-import { getUserPreferences } from "./database/user-preference-repository.js";
+import { openDatabase, defaultPreferences } from "./database/database.js";
+import { getUserPreferences, setUserPreferences } from "./database/user-preference-repository.js";
 
 import bindBookshelfHeaderEvents from "./pages/bookshelf/events/bookshelf-header-events.js";
 import bindBookImportEvents from "./pages/bookshelf/features/import-books.js";
@@ -11,11 +10,15 @@ import renderBookshelf from "./pages/bookshelf/features/render-bookshelf.js";
 
 await openDatabase();
 await renderBookshelf();
+try {
+   const userPreferences = await getUserPreferences();
+   document.documentElement.setAttribute('data-theme', userPreferences.theme);
+}
+catch {
+   setUserPreferences(defaultPreferences);
+}
 
-const userPreferences = await getUserPreferences();
-document.documentElement.setAttribute('data-theme', userPreferences.theme);
 bindBookshelfHeaderEvents();
-
 bindCategoryEvents();
 bindBookCardEvents();
 bindBookImportEvents();

@@ -258,11 +258,6 @@ body {
    gap: 16px;
 }
 
-/* Keep "Your Books" first */
-.category[data-category-name="Your Library"] {
-   order: -1;
-}
-
 /* ─── Category header ────────────────────────────────────────── */
 .category-header {
    display: flex;

@@ -1,7 +1,7 @@
-import { renameBook, deleteBook, changeBookCategory } from "../../../database/book-repository.js";
-import { getCategoryByName } from "../../../database/category-repository.js";
-import renderBookshelf from "../features/render-bookshelf.js";
-import openFormFor from "../features/open-forms.js";
+import { renameBook, deleteBook, changeBookCategory } from "../../../database/book-repository.ts";
+import { getCategoryByName } from "../../../database/category-repository.ts";
+import renderBookshelf from "../features/render-bookshelf.ts";
+import openFormFor from "../features/open-forms.ts";
 
 export default function bindBookCardEvents() {
    const bookshelf = document.getElementById("bookshelf")!;

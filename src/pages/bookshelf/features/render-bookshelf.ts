@@ -1,11 +1,10 @@
 import { getBooksByCategory } from "../../../database/book-repository.js";
-import { getAllCategories } from "../../../database/category-repository.js";
+import { getAllCategories, type CategoryRecord } from "../../../database/category-repository.js";
 import { STRING_FORM_RULES } from "./open-forms.js";
 import { getUserPreferences } from "../../../database/user-preference-repository.js";
 import EpubBook from "../../../epub/epub-book.js";
-import { defaultCategoryName, type CategoryRecord } from "../../../database/category-repository.js";
 import { type BookRecord } from "../../../database/book-repository.js";
-
+import { defaultCategory } from "../../../database/database.js";
 function renderBookCard(record: BookRecord): HTMLElement {
    const epub = EpubBook.fromRecord(record);
 
@@ -102,7 +101,7 @@ function renderCategory(categoryRecord: CategoryRecord, bookRecords: BookRecord[
    categoryHeaderElement.querySelector("h2")!.textContent = categoryName;
 
    const categoryActionsElement = categoryHeaderElement.querySelector(".category-actions")!;
-   if (categoryName === defaultCategoryName) {
+   if (categoryName === defaultCategory.name) {
       categoryActionsElement.querySelector(".rename-category-btn")?.remove();
       categoryActionsElement.querySelector(".delete-category-btn")?.remove();
       categoryActionsElement.querySelector(".move-category-up-btn")?.remove();

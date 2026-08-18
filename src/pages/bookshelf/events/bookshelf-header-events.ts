@@ -1,8 +1,8 @@
-import { getUserPreferences, setUserPreferences } from "../../../database/user-preference-repository.js";
-import openFormFor from "../features/open-forms.js";
-import { addCategory } from "../../../database/category-repository.js";
-import renderBookshelf from "../features/render-bookshelf.js";
-import type { CategoryRecord } from "../../../database/category-repository.js";
+import { getUserPreferences, setUserPreferences } from "../../../database/user-preference-repository.ts";
+import openFormFor from "../features/open-forms.ts";
+import { addCategory } from "../../../database/category-repository.ts";
+import renderBookshelf from "../features/render-bookshelf.ts";
+import type { CategoryRecord } from "../../../database/category-repository.ts";
 
 export default function bindBookshelfHeaderEvents() {
    document.getElementById('open-github-repo-btn')!.addEventListener('click', () => {
