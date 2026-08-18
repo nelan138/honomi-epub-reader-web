@@ -1,5 +1,5 @@
-import { addBook, getBooksByCategory } from "../../../database/book-repository.js";
-import { addCategory, getAllCategories } from "../../../database/category-repository.js";
+import { getBooksByCategory } from "../../../database/book-repository.js";
+import { getAllCategories } from "../../../database/category-repository.js";
 import { STRING_FORM_RULES } from "./open-forms.js";
 import { getUserPreferences } from "../../../database/user-preference-repository.js";
 import EpubBook from "../../../epub/epub-book.js";
@@ -94,6 +94,8 @@ function renderCategory(categoryRecord: CategoryRecord, bookRecords: BookRecord[
    const template = document.getElementById("category-template")! as HTMLTemplateElement;
    const clone = template.content.cloneNode(true) as DocumentFragment;
    const categoryElement = clone.querySelector(".category")! as HTMLElement;
+   categoryElement.setAttribute("data-category-id", String(categoryRecord.id));
+   categoryElement.setAttribute("data-category-name", categoryRecord.name);
 
    const categoryHeaderElement = categoryElement.querySelector(".category-header")!;
    categoryHeaderElement.querySelector("h2")!.textContent = categoryName;

@@ -31,7 +31,8 @@ export default function bindBookshelfHeaderEvents() {
       const categoryName = await openFormFor("category-name") as string;
       if (categoryName) {
          const record: CategoryRecord = {
-            name: categoryName
+            name: categoryName,
+            expanded: true,
          }
          await addCategory(record);
          await renderBookshelf();

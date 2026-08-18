@@ -1,6 +1,6 @@
 import openDatabase from "./database.js";
 import { getBooksByCategory } from "./book-repository.js";
-import { STORES, defaultCategoryName, type CategoryIdentifier, type CategoryRecord, type CategoryState } from "./schema.js";
+import { STORES, defaultCategoryName, type CategoryRecord, type CategoryState } from "./schema.js";
 
 export async function addCategory(categoryRecord: CategoryRecord): Promise<number> {
    const db = await openDatabase();
@@ -45,10 +45,20 @@ export async function addCategory(categoryRecord: CategoryRecord): Promise<numbe
    });
 }
 
-/**
- * Returns all categories stored in the database.
- * @returns {Promise<Array<CategoryRecord>> | Error} All categories in the database.
- */
+export async function getCategoryByName(name: string): Promise<CategoryRecord> {
+   const db = await openDatabase();
+
+   return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORES.CATEGORIES, "readonly");
+      const store = tx.objectStore(STORES.CATEGORIES);
+      const index = store.index("by_name");
+      const request = index.get(name) as IDBRequest<CategoryRecord>;
+
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+   });
+}
+
 export async function getAllCategories(): Promise<CategoryRecord[]> {
    const db = await openDatabase();
    return new Promise((resolve, reject) => {
@@ -61,34 +71,16 @@ export async function getAllCategories(): Promise<CategoryRecord[]> {
    });
 }
 
-export async function deleteCategory(identifier: CategoryIdentifier): Promise<void> {
+/**
+ * Delete all books in the category and then delete the category itself.
+ * 
+ * @param identifier - The category's name or ID.
+ * @returns A promise that resolves when the category and its books are deleted.
+ */
+export async function deleteCategory(id: number): Promise<void> {
    const db = await openDatabase();
-   let categoryId;
 
-   if (typeof identifier === "string") {
-      const category = await new Promise<CategoryRecord>((resolve, reject) => {
-         const transaction = db.transaction(STORES.CATEGORIES, "readonly");
-         const store = transaction.objectStore(STORES.CATEGORIES);
-         const index = store.index("by_name");
-         const request = index.get(identifier) as IDBRequest<CategoryRecord>;
-
-         request.onsuccess = () => resolve(request.result);
-         request.onerror = () => reject(request.error);
-      });
-
-      if (!category) {
-         throw new Error(`Category not found (Name: ${identifier})`);
-      }
-
-      categoryId = category.id;
-   } else {
-      categoryId = identifier;
-   }
-
-   if (!categoryId) return;
-
-   // Get all books before starting the delete transaction.
-   const books = await getBooksByCategory(categoryId);
+   const books = await getBooksByCategory(id);
 
    return new Promise((resolve, reject) => {
       const transaction = db.transaction([STORES.CATEGORIES, STORES.BOOKS], "readwrite");
@@ -100,7 +92,7 @@ export async function deleteCategory(identifier: CategoryIdentifier): Promise<vo
          if (book.id) bookStore.delete(book.id);
       }
 
-      categoryStore.delete(categoryId);
+      categoryStore.delete(id);
 
       transaction.oncomplete = () => {
          resolve();
@@ -116,7 +108,7 @@ export async function deleteCategory(identifier: CategoryIdentifier): Promise<vo
    });
 }
 
-export async function renameCategory(identifier: CategoryIdentifier, newCategoryName: string): Promise<void> {
+export async function renameCategory(id: number, newCategoryName: string): Promise<void> {
    const db = await openDatabase();
 
    return new Promise((resolve, reject) => {
@@ -124,46 +116,13 @@ export async function renameCategory(identifier: CategoryIdentifier, newCategory
          .transaction(STORES.CATEGORIES, "readwrite")
          .objectStore(STORES.CATEGORIES);
 
-      if (typeof identifier === "string") {
-         const index = store.index("by_name");
-         const getRequest = index.get(identifier);
-
-         getRequest.onsuccess = () => {
-            const category = getRequest.result;
-
-            if (!category) {
-               reject(new Error(`Category not found (Name: ${identifier})`));
-               return;
-            }
-
-            category.name = newCategoryName;
-
-            const putRequest = store.put(category);
-
-            putRequest.onsuccess = () => {
-               resolve();
-            };
-
-            putRequest.onerror = () => {
-               reject(putRequest.error);
-            };
-         };
-
-         getRequest.onerror = () => {
-            reject(getRequest.error);
-         };
-
-         return;
-      }
-
-      // * typeof identifier === "number"
-      const getRequest = store.get(identifier);
+      const getRequest = store.get(id);
 
       getRequest.onsuccess = () => {
          const category = getRequest.result;
 
          if (!category) {
-            reject(new Error(`Category not found (ID: ${identifier})`));
+            reject(new Error(`Category not found (ID: ${id})`));
             return;
          }
 
@@ -186,7 +145,7 @@ export async function renameCategory(identifier: CategoryIdentifier, newCategory
    });
 }
 
-export async function updateCategoryState(identifier: CategoryIdentifier, newState: CategoryState): Promise<void> {
+export async function updateCategoryState(id: number, newState: CategoryState): Promise<void> {
    const db = await openDatabase();
 
    return new Promise((resolve, reject) => {
@@ -195,26 +154,13 @@ export async function updateCategoryState(identifier: CategoryIdentifier, newSta
          .objectStore(STORES.CATEGORIES);
 
       let getRequest;
-
-      if (typeof identifier === "string") {
-         const index = store.index("by_name");
-         getRequest = index.get(identifier);
-      } else {
-         // * typeof identifier === "number"
-         getRequest = store.get(identifier);
-      }
+      getRequest = store.get(id);
 
       getRequest.onsuccess = () => {
          const category = getRequest.result;
 
          if (!category) {
-            reject(
-               new Error(
-                  typeof identifier === "string"
-                     ? `Category not found (Name: ${identifier})`
-                     : `Category not found (ID: ${identifier})`
-               )
-            );
+            reject(new Error(`Category not found (ID: ${id})`));
             return;
          }
 
@@ -237,7 +183,7 @@ export async function updateCategoryState(identifier: CategoryIdentifier, newSta
    });
 }
 
-export async function getCategory(identifier: CategoryIdentifier): Promise<void> {
+export async function getCategory(id: number): Promise<CategoryRecord> {
    const db = await openDatabase();
 
    return new Promise((resolve, reject) => {
@@ -246,26 +192,13 @@ export async function getCategory(identifier: CategoryIdentifier): Promise<void>
          .objectStore(STORES.CATEGORIES);
 
       let getRequest;
-
-      if (typeof identifier === "string") {
-         const index = store.index("by_name");
-         getRequest = index.get(identifier);
-      } else {
-         // * typeof identifier === "number"
-         getRequest = store.get(identifier);
-      }
+      getRequest = store.get(id);
 
       getRequest.onsuccess = () => {
          const category = getRequest.result;
 
          if (!category) {
-            reject(
-               new Error(
-                  typeof identifier === "string"
-                     ? `Category not found (Name: ${identifier})`
-                     : `Category not found (ID: ${identifier})`
-               )
-            );
+            reject(new Error(`Category not found (ID: ${id})`));
             return;
          }
 
@@ -278,47 +211,46 @@ export async function getCategory(identifier: CategoryIdentifier): Promise<void>
    });
 }
 
-type CategoryData = {
-   category: CategoryRecord;
-   neighbor: CategoryRecord | undefined;
-   yourBooksOrder: number;
-   maxOrder: number;
-};
-
-export async function shiftCategoryDisplayOrder(identifier: CategoryIdentifier, delta: number): Promise<void> {
+// * The lower the displayOrder, the higher the category is displayed in the list.
+export async function shiftCategoryDisplayOrder(id: number, delta: 1 | -1): Promise<void> {
    const db = await openDatabase();
 
-   const { category, neighbor, yourBooksOrder, maxOrder } = await new Promise<CategoryData>((resolve, reject) => {
-      const store = db.transaction(STORES.CATEGORIES, "readonly").objectStore(STORES.CATEGORIES);
-      const req = store.getAll();
-      req.onsuccess = () => {
-         const all = req.result;
-         const category = typeof identifier === "string"
-            ? all.find(c => c.name === identifier)
-            : all.find(c => c.id === identifier);
-         if (!category) { reject(new Error(`Category not found (Name or ID: ${identifier})`)); return; }
-         const newOrder = (category.displayOrder ?? 0) + delta;
-         const neighbor = all.find(c => c.displayOrder === newOrder);
-         const yourBooksOrder = all.find(c => c.name === defaultCategoryName)?.displayOrder ?? 0;
-         const maxOrder = Math.max(...all.map(c => c.displayOrder ?? 0));
-         resolve({ category, neighbor, yourBooksOrder, maxOrder });
-      };
-      req.onerror = () => reject(req.error);
-   });
-
-   const newOrder = (category.displayOrder ?? 0) + delta;
-   if (newOrder <= yourBooksOrder) return;
-   if (newOrder > maxOrder) return;
+   const categories = await getAllCategories();
+   const category = await getCategory(id);
 
    return new Promise((resolve, reject) => {
-      const store = db.transaction(STORES.CATEGORIES, "readwrite").objectStore(STORES.CATEGORIES);
-      if (neighbor) {
-         neighbor.displayOrder = category.displayOrder;
-         store.put(neighbor);
+      if (!category) {
+         reject(new Error(`Category not found (ID: ${id})`));
+         return;
       }
+
+      const newOrder = category.displayOrder! + delta;
+      const neighbor = categories.find(c => c.displayOrder === newOrder);
+
+      const maxOrder = Math.max(...categories.map(c => c.displayOrder ?? 0));
+      const minOrder = categories.find(c => c.name === defaultCategoryName)?.displayOrder ?? 0;
+
+      if (newOrder <= minOrder || newOrder > maxOrder) {
+         reject(new Error(`Cannot shift category display order beyond the allowed range (min: ${minOrder}, max: ${maxOrder})`));
+         return;
+      }
+
+      // If there's no neighbor category to swap with, just resolve without making changes.
+      if (!neighbor) {
+         resolve();
+         return;
+      }
+
+      neighbor.displayOrder = category.displayOrder;
       category.displayOrder = newOrder;
-      const req = store.put(category);
-      req.onsuccess = () => resolve();
-      req.onerror = () => reject(req.error);
+
+      const transaction = db.transaction(STORES.CATEGORIES, "readwrite");
+      const store = transaction.objectStore(STORES.CATEGORIES);
+      store.put(neighbor);
+      store.put(category);
+
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error);
+      transaction.onabort = () => reject(transaction.error);
    });
 }

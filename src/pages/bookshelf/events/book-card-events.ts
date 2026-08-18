@@ -1,4 +1,5 @@
 import { renameBook, deleteBook, changeBookCategory } from "../../../database/book-repository.js";
+import { getCategoryByName } from "../../../database/category-repository.js";
 import renderBookshelf from "../features/render-bookshelf.js";
 import openFormFor from "../features/open-forms.js";
 
@@ -21,11 +22,17 @@ export default function bindBookCardEvents() {
 
       else if (clickedButton.matches(".change-book-category-btn")) {
          const selectedCategory = await openFormFor("category-selection") as string;
-         if (selectedCategory) await changeBookCategory(bookId, selectedCategory)
+         
+         if (selectedCategory) {
+            const record = await getCategoryByName(selectedCategory);
+            const categoryId = record.id!;
+            await changeBookCategory(bookId, categoryId);
+         }
       }
 
       else if (clickedButton.matches(".delete-book-btn")) {
-         if (await openFormFor("confirmation") as boolean) await deleteBook(bookId);
+         const confirmation = await openFormFor("confirmation") as boolean;
+         if (confirmation) await deleteBook(bookId);
       }
 
       await renderBookshelf();

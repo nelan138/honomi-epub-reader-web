@@ -12,22 +12,23 @@ export default function bindCategoryEvents() {
       if (!clickedButton) return;
 
       const clickedCategory = clickedButton.closest('.category')! as HTMLElement;
-      const clickedCategoryName = clickedCategory.getAttribute('data-category-name')!;
+      const categoryId = parseInt(clickedCategory.getAttribute('data-category-id')!);
 
       if (clickedButton.matches('.expand-category-btn') && !clickedButton.hidden) {
-         await updateCategoryState(clickedCategoryName, 0);
+         await updateCategoryState(categoryId, 0);
          await renderBookshelf();
       }
 
       else if (clickedButton.matches('.collapse-category-btn') && !clickedButton.hidden) {
-         await updateCategoryState(clickedCategoryName, 1);
+         await updateCategoryState(categoryId, 1);
          await renderBookshelf();
       }
 
       else if (clickedButton.matches('.rename-category-btn')) {
          const newCategoryName = await openFormFor('category-name') as string;
+         const clickedCategoryName = clickedCategory.querySelector('.category-name')!.textContent!;
          if (newCategoryName && newCategoryName !== clickedCategoryName) {
-            await renameCategory(clickedCategoryName, newCategoryName);
+            await renameCategory(categoryId, newCategoryName);
             await renderBookshelf();
          }
       }
@@ -35,18 +36,18 @@ export default function bindCategoryEvents() {
       else if (clickedButton.matches('.delete-category-btn')) {
          const confirmation = await openFormFor('confirmation') as boolean;
          if (confirmation) {
-            await deleteCategory(clickedCategoryName);
+            await deleteCategory(categoryId);
             await renderBookshelf();
          }
       }
 
       else if (clickedButton.matches('.move-category-up-btn') && !clickedButton.hidden) {
-         await shiftCategoryDisplayOrder(clickedCategoryName, -1);
+         await shiftCategoryDisplayOrder(categoryId, -1);
          await renderBookshelf();
       }
 
       else if (clickedButton.matches('.move-category-down-btn') && !clickedButton.hidden) {
-         await shiftCategoryDisplayOrder(clickedCategoryName, 1);
+         await shiftCategoryDisplayOrder(categoryId, 1);
          await renderBookshelf();
       }
    });

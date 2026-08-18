@@ -1,5 +1,5 @@
 import openDatabase from './database.js';
-import { STORES, type BookRecord, type CategoryIdentifier, type CategoryRecord } from './schema.js';
+import { STORES, type BookRecord, type CategoryRecord } from './schema.js';
 
 /**
  * Adds a new book to the database
@@ -44,40 +44,17 @@ export async function getAllBooks(): Promise<BookRecord[]> {
    });
 }
 
-export async function getBooksByCategory(id: CategoryIdentifier): Promise<BookRecord[]> {
+export async function getBooksByCategory(id: number): Promise<BookRecord[]> {
    const db = await openDatabase();
    return new Promise((resolve, reject) => {
       const tx = db.transaction([STORES.BOOKS, STORES.CATEGORIES], 'readonly');
 
-      if (typeof id === "string") {
-         const categoryStore = tx.objectStore(STORES.CATEGORIES);
-         const index = categoryStore.index('by_name');
-         const getCategoryRequest = index.get(id) as IDBRequest<CategoryRecord>;
+      const bookStore = tx.objectStore(STORES.BOOKS);
+      const index = bookStore.index('by_category');
+      const request = index.getAll(id) as IDBRequest<BookRecord[]>;
 
-         getCategoryRequest.onsuccess = () => {
-            if (!getCategoryRequest.result) {
-               resolve([]);
-               return;
-            }
-            id = Number(getCategoryRequest.result.id);
-            const bookStore = tx.objectStore(STORES.BOOKS);
-            const index = bookStore.index('by_category');
-            const request = index.getAll(id) as IDBRequest<BookRecord[]>;
-
-            request.onsuccess = () => resolve(request.result);
-            request.onerror = () => reject(request.error);
-         };
-         getCategoryRequest.onerror = () => reject(getCategoryRequest.error);
-      }
-
-      else {
-         const bookStore = tx.objectStore(STORES.BOOKS);
-         const index = bookStore.index('by_category');
-         const request = index.getAll(id) as IDBRequest<BookRecord[]>;
-
-         request.onsuccess = () => resolve(request.result);
-         request.onerror = () => reject(request.error);
-      }
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
    });
 }
 
@@ -121,7 +98,7 @@ export async function deleteBook(id: number): Promise<void> {
    });
 }
 
-export async function changeBookCategory(bookId: number, categoryNameOrId: CategoryIdentifier): Promise<void> {
+export async function changeBookCategory(bookId: number, categoryId: number): Promise<void> {
    const db = await openDatabase();
 
    return new Promise((resolve, reject) => {
@@ -142,20 +119,13 @@ export async function changeBookCategory(bookId: number, categoryNameOrId: Categ
 
          let categoryRequest;
 
-         if (typeof categoryNameOrId === 'string') {
-            const index = categoryStore.index('by_name');
-            categoryRequest = index.get(categoryNameOrId) as IDBRequest<CategoryRecord>;
-         } else categoryRequest = categoryStore.get(categoryNameOrId);
+         categoryRequest = categoryStore.get(categoryId) as IDBRequest<CategoryRecord>;
 
          categoryRequest.onsuccess = () => {
             const category = categoryRequest.result;
 
-            if (!category) {
-               reject(new Error(
-                  typeof categoryNameOrId === 'string'
-                     ? `Category not found (Name: ${categoryNameOrId})`
-                     : `Category not found (ID: ${categoryNameOrId})`
-               ));
+            if (!category || !category.id) {
+               reject(new Error(`Category error (ID: ${categoryId})`));
                return;
             }
 

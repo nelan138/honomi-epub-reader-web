@@ -27,7 +27,6 @@ export interface BookRecord {
 }
 
 export type CategoryState = false | true | 1 | 0;
-export type CategoryIdentifier = number | string;
 export interface CategoryRecord {
    id?: number;
    name: string;
