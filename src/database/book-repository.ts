@@ -14,7 +14,7 @@ export interface BookRecord {
 
    epubFile: Blob;
    opfPath: string;
-   manifest: ManifestItem[];
+   manifest: Map<string, ManifestItem>;
    navigation: NavigationItem[];
    spine: SpineItem[];
 }
