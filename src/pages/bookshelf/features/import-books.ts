@@ -1,10 +1,12 @@
 import EpubBook from "../../../epub/epub-book.ts";
-import { addBook } from "../../../database/book-repository.ts";
-import { addCategory } from "../../../database/category-repository.ts";
-import renderBookshelf from "./render-bookshelf.ts";
-import  { type CategoryRecord, getCategoryByName } from "../../../database/category-repository.ts";
-import type { BookRecord } from "../../../database/book-repository.ts";
+
 import { defaultCategory } from "../../../database/database.ts";
+import { addBook } from "../../../database/book-repository.ts";
+import type { BookRecord } from "../../../database/book-repository.ts";
+import { getCategoryByName } from "../../../database/category-repository.ts";
+
+import renderBookshelf from "./render-bookshelf.ts";
+
 
 export default function bindBookImportEvents() {
    const importBtn = document.getElementById("import-book-btn")!;

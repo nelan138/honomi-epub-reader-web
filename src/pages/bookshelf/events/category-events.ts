@@ -2,8 +2,10 @@ import { deleteCategory, renameCategory, updateCategoryState, shiftCategoryDispl
 import renderBookshelf from "../features/render-bookshelf.ts";
 import openFormFor from "../features/open-forms.ts";
 
+
 export default function bindCategoryEvents() {
    const bookshelf = document.getElementById('bookshelf')!;
+
    bookshelf.addEventListener("click", async (event: MouseEvent) => {
       const target = event.target as HTMLElement;
       if (!target) return;
@@ -12,15 +14,11 @@ export default function bindCategoryEvents() {
       if (!clickedButton) return;
 
       const clickedCategory = clickedButton.closest('.category')! as HTMLElement;
-      const categoryId = parseInt(clickedCategory.getAttribute('data-category-id')!);
-
-      if (clickedButton.matches('.expand-category-btn') && !clickedButton.hidden) {
-         await updateCategoryState(categoryId, true);
-         await renderBookshelf();
-      }
-
-      else if (clickedButton.matches('.collapse-category-btn') && !clickedButton.hidden) {
-         await updateCategoryState(categoryId, false);
+      const categoryId = Number(clickedCategory.getAttribute('data-category-id'));
+      
+      if (clickedButton.matches('.expand-category-btn') || clickedButton.matches('.collapse-category-btn')) {
+         const isExpanded = clickedCategory.classList.contains('expanded');
+         await updateCategoryState(categoryId, !isExpanded);
          await renderBookshelf();
       }
 

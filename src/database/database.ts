@@ -1,5 +1,6 @@
-import { type CategoryRecord } from "./category-repository.ts";
-import { type UserPreferences } from "./user-preference-repository.ts";
+import type { CategoryRecord } from "./category-repository.ts";
+import type { UserPreferences } from "./user-preference-repository.ts";
+
 
 export const DB_NAME = "Honomi";
 export const DB_VERSION = 2;
@@ -81,5 +82,5 @@ export function openDatabase(): Promise<IDBDatabase> {
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error);
    });
-} 
+}
 

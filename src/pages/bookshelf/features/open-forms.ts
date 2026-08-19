@@ -1,5 +1,6 @@
 import { getAllCategories } from "../../../database/category-repository.js";
 
+
 export const STRING_FORM_RULES = {
    maxLength: 20,
    pattern: /^[^\p{C}/<>\\]+$/u, // no control chars or common injection chars

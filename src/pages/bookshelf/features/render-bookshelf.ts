@@ -1,10 +1,14 @@
-import { getBooksByCategory } from "../../../database/book-repository.js";
-import { getAllCategories, type CategoryRecord } from "../../../database/category-repository.js";
-import { STRING_FORM_RULES } from "./open-forms.js";
-import { getUserPreferences } from "../../../database/user-preference-repository.js";
-import EpubBook from "../../../epub/epub-book.js";
-import { type BookRecord } from "../../../database/book-repository.js";
 import { defaultCategory } from "../../../database/database.js";
+import { getBooksByCategory } from "../../../database/book-repository.js";
+import { getAllCategories } from "../../../database/category-repository.js";
+import { getUserPreferences } from "../../../database/user-preference-repository.js";
+import type { BookRecord } from "../../../database/book-repository.js";
+import type { CategoryRecord } from "../../../database/category-repository.js";
+
+import { STRING_FORM_RULES } from "./open-forms.js";
+import EpubBook from "../../../epub/epub-book.js";
+
+
 function renderBookCard(record: BookRecord): HTMLElement {
    const epub = EpubBook.fromRecord(record);
 

@@ -1,6 +1,9 @@
+import type { Metadata, ManifestItem, NavigationItem, SpineItem } from '../epub/epub-book.ts';
+
 import { openDatabase, STORES } from './database.ts';
 import type { CategoryRecord } from "./category-repository.ts";
-import type { Metadata, ManifestItem, NavigationItem, SpineItem } from '../epub/epub-book.ts';
+
+
 export interface BookRecord {
    id?: number;
    categoryId: number;

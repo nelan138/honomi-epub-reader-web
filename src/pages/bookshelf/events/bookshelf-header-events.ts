@@ -1,8 +1,11 @@
 import { getUserPreferences, setUserPreferences } from "../../../database/user-preference-repository.ts";
-import openFormFor from "../features/open-forms.ts";
 import { addCategory } from "../../../database/category-repository.ts";
-import renderBookshelf from "../features/render-bookshelf.ts";
+import type { TitleSortOrder } from "../../../database/user-preference-repository.ts";
 import type { CategoryRecord } from "../../../database/category-repository.ts";
+
+import renderBookshelf from "../features/render-bookshelf.ts";
+import openFormFor from "../features/open-forms.ts";
+
 
 export default function bindBookshelfHeaderEvents() {
    document.getElementById('open-github-repo-btn')!.addEventListener('click', () => {
@@ -18,7 +21,7 @@ export default function bindBookshelfHeaderEvents() {
 
    document.getElementById('sort-books-btn')!.addEventListener('click', async () => {
       let userPreferences = await getUserPreferences();
-      const newSortOrder = userPreferences.titleSortOrder === "title-asc" ? "title-desc" : "title-asc";
+      const newSortOrder: TitleSortOrder = userPreferences.titleSortOrder === "title-asc" ? "title-desc" : "title-asc";
       userPreferences = {
          theme: userPreferences.theme,
          titleSortOrder: newSortOrder
@@ -41,17 +44,10 @@ export default function bindBookshelfHeaderEvents() {
 
    document.getElementById('toggle-theme-btn')!.addEventListener('click', async () => {
       let userPreferences = await getUserPreferences();
-      const currentTheme = userPreferences.theme;
-      if (currentTheme === 'light') {
-         userPreferences.theme = 'dark';
-         await setUserPreferences(userPreferences);
-         document.documentElement.setAttribute('data-theme', 'dark');
-      }
-      else {
-         userPreferences.theme = 'light';
-         await setUserPreferences(userPreferences);
-         document.documentElement.setAttribute('data-theme', 'light');
-      }
+      userPreferences.theme = userPreferences.theme === 'light' ? 'dark' : 'light';
+
+      await setUserPreferences(userPreferences);
+      document.documentElement.setAttribute('data-theme', userPreferences.theme);
    });
 
    document.getElementById('toggle-settings-btn')!.addEventListener('click', async () => {

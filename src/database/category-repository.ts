@@ -1,5 +1,6 @@
 import { openDatabase, STORES } from "./database.ts";
 
+
 export type CategoryState = false | true;
 type DisplayOrders = { min: number, max: number };
 export interface CategoryRecord {
