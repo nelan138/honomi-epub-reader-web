@@ -1,5 +1,5 @@
 import type { BookRecord } from "../database/book-repository.ts";
-import { unzipSync, strFromU8 } from "../vendor/fflate.js";
+import { unzipSync, strFromU8 } from "fflate";
 
 export interface ManifestItem {
    href: string; // * resource path

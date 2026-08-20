@@ -6,6 +6,8 @@ import bindBookImportEvents from "./pages/bookshelf/features/import-books.js";
 import bindCategoryEvents from "./pages/bookshelf/events/category-events.js";
 import bindBookCardEvents from "./pages/bookshelf/events/book-card-events.js";
 
+import '../styles/bookshelf.css';
+import '../styles/forms.css';
 import renderBookshelf from "./pages/bookshelf/features/render-bookshelf.js";
 
 await openDatabase();
