@@ -43,7 +43,7 @@ async function selectCategoryForm() {
 }
 
 function getStringForm(title: string, placeholder = 'Enter text here'): Promise<string | null> {
-   return new Promise((resolve, reject) => {
+   return new Promise((resolve) => {
       const { overlay, modal } = createModal();
 
       modal.innerHTML = `

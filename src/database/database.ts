@@ -23,7 +23,7 @@ export const defaultCategory: CategoryRecord = {
    expanded: true,
 };
 
-function createSchemas(db: IDBDatabase, transaction?: IDBTransaction): void {
+function createSchemas(db: IDBDatabase): void {
    // * BOOKS
    if (!db.objectStoreNames.contains(STORES.BOOKS)) {
       const bookStore = db.createObjectStore(STORES.BOOKS, {
@@ -69,7 +69,7 @@ export function openDatabase(): Promise<IDBDatabase> {
             return;
          }
          database = request.result;
-         createSchemas(database, transaction);
+         createSchemas(database);
 
          const categoryStore = transaction.objectStore(STORES.CATEGORIES);
          categoryStore.put(defaultCategory);

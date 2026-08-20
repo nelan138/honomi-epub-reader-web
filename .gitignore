@@ -1,10 +1,15 @@
 .agents
+
 # Dependencies
 node_modules/
 
 # Build output
 dist/
 build/
+
+# Vite caches
+.vite/
+node_modules/.vite/
 
 # TypeScript emit (if you ever enable emit)
 *.tsbuildinfo
