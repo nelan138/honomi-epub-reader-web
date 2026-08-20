@@ -1,8 +1,7 @@
-import { openDatabase, STORES } from "./database.ts";
-
+import { openDatabase, STORES } from './database.ts';
 
 export type CategoryState = false | true;
-type DisplayOrders = { min: number, max: number };
+type DisplayOrders = { min: number; max: number };
 export interface CategoryRecord {
    id?: number;
    name: string;
@@ -15,13 +14,19 @@ async function getDisplayOrders(): Promise<DisplayOrders> {
    const categories = await getAllCategories();
 
    return categories.length === 0 ? { min: 0, max: 0 } : {
-      min: categories.reduce((min, c) => Math.min(min, c.displayOrder ?? 0), Infinity),
-      max: categories.reduce((max, c) => Math.max(max, c.displayOrder ?? 0), -Infinity)
+      min: categories.reduce(
+         (min, c) => Math.min(min, c.displayOrder ?? 0),
+         Infinity,
+      ),
+      max: categories.reduce(
+         (max, c) => Math.max(max, c.displayOrder ?? 0),
+         -Infinity,
+      ),
    };
 }
 
 /**
- * Adds a new category to the database. 
+ * Adds a new category to the database.
  * Returns ID if a category with the same name already exists.
  */
 export async function addCategory(record: CategoryRecord): Promise<number> {
@@ -29,12 +34,14 @@ export async function addCategory(record: CategoryRecord): Promise<number> {
    const { max } = await getDisplayOrders();
 
    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(STORES.CATEGORIES, "readwrite");
+      const transaction = db.transaction(STORES.CATEGORIES, 'readwrite');
       transaction.oncomplete = () => resolve(categoryId!);
       transaction.onerror = () => reject(transaction.error);
 
       const store = transaction.objectStore(STORES.CATEGORIES);
-      const getRequest = store.index("by_name").get(record.name) as IDBRequest<CategoryRecord | undefined>;
+      const getRequest = store.index('by_name').get(record.name) as IDBRequest<
+         CategoryRecord | undefined
+      >;
 
       let categoryId: number | null = null;
       getRequest.onsuccess = () => {
@@ -43,8 +50,7 @@ export async function addCategory(record: CategoryRecord): Promise<number> {
             record.displayOrder = record.displayOrder ?? max + 1;
             const addRequest = store.add(record) as IDBRequest<number>;
             addRequest.onsuccess = () => categoryId = addRequest.result;
-         }
-         else categoryId = category.id!;
+         } else categoryId = category.id!;
       };
    });
 }
@@ -53,7 +59,9 @@ export async function getCategoryById(id: number): Promise<CategoryRecord> {
    const db = await openDatabase();
 
    return new Promise((resolve, reject) => {
-      const store = db.transaction(STORES.CATEGORIES, "readonly").objectStore(STORES.CATEGORIES);
+      const store = db.transaction(STORES.CATEGORIES, 'readonly').objectStore(
+         STORES.CATEGORIES,
+      );
       const request = store.get(id) as IDBRequest<CategoryRecord | undefined>;
       request.onsuccess = () => {
          const category = request.result;
@@ -71,8 +79,10 @@ export async function getCategoryByName(name: string): Promise<CategoryRecord> {
    const db = await openDatabase();
 
    return new Promise((resolve, reject) => {
-      const store = db.transaction(STORES.CATEGORIES, "readonly").objectStore(STORES.CATEGORIES);
-      const index = store.index("by_name");
+      const store = db.transaction(STORES.CATEGORIES, 'readonly').objectStore(
+         STORES.CATEGORIES,
+      );
+      const index = store.index('by_name');
       const request = index.get(name) as IDBRequest<CategoryRecord | undefined>;
       request.onsuccess = () => {
          if (request.result === undefined) {
@@ -80,7 +90,7 @@ export async function getCategoryByName(name: string): Promise<CategoryRecord> {
             return;
          }
          resolve(request.result);
-      }
+      };
       request.onerror = () => reject(request.error);
    });
 }
@@ -88,7 +98,9 @@ export async function getCategoryByName(name: string): Promise<CategoryRecord> {
 export async function getAllCategories(): Promise<CategoryRecord[]> {
    const db = await openDatabase();
    return new Promise((resolve, reject) => {
-      const store = db.transaction(STORES.CATEGORIES, "readonly").objectStore(STORES.CATEGORIES);
+      const store = db.transaction(STORES.CATEGORIES, 'readonly').objectStore(
+         STORES.CATEGORIES,
+      );
       const request = store.getAll();
 
       request.onsuccess = () => resolve(request.result);
@@ -100,12 +112,17 @@ export async function deleteCategory(id: number): Promise<void> {
    const db = await openDatabase();
 
    return new Promise((resolve, reject) => {
-      const transaction = db.transaction([STORES.CATEGORIES, STORES.BOOKS], "readwrite");
+      const transaction = db.transaction(
+         [STORES.CATEGORIES, STORES.BOOKS],
+         'readwrite',
+      );
       transaction.oncomplete = () => resolve();
       transaction.onerror = () => reject(transaction.error);
 
       const categoryStore = transaction.objectStore(STORES.CATEGORIES);
-      const getCategoryRequest = categoryStore.get(id) as IDBRequest<CategoryRecord | undefined>;
+      const getCategoryRequest = categoryStore.get(id) as IDBRequest<
+         CategoryRecord | undefined
+      >;
       getCategoryRequest.onsuccess = () => {
          const category = getCategoryRequest.result;
          if (!category) {
@@ -114,28 +131,35 @@ export async function deleteCategory(id: number): Promise<void> {
             return;
          }
          const bookStore = transaction.objectStore(STORES.BOOKS);
-         const getBooksRequest = bookStore.index("by_category").getAllKeys(id) as IDBRequest<number[]>;
+         const getBooksRequest = bookStore.index('by_category').getAllKeys(
+            id,
+         ) as IDBRequest<number[]>;
          getBooksRequest.onsuccess = () => {
             for (const bookId of getBooksRequest.result) {
                bookStore.delete(bookId);
             }
 
             categoryStore.delete(id);
-         }
-      }
+         };
+      };
    });
 }
 
-export async function renameCategory(id: number, newCategoryName: string): Promise<void> {
+export async function renameCategory(
+   id: number,
+   newCategoryName: string,
+): Promise<void> {
    const db = await openDatabase();
 
    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(STORES.CATEGORIES, "readwrite");
+      const transaction = db.transaction(STORES.CATEGORIES, 'readwrite');
       transaction.oncomplete = () => resolve();
       transaction.onerror = () => reject(transaction.error);
 
       const store = transaction.objectStore(STORES.CATEGORIES);
-      const getRequest = store.get(id) as IDBRequest<CategoryRecord | undefined>;
+      const getRequest = store.get(id) as IDBRequest<
+         CategoryRecord | undefined
+      >;
       getRequest.onsuccess = () => {
          const category = getRequest.result;
          if (!category) {
@@ -146,20 +170,25 @@ export async function renameCategory(id: number, newCategoryName: string): Promi
 
          category.name = newCategoryName;
          store.put(category);
-      }
+      };
    });
 }
 
-export async function updateCategoryState(id: number, newState: CategoryState): Promise<void> {
+export async function updateCategoryState(
+   id: number,
+   newState: CategoryState,
+): Promise<void> {
    const db = await openDatabase();
 
    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(STORES.CATEGORIES, "readwrite");
+      const transaction = db.transaction(STORES.CATEGORIES, 'readwrite');
       transaction.oncomplete = () => resolve();
       transaction.onerror = () => reject(transaction.error);
 
       const store = transaction.objectStore(STORES.CATEGORIES);
-      const getRequest = store.get(id) as IDBRequest<CategoryRecord | undefined>;
+      const getRequest = store.get(id) as IDBRequest<
+         CategoryRecord | undefined
+      >;
       getRequest.onsuccess = () => {
          const category = getRequest.result;
          if (!category) {
@@ -169,16 +198,19 @@ export async function updateCategoryState(id: number, newState: CategoryState): 
          }
          category.expanded = newState;
          store.put(category);
-      }
+      };
    });
 }
 
 // * The lower the displayOrder, the higher the category is displayed in the list.
-export async function shiftCategoryDisplayOrder(id: number, delta: 1 | -1): Promise<void> {
+export async function shiftCategoryDisplayOrder(
+   id: number,
+   delta: 1 | -1,
+): Promise<void> {
    const db = await openDatabase();
 
    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(STORES.CATEGORIES, "readwrite");
+      const transaction = db.transaction(STORES.CATEGORIES, 'readwrite');
       transaction.oncomplete = () => resolve();
       transaction.onerror = () => reject(transaction.error);
 
@@ -187,7 +219,7 @@ export async function shiftCategoryDisplayOrder(id: number, delta: 1 | -1): Prom
       request.onsuccess = () => {
          // * Sort by displayOrders
          const categories = request.result.sort(
-            (a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0)
+            (a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0),
          );
 
          // * Normalize the displayOrders, starting from 0
@@ -195,7 +227,7 @@ export async function shiftCategoryDisplayOrder(id: number, delta: 1 | -1): Prom
             category.displayOrder = index;
          });
 
-         const categoryIndex = categories.findIndex(c => c.id === id);
+         const categoryIndex = categories.findIndex((c) => c.id === id);
          if (categoryIndex === -1 || categoryIndex === 0) return; // ? Does not exist or is the default category (cannot be moved)
 
          // * Treat indices as displayOrder.
@@ -211,6 +243,6 @@ export async function shiftCategoryDisplayOrder(id: number, delta: 1 | -1): Prom
          for (const category of categories) {
             store.put(category);
          }
-      }
+      };
    });
 }

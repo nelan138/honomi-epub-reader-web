@@ -1,4 +1,5 @@
 {
+  "$schema": "https://raw.githubusercontent.com/denoland/deno/main/cli/schemas/config-file.v1.json",
   "imports": {
     "@deno/vite-plugin": "npm:@deno/vite-plugin@^2.0.3",
     "fflate": "npm:fflate@^0.8.3",
@@ -8,26 +9,21 @@
   "nodeModulesDir": "auto",
   "fmt": {
     "useTabs": false,
-    "lineWidth": 80,
+    "lineWidth": 100,
     "indentWidth": 3,
     "semiColons": true,
     "singleQuote": true,
     "proseWrap": "always",
     "include": ["src/"],
     "exclude": ["**/test/**"],
-    "sortNamedImports": true,
-    "sortNamedExports": true,
-    "json": {
-      "trailingCommas": "only"
-    }
+    "trailingCommas": "onlyMultiLine"
   },
   "lint": {
     "include": ["src/"],
     "exclude": ["**/test/**"],
     "rules": {
       "tags": ["recommended"],
-      "include": ["ban-untagged-todo"],
-      "exclude": ["no-unused-vars"]
+      "exclude": ["no-unused-vars", "ban-untagged-todo"]
     }
   },
   "tasks": {
