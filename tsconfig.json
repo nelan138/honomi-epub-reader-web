@@ -1,35 +1,35 @@
 {
   "compilerOptions": {
     "target": "ES2022",
+    "useDefineForClassFields": true,
     "lib": [
       "ES2022",
       "DOM",
       "DOM.Iterable"
     ],
-    "types": [],
     "module": "ESNext",
+    "skipLibCheck": true,
+    
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
-    "noEmit": true,
     "isolatedModules": true,
-    "verbatimModuleSyntax": true,
+    "noEmit": true,
+    
     "strict": true,
-    "allowJs": true,
-    "checkJs": false,
-    "noUncheckedIndexedAccess": false,
-    "exactOptionalPropertyTypes": false,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
+    
     "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true
+    "forceConsistentCasingInFileNames": true
   },
   "include": [
-    "src/**/*.ts",
-    "src/**/*.js",
-    "vite.config.ts",
-    "*.d.ts"
+    "src", "vite-env.d.ts"
+  ],
+  "references": [
+    {
+      "path": "./tsconfig.node.json"
+    }
   ]
 }
