@@ -1,0 +1,38 @@
+{
+  "imports": {
+    "@deno/vite-plugin": "npm:@deno/vite-plugin@^2.0.3",
+    "fflate": "npm:fflate@^0.8.3",
+    "typescript": "npm:typescript@^6.0.3",
+    "vite": "npm:vite@^8.2.1"
+  },
+  "nodeModulesDir": "auto",
+  "fmt": {
+    "useTabs": false,
+    "lineWidth": 80,
+    "indentWidth": 3,
+    "semiColons": true,
+    "singleQuote": true,
+    "proseWrap": "always",
+    "include": ["src/"],
+    "exclude": ["**/test/**"],
+    "sortNamedImports": true,
+    "sortNamedExports": true,
+    "json": {
+      "trailingCommas": "only"
+    }
+  },
+  "lint": {
+    "include": ["src/"],
+    "exclude": ["**/test/**"],
+    "rules": {
+      "tags": ["recommended"],
+      "include": ["ban-untagged-todo"],
+      "exclude": ["no-unused-vars"]
+    }
+  },
+  "tasks": {
+    "dev": "deno run -A npm:vite",
+    "build": "deno run -A npm:vite build",
+    "preview": "deno run -A npm:vite preview"
+  }
+}

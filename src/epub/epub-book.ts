@@ -204,35 +204,45 @@ export default class EpubBook {
 
       if (navigationManifestItem) {
          const navigationDocument = this.#getXmlDocument(navigationManifestItem.path);
-         const toc = navigationDocument.querySelector('nav[epub\\:type="toc"], nav[type="toc"]');
+
+         // Find <nav epub:type="toc"> or <nav type="toc">
+         const navElements = navigationDocument.getElementsByTagName('nav');
+         let toc: Element | null = null;
+         for (const nav of navElements) {
+            if (nav.getAttribute('epub:type') === 'toc' || nav.getAttribute('type') === 'toc') {
+               toc = nav;
+               break;
+            }
+         }
+
          if (toc) {
-            const basePath = navigationManifestItem.path;
-
-            const parseList = (list: Element): NavigationItem[] => {
-               return [...list.children]
-                  .filter(element => element.localName === "li")
-                  .map(li => {
-                     const link = li.querySelector(":scope > a, :scope > span");
-                     const href = link?.getAttribute("href") ?? "";
-                     const nestedList = [...li.children].find(
-                        element => element.localName === "ol" || element.localName === "ul"
-                     );
-
-                     return {
-                        label: link?.textContent?.trim() ?? li.textContent?.trim() ?? "",
-                        href,
-                        path: href ? this.#resolvePath(basePath, href) : "",
-                        ...(nestedList ? { children: parseList(nestedList) } : {}),
-                     };
-                  });
-            };
-            const list = toc.querySelector(":scope > ol");
+            const list = toc.querySelector('ol');
             if (list) {
+               const basePath = navigationManifestItem.path;
+               const parseList = (list: Element): NavigationItem[] => {
+                  return [...list.children]
+                     .filter(element => element.localName === "li")
+                     .map(li => {
+                        const link = li.querySelector(':scope > a, :scope > span');
+                        const href = link?.getAttribute("href") ?? "";
+                        const nestedList = [...li.children].find(
+                           element => element.localName === "ol" || element.localName === "ul"
+                        );
+                        return {
+                           label: link?.textContent?.trim() ?? li.textContent?.trim() ?? "",
+                           href,
+                           path: href ? this.#resolvePath(basePath, href) : "",
+                           ...(nestedList ? { children: parseList(nestedList) } : {}),
+                        };
+                     });
+               };
                this.#navigation = parseList(list);
                return this.#navigation;
             }
          }
       }
+
+      // Fallback to NCX
       const opfDocument = this.#getXmlDocument(this.#opfPath);
       const spine = opfDocument.querySelector("spine");
       const ncxId = spine?.getAttribute("toc");
@@ -241,11 +251,10 @@ export default class EpubBook {
          ? manifest.get(ncxId)
          : [...manifest.values()].find(item => item.mediaType === "application/x-dtbncx+xml");
 
-      if (!ncxManifestItem) throw new Error("EPUB package does not contain a navigation document or NCX file");
+      if (!ncxManifestItem) return [];
 
       const ncxDocument = this.#getXmlDocument(ncxManifestItem.path);
       const navMap = ncxDocument.querySelector("navMap");
-
       if (!navMap) throw new Error("EPUB NCX document does not contain a navMap");
 
       const basePath = ncxManifestItem.path;
@@ -253,10 +262,10 @@ export default class EpubBook {
          return [...parent.children]
             .filter(element => element.localName === "navPoint")
             .map(navPoint => {
-               const label = navPoint.querySelector(":scope > navLabel > text")?.textContent?.trim() ?? "";
-               const href = navPoint.querySelector(":scope > content")?.getAttribute("src") ?? "";
+               // Direct child lookup to avoid nested confusion
+               const label = navPoint.querySelector(':scope > navLabel > text')?.textContent?.trim() ?? "";
+               const href = navPoint.querySelector(':scope > content')?.getAttribute("src") ?? "";
                const children = parseNavPoints(navPoint);
-
                return {
                   label,
                   href,
@@ -269,7 +278,7 @@ export default class EpubBook {
       this.#navigation = parseNavPoints(navMap);
       return this.#navigation;
    }
-
+   
    getMetadata(): Metadata {
       if (this.#metadata) return this.#metadata;
 
