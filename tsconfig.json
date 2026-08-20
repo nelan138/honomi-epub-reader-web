@@ -28,6 +28,8 @@
   },
   "include": [
     "src/**/*.ts",
-    "src/**/*.js"
+    "src/**/*.js",
+    "vite.config.ts",
+    "*.d.ts"
   ]
 }
