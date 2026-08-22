@@ -4,6 +4,7 @@ import { openDatabase, STORES } from './database.ts';
 import type { CategoryRecord } from './category-repository.ts';
 
 export interface BookRecord {
+   version: number;
    id?: number;
    categoryId: number;
    progress: number;

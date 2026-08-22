@@ -22,7 +22,7 @@
       "noUncheckedSideEffectImports": true,
       "noUnusedLocals": true,
       "noImplicitOverride": true,
-      "noUnusedParameters": true,
+      "noUnusedParameters": false,
       "allowUnusedLabels": false,
       "allowUnreachableCode": false,
       // * NOT transpiling with TypeScript

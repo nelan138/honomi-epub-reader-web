@@ -1,0 +1,113 @@
+<?xml version='1.0' encoding='utf-8'?>
+<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1" xml:lang="jpn">
+  <head>
+    <meta content="131ffce7-fb4f-4b66-bd95-b4ab2ebcc727" name="dtb:uid" />
+    <meta content="2" name="dtb:depth" />
+    <meta content="calibre (2.80.0)" name="dtb:generator" />
+    <meta content="0" name="dtb:totalPageCount" />
+    <meta content="0" name="dtb:maxPageNumber" />
+  </head>
+
+  <docTitle>
+    <text>魔女の旅々 (GAノベル)</text>
+  </docTitle>
+
+  <navMap>
+    <navPoint class="chapter" id="num_1" playOrder="0">
+      <navLabel>
+        <text>目次</text>
+      </navLabel>
+      <content src="text/part0007.html#6LJU0-61162118db0e4abfa26cc868190c2a90" />
+    </navPoint>
+    <navPoint class="chapter" id="num_2" playOrder="1">
+      <navLabel>
+        <text>第一章 魔法使いの国</text>
+      </navLabel>
+      <content src="text/part0008.html" />
+    </navPoint>
+    <navPoint class="chapter" id="num_3" playOrder="2">
+      <navLabel>
+        <text>第二章 花のように可憐な彼女</text>
+      </navLabel>
+      <content src="text/part0011.html" />
+    </navPoint>
+    <navPoint class="chapter" id="num_4" playOrder="3">
+      <navLabel>
+        <text>第三章 旅の途中：妹を捜す筋肉男の話</text>
+      </navLabel>
+      <content src="text/part0012.html" />
+    </navPoint>
+    <navPoint class="chapter" id="num_5" playOrder="4">
+      <navLabel>
+        <text>第四章 資金調達</text>
+      </navLabel>
+      <content src="text/part0013.html" />
+    </navPoint>
+    <navPoint class="chapter" id="num_6" playOrder="5">
+      <navLabel>
+        <text>第五章 旅の途中：勝負の決まらない二人の男の話</text>
+      </navLabel>
+      <content src="text/part0014.html" />
+    </navPoint>
+    <navPoint class="chapter" id="num_7" playOrder="6">
+      <navLabel>
+        <text>第六章 瓶詰めの幸せ</text>
+      </navLabel>
+      <content src="text/part0015.html" />
+    </navPoint>
+    <navPoint class="chapter" id="num_8" playOrder="7">
+      <navLabel>
+        <text>第七章 勝負を始める前に</text>
+      </navLabel>
+      <content src="text/part0016.html" />
+    </navPoint>
+    <navPoint class="chapter" id="num_9" playOrder="8">
+      <navLabel>
+        <text>第八章 旅の途中：女の子を取り合う二人の男の話</text>
+      </navLabel>
+      <content src="text/part0017.html" />
+    </navPoint>
+    <navPoint class="chapter" id="num_10" playOrder="9">
+      <navLabel>
+        <text>第九章 魔女見習いイレイナ</text>
+      </navLabel>
+      <content src="text/part0018.html" />
+    </navPoint>
+    <navPoint class="chapter" id="num_11" playOrder="10">
+      <navLabel>
+        <text>第十章 緩やかに歩み寄る穏やかな死</text>
+      </navLabel>
+      <content src="text/part0021.html" />
+    </navPoint>
+    <navPoint class="chapter" id="num_12" playOrder="11">
+      <navLabel>
+        <text>第十一章 不細工を虐げる国</text>
+      </navLabel>
+      <content src="text/part0024.html" />
+    </navPoint>
+    <navPoint class="chapter" id="num_13" playOrder="12">
+      <navLabel>
+        <text>第十二章 民なき国の王女</text>
+      </navLabel>
+      <content src="text/part0025.html" />
+    </navPoint>
+    <navPoint class="chapter" id="num_14" playOrder="13">
+      <navLabel>
+        <text>第十三章 旅の始まり</text>
+      </navLabel>
+      <content src="text/part0026.html" />
+    </navPoint>
+    <navPoint class="chapter" id="num_15" playOrder="14">
+      <navLabel>
+        <text>第十四章 王立セレステリア</text>
+      </navLabel>
+      <content src="text/part0028.html" />
+    </navPoint>
+    <navPoint class="chapter" id="num_16" playOrder="15">
+      <navLabel>
+        <text>奥付</text>
+      </navLabel>
+      <content src="text/part0034.html#10DJ40-61162118db0e4abfa26cc868190c2a90" />
+    </navPoint>
+  </navMap>
+</ncx>

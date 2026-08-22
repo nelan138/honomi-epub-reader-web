@@ -232,8 +232,8 @@ export async function shiftCategoryDisplayOrder(
          const newIndex = categoryIndex + delta;
          if (newIndex < 1 || newIndex >= categories.length) return; // Cannot swap with default category (0) or out of bounds
 
-         const categoryToShift = categories[categoryIndex];
-         const neighborCategory = categories[newIndex];
+         const categoryToShift = categories[categoryIndex]!;
+         const neighborCategory = categories[newIndex]!;
 
          categoryToShift.displayOrder = newIndex;
          neighborCategory.displayOrder = categoryIndex;

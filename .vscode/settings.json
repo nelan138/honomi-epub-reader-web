@@ -1,0 +1,32 @@
+{
+  "editor.fontFamily": "Cascadia Code, Fira Code, monospace",
+  "cSpell.ignorePaths": [
+    "tests/**",
+  ],
+  "cSpell.words": [
+    "Cascadia",
+    "denoland",
+    "dtbncx",
+    "esbenp",
+    "Fira",
+    "idref",
+    "itemref",
+    "maxlength",
+    "OEBPS",
+    "parsererror",
+    "vite"
+  ],
+  "deno.enable": true,
+  "deno.lint": true,
+  "editor.formatOnSave": true,
+  "[typescript]": {
+    "editor.defaultFormatter": "denoland.vscode-deno"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "denoland.vscode-deno"
+  },
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "C_Cpp.errorSquiggles": "disabled"
+}

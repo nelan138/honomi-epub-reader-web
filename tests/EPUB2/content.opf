@@ -1,0 +1,130 @@
+<?xml version="1.0"  encoding="UTF-8"?>
+<package xmlns="http://www.idpf.org/2007/opf" unique-identifier="uuid_id" version="2.0">
+  <metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:opf="http://www.idpf.org/2007/opf" xmlns:calibre="http://calibre.kovidgoyal.net/2009/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <dc:title>魔女の旅々 (GAノベル)</dc:title>
+    <dc:creator opf:role="aut" opf:file-as="定規, 白石">白石 定規</dc:creator>
+    <dc:publisher>SBクリエイティブ株式会社</dc:publisher>
+    <dc:date>2016-04-12T16:00:00+00:00</dc:date>
+    <dc:contributor opf:role="bkp">calibre (3.47.0) [https://calibre-ebook.com]</dc:contributor>
+    <dc:identifier id="uuid_id" opf:scheme="uuid">131ffce7-fb4f-4b66-bd95-b4ab2ebcc727</dc:identifier>
+    <dc:language>ja</dc:language>
+    <dc:identifier opf:scheme="calibre">c6ea2aaf-c991-4ee4-a5b3-bf5a28d07315</dc:identifier>
+    <dc:identifier opf:scheme="MOBI-ASIN">B01DK0TRFK</dc:identifier>
+    <meta name="calibre:timestamp" content="2017-11-08T11:35:31.379000+00:00"/>
+    <meta name="calibre:title_sort" content="魔女の旅々 (GAノベル)"/>
+    <meta name="cover" content="cover"/>
+    <meta name="calibre:author_link_map" content="{&quot;白石 定規&quot;: &quot;&quot;}"/>
+    <meta name="calibre:user_metadata:#id" content="{&quot;category_sort&quot;: &quot;value&quot;, &quot;is_custom&quot;: true, &quot;#extra#&quot;: null, &quot;rec_index&quot;: 22, &quot;column&quot;: &quot;value&quot;, &quot;is_multiple2&quot;: {}, &quot;search_terms&quot;: [&quot;#id&quot;], &quot;name&quot;: &quot;ID&quot;, &quot;colnum&quot;: 1, &quot;kind&quot;: &quot;field&quot;, &quot;link_column&quot;: &quot;value&quot;, &quot;is_category&quot;: false, &quot;is_multiple&quot;: null, &quot;is_csp&quot;: false, &quot;table&quot;: &quot;custom_column_1&quot;, &quot;#value#&quot;: &quot;8870&quot;, &quot;is_editable&quot;: true, &quot;label&quot;: &quot;id&quot;, &quot;datatype&quot;: &quot;composite&quot;, &quot;display&quot;: {&quot;make_category&quot;: false, &quot;description&quot;: &quot;&quot;, &quot;composite_sort&quot;: &quot;text&quot;, &quot;contains_html&quot;: false, &quot;use_decorations&quot;: 0, &quot;composite_template&quot;: &quot;{id}&quot;}}"/>
+  </metadata>
+  <manifest>
+    <item href="titlepage.xhtml" id="titlepage" media-type="application/xhtml+xml"/>
+    <item href="text/part0000.html" id="id37" media-type="application/xhtml+xml"/>
+    <item href="text/part0001.html" id="id38" media-type="application/xhtml+xml"/>
+    <item href="text/part0002.html" id="id39" media-type="application/xhtml+xml"/>
+    <item href="text/part0003.html" id="id40" media-type="application/xhtml+xml"/>
+    <item href="text/part0004.html" id="id41" media-type="application/xhtml+xml"/>
+    <item href="text/part0005.html" id="id42" media-type="application/xhtml+xml"/>
+    <item href="text/part0006.html" id="id43" media-type="application/xhtml+xml"/>
+    <item href="text/part0007.html" id="id44" media-type="application/xhtml+xml"/>
+    <item href="text/part0008.html" id="id45" media-type="application/xhtml+xml"/>
+    <item href="text/part0009.html" id="id46" media-type="application/xhtml+xml"/>
+    <item href="text/part0010.html" id="id47" media-type="application/xhtml+xml"/>
+    <item href="text/part0011.html" id="id48" media-type="application/xhtml+xml"/>
+    <item href="text/part0012.html" id="id49" media-type="application/xhtml+xml"/>
+    <item href="text/part0013.html" id="id50" media-type="application/xhtml+xml"/>
+    <item href="text/part0014.html" id="id51" media-type="application/xhtml+xml"/>
+    <item href="text/part0015.html" id="id52" media-type="application/xhtml+xml"/>
+    <item href="text/part0016.html" id="id53" media-type="application/xhtml+xml"/>
+    <item href="text/part0017.html" id="id54" media-type="application/xhtml+xml"/>
+    <item href="text/part0018.html" id="id55" media-type="application/xhtml+xml"/>
+    <item href="text/part0019.html" id="id56" media-type="application/xhtml+xml"/>
+    <item href="text/part0020.html" id="id57" media-type="application/xhtml+xml"/>
+    <item href="text/part0021.html" id="id58" media-type="application/xhtml+xml"/>
+    <item href="text/part0022.html" id="id59" media-type="application/xhtml+xml"/>
+    <item href="text/part0023.html" id="id60" media-type="application/xhtml+xml"/>
+    <item href="text/part0024.html" id="id61" media-type="application/xhtml+xml"/>
+    <item href="text/part0025.html" id="id62" media-type="application/xhtml+xml"/>
+    <item href="text/part0026.html" id="id63" media-type="application/xhtml+xml"/>
+    <item href="text/part0027.html" id="id64" media-type="application/xhtml+xml"/>
+    <item href="text/part0028.html" id="id65" media-type="application/xhtml+xml"/>
+    <item href="text/part0029.html" id="id66" media-type="application/xhtml+xml"/>
+    <item href="text/part0030.html" id="id67" media-type="application/xhtml+xml"/>
+    <item href="text/part0031.html" id="id68" media-type="application/xhtml+xml"/>
+    <item href="text/part0032.html" id="id69" media-type="application/xhtml+xml"/>
+    <item href="text/part0033.html" id="id70" media-type="application/xhtml+xml"/>
+    <item href="text/part0034.html" id="id71" media-type="application/xhtml+xml"/>
+    <item href="toc.ncx" id="ncx" media-type="application/x-dtbncx+xml"/>
+    <item href="page_styles.css" id="page_css" media-type="text/css"/>
+    <item href="stylesheet.css" id="css" media-type="text/css"/>
+    <item href="cover.jpeg" id="cover" media-type="image/jpeg"/>
+    <item href="images/00001.jpeg" id="id1" media-type="image/jpeg"/>
+    <item href="images/00002.jpeg" id="id2" media-type="image/jpeg"/>
+    <item href="images/00003.jpeg" id="id3" media-type="image/jpeg"/>
+    <item href="images/00004.jpeg" id="id4" media-type="image/jpeg"/>
+    <item href="images/00005.gif" id="id5" media-type="image/gif"/>
+    <item href="images/00006.jpeg" id="id6" media-type="image/jpeg"/>
+    <item href="images/00007.jpeg" id="id7" media-type="image/jpeg"/>
+    <item href="images/00008.jpeg" id="id8" media-type="image/jpeg"/>
+    <item href="images/00009.jpeg" id="id9" media-type="image/jpeg"/>
+    <item href="images/00010.jpeg" id="id10" media-type="image/jpeg"/>
+    <item href="images/00011.jpeg" id="id11" media-type="image/jpeg"/>
+    <item href="images/00012.jpeg" id="id12" media-type="image/jpeg"/>
+    <item href="images/00013.jpeg" id="id13" media-type="image/jpeg"/>
+    <item href="images/00014.jpeg" id="id14" media-type="image/jpeg"/>
+    <item href="images/00015.jpeg" id="id15" media-type="image/jpeg"/>
+    <item href="images/00016.jpeg" id="id16" media-type="image/jpeg"/>
+    <item href="images/00017.jpeg" id="id17" media-type="image/jpeg"/>
+    <item href="images/00018.jpeg" id="id18" media-type="image/jpeg"/>
+    <item href="images/00019.jpeg" id="id19" media-type="image/jpeg"/>
+    <item href="images/00020.jpeg" id="id20" media-type="image/jpeg"/>
+    <item href="images/00021.jpeg" id="id21" media-type="image/jpeg"/>
+    <item href="images/00022.jpeg" id="id22" media-type="image/jpeg"/>
+    <item href="images/00023.jpeg" id="id23" media-type="image/jpeg"/>
+    <item href="images/00024.jpeg" id="id24" media-type="image/jpeg"/>
+    <item href="images/00025.gif" id="id25" media-type="image/gif"/>
+  </manifest>
+  <spine toc="ncx" page-progression-direction="rtl">
+    <itemref idref="titlepage"/>
+    <itemref idref="id37"/>
+    <itemref idref="id38"/>
+    <itemref idref="id39"/>
+    <itemref idref="id40"/>
+    <itemref idref="id41"/>
+    <itemref idref="id42"/>
+    <itemref idref="id43"/>
+    <itemref idref="id44"/>
+    <itemref idref="id45"/>
+    <itemref idref="id46"/>
+    <itemref idref="id47"/>
+    <itemref idref="id48"/>
+    <itemref idref="id49"/>
+    <itemref idref="id50"/>
+    <itemref idref="id51"/>
+    <itemref idref="id52"/>
+    <itemref idref="id53"/>
+    <itemref idref="id54"/>
+    <itemref idref="id55"/>
+    <itemref idref="id56"/>
+    <itemref idref="id57"/>
+    <itemref idref="id58"/>
+    <itemref idref="id59"/>
+    <itemref idref="id60"/>
+    <itemref idref="id61"/>
+    <itemref idref="id62"/>
+    <itemref idref="id63"/>
+    <itemref idref="id64"/>
+    <itemref idref="id65"/>
+    <itemref idref="id66"/>
+    <itemref idref="id67"/>
+    <itemref idref="id68"/>
+    <itemref idref="id69"/>
+    <itemref idref="id70"/>
+    <itemref idref="id71"/>
+  </spine>
+  <guide>
+    <reference href="text/part0034.html#10DJ40-61162118db0e4abfa26cc868190c2a90" title="奥付" type="colophon"/>
+    <reference href="text/part0008.html#7K4G0-61162118db0e4abfa26cc868190c2a90" title="本編" type="text"/>
+    <reference href="titlepage.xhtml" title="Cover" type="cover"/>
+    <reference href="text/part0007.html#6LJU0-61162118db0e4abfa26cc868190c2a90" title="目次" type="toc"/>
+  </guide>
+</package>
