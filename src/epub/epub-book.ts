@@ -62,10 +62,10 @@ export default class EpubBook {
       const book = new EpubBook();
 
       book.#epubFile = file;
-      book.#version = book.getVersion();
       const buffer = await file.arrayBuffer();
       book.#epubData = unzipSync(new Uint8Array(buffer), {});
-
+      
+      book.#version = book.getVersion();
       book.#opfPath = book.getOpfPath();
       book.#manifest = book.getManifest();
       book.#spine = book.getSpine();
@@ -138,9 +138,9 @@ export default class EpubBook {
    getVersion(): SupportedEpubVersion {
       if (this.#version) return this.#version;
 
-      const opfDocument = this.#getXmlDocument('META-INF/container.xml');
-      const rootfile = opfDocument.getElementsByTagName('rootfile')[0];
-      const version = rootfile?.getAttribute('version');
+      const opfDocument = this.#getXmlDocument(this.getOpfPath());
+      const packageElement = opfDocument.getElementsByTagName('package')[0];
+      const version = packageElement?.getAttribute('version');
       if (!version) throw new Error('EPUB container does not define a version');
 
       const supportedVersion = parseInt(version);
@@ -166,7 +166,7 @@ export default class EpubBook {
    getManifest(): Map<ManifestItemId, ManifestItem> {
       if (this.#manifest) return this.#manifest;
 
-      const opfDocument = this.#getXmlDocument(this.#opfPath);
+      const opfDocument = this.#getXmlDocument(this.getOpfPath());
 
       const manifestElement = opfDocument.getElementsByTagName('manifest')[0];
       if (!manifestElement) throw new Error('EPUB package does not contain a manifest');
@@ -206,7 +206,7 @@ export default class EpubBook {
    getSpine(): SpineItem[] {
       if (this.#spine) return this.#spine;
 
-      const opfDocument = this.#getXmlDocument(this.#opfPath);
+      const opfDocument = this.#getXmlDocument(this.getOpfPath());
 
       const spineElement = opfDocument.getElementsByTagName('spine')[0];
       if (!spineElement) throw new Error('EPUB package does not contain a spine');
@@ -234,7 +234,7 @@ export default class EpubBook {
    getMetadata(): Metadata {
       if (this.#metadata) return this.#metadata;
 
-      const opfDocument = this.#getXmlDocument(this.#opfPath);
+      const opfDocument = this.#getXmlDocument(this.getOpfPath());
 
       const metadataElement = opfDocument.getElementsByTagName('metadata')[0];
       if (!metadataElement) throw new Error('EPUB package does not contain metadata');
@@ -259,16 +259,17 @@ export default class EpubBook {
       if (this.#cover) return this.#cover;
 
       const manifest = this.getManifest();
-      const opfDocument = this.#getXmlDocument(this.#opfPath);
 
       // * EPUB 3
-      let coverItem = [...manifest.values()]
-         .find((item) => item.properties.includes('cover-image'));
+      let coverItem = [...manifest.values()].find((item) =>
+         item.properties.includes('cover-image')
+      );
 
-      // * EPUB 2 fall back
+      // * EPUB 2 fallback
       if (!coverItem) {
+         const opfDocument = this.#getXmlDocument(this.getOpfPath());
          const coverId = [...opfDocument.getElementsByTagName('meta')]
-            .find((element) => element.getAttribute('name') === 'cover')
+            .find((meta) => meta.getAttribute('name') === 'cover')
             ?.getAttribute('content');
 
          if (coverId) coverItem = manifest.get(coverId);
@@ -278,13 +279,9 @@ export default class EpubBook {
 
       if (!this.#epubData) throw new Error('EPUB data is not loaded');
       const coverData = this.#epubData[coverItem.resolvedPath];
-
       if (!coverData) return null;
 
-      this.#cover = new Blob([coverData as BlobPart], {
-         type: coverItem.mediaType || 'application/octet-stream',
-      });
-
+      this.#cover = new Blob([coverData as BlobPart], { type: coverItem.mediaType });
       return this.#cover;
    }
 
@@ -337,7 +334,7 @@ export default class EpubBook {
       return parts.join('/');
    }
 
-   parseEpub3Navigation(navDocument: Document, navPath: ResourcePath): NavigationItem[] {
+   #parseEpub3Navigation(navDocument: Document, navPath: ResourcePath): NavigationItem[] {
       const navElements = navDocument.getElementsByTagName('nav');
       let tocNav: Element | null = null;
 
@@ -383,7 +380,7 @@ export default class EpubBook {
       return rootOl ? parseOl(rootOl) : [];
    }
 
-   parseEpub2Navigation(tocDocument: Document, tocPath: ResourcePath): NavigationItem[] {
+   #parseEpub2Navigation(tocDocument: Document, tocPath: ResourcePath): NavigationItem[] {
       const navMap = tocDocument.getElementsByTagName('navMap')[0];
       if (!navMap) return [];
 
@@ -443,7 +440,7 @@ export default class EpubBook {
             navItem = tocItem;
          }
          const navDocument = this.#getXmlDocument(navItem.resolvedPath);
-         this.#navigation = this.parseEpub3Navigation(navDocument, navItem.resolvedPath);
+         this.#navigation = this.#parseEpub3Navigation(navDocument, navItem.resolvedPath);
 
          return this.#navigation;
       }
@@ -462,7 +459,7 @@ export default class EpubBook {
          if (!tocItem) return [];
 
          const navDocument = this.#getXmlDocument(tocItem.resolvedPath);
-         this.#navigation = this.parseEpub2Navigation(navDocument, tocItem.resolvedPath);
+         this.#navigation = this.#parseEpub2Navigation(navDocument, tocItem.resolvedPath);
 
          return this.#navigation;
       }
