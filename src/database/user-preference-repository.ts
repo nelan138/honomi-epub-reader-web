@@ -1,8 +1,4 @@
-import {
-   defaultPreferences,
-   openDatabase,
-   PREFERENCES_KEY,
-} from './database.ts';
+import { defaultPreferences, openDatabase, PREFERENCES_KEY } from './database.ts';
 import { STORES } from './database.ts';
 
 export type Theme = 'light' | 'dark';
@@ -23,7 +19,7 @@ export async function getUserPreferences(): Promise<UserPreferences> {
          if (request.result) {
             resolve(request.result);
             return;
-         } else reject(new Error('User preferences not found'));
+         } else { reject(new Error('User preferences not found')); }
       };
 
       request.onerror = () => reject(request.error);

@@ -1,35 +1,39 @@
 {
-  "compilerOptions": {
-    "target": "ES2022",
-    "useDefineForClassFields": true,
-    "lib": [
-      "ES2022",
-      "DOM",
-      "DOM.Iterable"
-    ],
-    "module": "ESNext",
-    "skipLibCheck": true,
-    
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "noEmit": true,
-    
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-    
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true
-  },
-  "include": [
-    "src", "vite-env.d.ts"
-  ],
-  "references": [
-    {
-      "path": "./tsconfig.node.json"
-    }
-  ]
+   "include": [
+      "src/"
+   ],
+   "compilerOptions": {
+      "paths": {
+         "@src/*": ["./src/*"],
+      },
+      "esModuleInterop": true,
+      "skipLibCheck": true,
+      "target": "es2022",
+      "allowJs": false,
+      "resolveJsonModule": true,
+      "moduleDetection": "force",
+      "isolatedModules": true,
+      "verbatimModuleSyntax": true,
+      // * TS Rules
+      "strict": true,
+      "noUncheckedIndexedAccess": true,
+      "noFallthroughCasesInSwitch": true,
+      "noImplicitReturns": true,
+      "noUncheckedSideEffectImports": true,
+      "noUnusedLocals": true,
+      "noImplicitOverride": true,
+      "noUnusedParameters": true,
+      "allowUnusedLabels": false,
+      "allowUnreachableCode": false,
+      // * NOT transpiling with TypeScript
+      "moduleResolution": "bundler",
+      "module": "preserve",
+      "noEmit": true,
+      // * Runs in the DOM
+      "lib": [
+         "es2022",
+         "dom",
+         "dom.iterable"
+      ]
+   },
 }

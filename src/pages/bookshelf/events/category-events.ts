@@ -27,8 +27,8 @@ export default function bindCategoryEvents() {
       );
 
       if (
-         clickedButton.matches('.expand-category-btn') ||
-         clickedButton.matches('.collapse-category-btn')
+         clickedButton.matches('.expand-category-btn')
+         || clickedButton.matches('.collapse-category-btn')
       ) {
          const isExpanded = clickedCategory.classList.contains('expanded');
          await updateCategoryState(categoryId, !isExpanded);
@@ -55,8 +55,8 @@ export default function bindCategoryEvents() {
          await shiftCategoryDisplayOrder(categoryId, -1);
          await renderBookshelf();
       } else if (
-         clickedButton.matches('.move-category-down-btn') &&
-         !clickedButton.hidden
+         clickedButton.matches('.move-category-down-btn')
+         && !clickedButton.hidden
       ) {
          await shiftCategoryDisplayOrder(categoryId, 1);
          await renderBookshelf();

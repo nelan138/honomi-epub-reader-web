@@ -24,9 +24,7 @@ export default function bindBookshelfHeaderEvents() {
       'click',
       async () => {
          const searchText = await openFormFor('search-book') as string;
-         if (searchText) {
-            await renderBookshelf(searchText);
-         }
+         if (searchText) await renderBookshelf(searchText);
       },
    );
 
@@ -34,10 +32,9 @@ export default function bindBookshelfHeaderEvents() {
       'click',
       async () => {
          let userPreferences = await getUserPreferences();
-         const newSortOrder: TitleSortOrder =
-            userPreferences.titleSortOrder === 'title-asc'
-               ? 'title-desc'
-               : 'title-asc';
+         const newSortOrder: TitleSortOrder = userPreferences.titleSortOrder === 'title-asc'
+            ? 'title-desc'
+            : 'title-asc';
          userPreferences = {
             theme: userPreferences.theme,
             titleSortOrder: newSortOrder,
@@ -66,9 +63,7 @@ export default function bindBookshelfHeaderEvents() {
       'click',
       async () => {
          const userPreferences = await getUserPreferences();
-         userPreferences.theme = userPreferences.theme === 'light'
-            ? 'dark'
-            : 'light';
+         userPreferences.theme = userPreferences.theme === 'light' ? 'dark' : 'light';
 
          await setUserPreferences(userPreferences);
          document.documentElement.setAttribute(

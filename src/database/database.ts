@@ -44,9 +44,7 @@ function createSchemas(db: IDBDatabase): void {
    }
 
    // * USER PREFERENCES: Only one record exists
-   if (!db.objectStoreNames.contains(STORES.PREFERENCES)) {
-      db.createObjectStore(STORES.PREFERENCES);
-   }
+   if (!db.objectStoreNames.contains(STORES.PREFERENCES)) db.createObjectStore(STORES.PREFERENCES);
 
    console.log('Database schemas created or already exist.');
 }

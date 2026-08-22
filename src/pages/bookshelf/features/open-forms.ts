@@ -76,12 +76,9 @@ function getStringForm(title: string, placeholder = 'Enter text here'): Promise<
 
       function validate(value: string): string | null {
          if (!value) return 'Name cannot be empty.';
-         if (value.length > STRING_FORM_RULES.maxLength) {
+         if (value.length > STRING_FORM_RULES.maxLength)
             return `Must be ${STRING_FORM_RULES.maxLength} characters or fewer.`;
-         }
-         if (!STRING_FORM_RULES.pattern.test(value)) {
-            return 'Name contains invalid characters.';
-         }
+         if (!STRING_FORM_RULES.pattern.test(value)) return 'Name contains invalid characters.';
          return null;
       }
 

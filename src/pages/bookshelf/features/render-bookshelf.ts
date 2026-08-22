@@ -26,9 +26,7 @@ function renderBookCard(record: BookRecord): HTMLElement {
 
    const title = metadata.title;
    const cover = epub.getCover();
-   const coverUrl = cover
-      ? URL.createObjectURL(cover)
-      : `cover of ${title} not found`;
+   const coverUrl = cover ? URL.createObjectURL(cover) : `cover of ${title} not found`;
    const creator = metadata.creator ?? 'Unknown Creator';
    const language = metadata.language ?? 'Unknown Language';
 
@@ -69,9 +67,9 @@ function sortAndFilterBooks(
          metadata.creator = metadata.creator ?? '';
          metadata.language = metadata.language ?? '';
 
-         return metadata?.title.toLowerCase().includes(lowerSearchText) ||
-            metadata?.creator.toLowerCase().includes(lowerSearchText) ||
-            metadata?.language.toLowerCase().includes(lowerSearchText);
+         return metadata?.title.toLowerCase().includes(lowerSearchText)
+            || metadata?.creator.toLowerCase().includes(lowerSearchText)
+            || metadata?.language.toLowerCase().includes(lowerSearchText);
       });
    }
 
@@ -174,9 +172,7 @@ export default async function renderBookshelf(searchText = ''): Promise<void> {
       return;
    }
 
-   categories = categories.sort((a, b) =>
-      (a.displayOrder ?? 0) - (b.displayOrder ?? 0)
-   );
+   categories = categories.sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0));
 
    const categoryElementArray = [];
    for (const category of categories) {

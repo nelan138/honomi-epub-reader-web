@@ -50,7 +50,7 @@ export async function addCategory(record: CategoryRecord): Promise<number> {
             record.displayOrder = record.displayOrder ?? max + 1;
             const addRequest = store.add(record) as IDBRequest<number>;
             addRequest.onsuccess = () => categoryId = addRequest.result;
-         } else categoryId = category.id!;
+         } else { categoryId = category.id!; }
       };
    });
 }
@@ -135,9 +135,7 @@ export async function deleteCategory(id: number): Promise<void> {
             id,
          ) as IDBRequest<number[]>;
          getBooksRequest.onsuccess = () => {
-            for (const bookId of getBooksRequest.result) {
-               bookStore.delete(bookId);
-            }
+            for (const bookId of getBooksRequest.result) bookStore.delete(bookId);
 
             categoryStore.delete(id);
          };
@@ -240,9 +238,7 @@ export async function shiftCategoryDisplayOrder(
          categoryToShift.displayOrder = newIndex;
          neighborCategory.displayOrder = categoryIndex;
 
-         for (const category of categories) {
-            store.put(category);
-         }
+         for (const category of categories) store.put(category);
       };
    });
 }

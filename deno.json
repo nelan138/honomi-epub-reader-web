@@ -1,5 +1,12 @@
 {
   "$schema": "https://raw.githubusercontent.com/denoland/deno/main/cli/schemas/config-file.v1.json",
+  "tasks": {
+    "dev": "deno run -A npm:vite",
+    "build": "deno run -A npm:vite build",
+    "preview": "deno run -A npm:vite preview",
+    "fmt": "deno fmt",
+    "lint": "deno lint"
+  },
   "imports": {
     "@deno/vite-plugin": "npm:@deno/vite-plugin@^2.0.3",
     "fflate": "npm:fflate@^0.8.3",
@@ -8,27 +15,26 @@
   },
   "nodeModulesDir": "auto",
   "fmt": {
+    "include": [
+      "src/"
+    ],
     "useTabs": false,
     "lineWidth": 100,
     "indentWidth": 3,
     "semiColons": true,
+    "operatorPosition": "nextLine",
     "singleQuote": true,
+    "useBraces": "preferNone",
+    "singleBodyPosition": "sameLine",
     "proseWrap": "always",
-    "include": ["src/"],
-    "exclude": ["**/test/**"],
     "trailingCommas": "onlyMultiLine"
   },
   "lint": {
-    "include": ["src/"],
-    "exclude": ["**/test/**"],
+    "include": [ 
+      "src/"
+    ],
     "rules": {
-      "tags": ["recommended"],
-      "exclude": ["no-unused-vars", "ban-untagged-todo"]
+      "tags": ["recommended"]
     }
-  },
-  "tasks": {
-    "dev": "deno run -A npm:vite",
-    "build": "deno run -A npm:vite build",
-    "preview": "deno run -A npm:vite preview"
   }
 }

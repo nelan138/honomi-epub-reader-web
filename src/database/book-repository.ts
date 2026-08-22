@@ -1,9 +1,4 @@
-import type {
-   ManifestItem,
-   Metadata,
-   NavigationItem,
-   SpineItem,
-} from '../epub/epub-book.ts';
+import type { ManifestItem, Metadata, NavigationItem, SpineItem } from '../epub/epub-book.ts';
 
 import { openDatabase, STORES } from './database.ts';
 import type { CategoryRecord } from './category-repository.ts';
@@ -136,10 +131,7 @@ export async function deleteBook(id: number): Promise<void> {
    });
 }
 
-export async function changeBookCategory(
-   bookId: number,
-   categoryId: number,
-): Promise<void> {
+export async function changeBookCategory(bookId: number, categoryId: number): Promise<void> {
    const db = await openDatabase();
 
    return new Promise((resolve, reject) => {
