@@ -2,17 +2,19 @@ import type { ManifestItem, Metadata, NavigationItem, SpineItem } from '@src/epu
 
 import { openDatabase, STORES } from './database.ts';
 import type { CategoryRecord } from './category-repository.ts';
+import type { SupportedEpubVersion } from '@src/epub/epub-book.ts';
 
 export interface BookRecord {
-   version: number;
-   id?: number;
+   id: number | null;
    categoryId: number;
    progress: number;
 
-   cover?: Blob;
-   metadata?: Metadata;
-
    epubFile: Blob;
+   version: SupportedEpubVersion;
+
+   metadata: Metadata;
+   cover: Blob | null;
+
    opfPath: string;
    manifest: Map<string, ManifestItem>;
    navigation: NavigationItem[];
@@ -71,11 +73,9 @@ export async function getBooksByCategory(id: number): Promise<BookRecord[]> {
    const db = await openDatabase();
 
    return new Promise((resolve, reject) => {
-      const store = db.transaction(
-         [STORES.BOOKS, STORES.CATEGORIES],
-         'readonly',
-      )
+      const store = db.transaction([STORES.BOOKS, STORES.CATEGORIES], 'readonly')
          .objectStore(STORES.BOOKS);
+
       const index = store.index('by_category');
       const request = index.getAll(id) as IDBRequest<BookRecord[]>;
 
@@ -102,8 +102,18 @@ export async function renameBook(id: number, newTitle: string): Promise<void> {
             return;
          }
 
-         if (!book.metadata) book.metadata = { title: newTitle };
-         else book.metadata.title = newTitle;
+         if (!book.metadata) {
+            book.metadata = {
+               title: newTitle,
+               creator: 'Unknown Creator',
+               publisher: 'Unknown Publisher',
+               language: 'Unknown',
+               identifier: null,
+               description: null,
+               subject: null,
+            };
+         }
+         else { book.metadata.title = newTitle; }
 
          store.put(book);
       };

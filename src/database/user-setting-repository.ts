@@ -1,21 +1,21 @@
-import { defaultPreferences, openDatabase, PREFERENCES_KEY } from './database.ts';
+import { defaultUserSettings, openDatabase, USER_SETTINGS_KEY } from './database.ts';
 import { STORES } from './database.ts';
 
 export type Theme = 'light' | 'dark';
 export type TitleSortOrder = 'title-asc' | 'title-desc';
-export interface UserPreferences {
+export interface UserSettingsRecord {
    theme: Theme;
    titleSortOrder: TitleSortOrder;
 }
 
-export async function getUserPreferences(): Promise<UserPreferences> {
+export async function getUserPreferences(): Promise<UserSettingsRecord> {
    const db = await openDatabase();
 
    return new Promise((resolve, reject) => {
-      const store = db.transaction(STORES.PREFERENCES, 'readonly').objectStore(
-         STORES.PREFERENCES,
+      const store = db.transaction(STORES.USER_SETTINGS, 'readonly').objectStore(
+         STORES.USER_SETTINGS,
       );
-      const request = store.get(PREFERENCES_KEY) as IDBRequest<UserPreferences>;
+      const request = store.get(USER_SETTINGS_KEY) as IDBRequest<UserSettingsRecord>;
       request.onsuccess = () => {
          if (request.result) {
             resolve(request.result);
@@ -28,14 +28,14 @@ export async function getUserPreferences(): Promise<UserPreferences> {
    });
 }
 
-export async function setUserPreferences(record = defaultPreferences): Promise<void> {
+export async function setUserPreferences(record = defaultUserSettings): Promise<void> {
    const db = await openDatabase();
 
    return new Promise((resolve, reject) => {
-      const store = db.transaction(STORES.PREFERENCES, 'readwrite').objectStore(
-         STORES.PREFERENCES,
+      const store = db.transaction(STORES.USER_SETTINGS, 'readwrite').objectStore(
+         STORES.USER_SETTINGS,
       );
-      const request = store.put(record, PREFERENCES_KEY);
+      const request = store.put(record, USER_SETTINGS_KEY);
 
       request.onsuccess = () => resolve();
       request.onerror = () => reject(request.error);

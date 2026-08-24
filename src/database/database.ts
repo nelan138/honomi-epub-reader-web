@@ -1,5 +1,5 @@
 import type { CategoryRecord } from './category-repository.ts';
-import type { UserPreferences } from './user-preference-repository.ts';
+import type { UserSettingsRecord } from './user-setting-repository.ts';
 
 export const DB_NAME = 'Honomi';
 export const DB_VERSION = 1;
@@ -7,11 +7,11 @@ export const DB_VERSION = 1;
 export const STORES = {
    BOOKS: 'books',
    CATEGORIES: 'categories',
-   PREFERENCES: 'userPreferences',
-}
-export const PREFERENCES_KEY = 'userPreferences';
+   USER_SETTINGS: 'userSettings',
+};
+export const USER_SETTINGS_KEY = 'userPreferences';
 
-export const defaultPreferences: UserPreferences = {
+export const defaultUserSettings: UserSettingsRecord = {
    theme: 'light',
    titleSortOrder: 'title-asc',
 };
@@ -44,7 +44,7 @@ function createSchemas(db: IDBDatabase): void {
    }
 
    // * USER PREFERENCES: Only one record exists
-   if (!db.objectStoreNames.contains(STORES.PREFERENCES)) db.createObjectStore(STORES.PREFERENCES);
+   if (!db.objectStoreNames.contains(STORES.USER_SETTINGS)) db.createObjectStore(STORES.USER_SETTINGS);
 
    console.log('Database schemas created or already exist.');
 }
@@ -73,8 +73,8 @@ export function openDatabase(): Promise<IDBDatabase> {
          const categoryStore = transaction.objectStore(STORES.CATEGORIES);
          categoryStore.put(defaultCategory);
 
-         const userPreferencesStore = transaction.objectStore(STORES.PREFERENCES);
-         userPreferencesStore.put(defaultPreferences, PREFERENCES_KEY);
+         const userPreferencesStore = transaction.objectStore(STORES.USER_SETTINGS);
+         userPreferencesStore.put(defaultUserSettings, USER_SETTINGS_KEY);
       };
 
       request.onsuccess = () => resolve(request.result);

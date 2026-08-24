@@ -5,12 +5,12 @@ import {
    updateCategoryState,
 } from '@src/database/category-repository.ts';
 import renderBookshelf from '../features/render-bookshelf.ts';
-import openFormFor from '../features/open-forms.ts';
+import { openFormFor } from '../features/overlays.ts';
 
 async function handleCategoryAction(action: string | null, clickedCategory: HTMLElement): Promise<void> {
    const categoryId = Number(clickedCategory?.getAttribute('data-category-id'));
    if (!Number.isSafeInteger(categoryId)) throw new Error('Invalid category ID');
-   
+
    switch (action) {
       case 'expand':
       case 'collapse': {

@@ -1,8 +1,7 @@
-import EpubBook from '@src/epub/epub-book.ts';
+import { EpubBook } from '@src/epub/epub-book.ts';
 
 import { defaultCategory } from '@src/database/database.ts';
 import { addBook } from '@src/database/book-repository.ts';
-import type { BookRecord } from '@src/database/book-repository.ts';
 import { getCategoryByName } from '@src/database/category-repository.ts';
 
 import renderBookshelf from './render-bookshelf.ts';
@@ -16,29 +15,36 @@ export default function bindBookImportEvents() {
 
    importBtn.addEventListener('click', () => fileInput.click());
    fileInput.addEventListener('change', async () => {
-      const files = fileInput.files!;
+      const files = fileInput.files;
+      if (!files || files.length === 0) return;
+
       for (const file of files) {
          if (!file) continue;
 
-         const category = await getCategoryByName(defaultCategory.name);
+         const categoryId = (await getCategoryByName(defaultCategory.name)).id;
+         if (categoryId === undefined) throw new Error('Default category not found');
 
-         const epub = await EpubBook.fromFile(file);
-         const bookRecord: BookRecord = {
-            version: epub.getVersion(),
-            categoryId: category.id!,
+         const epub = new EpubBook(file);
+         await epub.parse();
+
+         await addBook({
+            id: null,
+            categoryId: categoryId,
             progress: 0,
-            cover: epub.getCover() ?? undefined,
-            metadata: epub.getMetadata(),
+            version: epub.getVersion(),
+
             epubFile: epub.getEpubFile(),
             opfPath: epub.getOpfPath(),
             manifest: epub.getManifest(),
             navigation: epub.getNavigation(),
-            spine: epub.getSpine(),
-         };
 
-         await addBook(bookRecord);
+            spine: epub.getSpine(),
+            cover: epub.getCover(),
+            metadata: epub.getMetadata(),
+         });
       }
-      await renderBookshelf();
+      
       fileInput.value = '';
+      await renderBookshelf();
    });
 }

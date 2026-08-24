@@ -1,12 +1,9 @@
-import {
-   getUserPreferences,
-   setUserPreferences,
-} from '@src/database/user-preference-repository.ts';
+import { getUserPreferences, setUserPreferences } from '../../../database/user-setting-repository.ts';
 import { addCategory } from '@src/database/category-repository.ts';
 import type { CategoryRecord } from '@src/database/category-repository.ts';
 
 import renderBookshelf from '../features/render-bookshelf.ts';
-import openFormFor from '../features/open-forms.ts';
+import { openFormFor } from '../features/overlays.ts';
 
 export default function bindBookshelfHeaderEvents() {
    document.getElementById('open-github-repo-btn')!.addEventListener(
@@ -31,9 +28,7 @@ export default function bindBookshelfHeaderEvents() {
       'click',
       async () => {
          const userPreferences = await getUserPreferences();
-         userPreferences.titleSortOrder = userPreferences.titleSortOrder === 'title-asc'
-            ? 'title-desc'
-            : 'title-asc';
+         userPreferences.titleSortOrder = userPreferences.titleSortOrder === 'title-asc' ? 'title-desc' : 'title-asc';
 
          await setUserPreferences(userPreferences);
          await renderBookshelf();

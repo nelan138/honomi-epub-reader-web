@@ -2,12 +2,12 @@ import { changeBookCategory, deleteBook, renameBook } from '@src/database/book-r
 import { getCategoryByName } from '@src/database/category-repository.ts';
 
 import renderBookshelf from '../features/render-bookshelf.ts';
-import openFormFor from '../features/open-forms.ts';
+import { openFormFor } from '../features/overlays.ts';
 
 async function handleBookCardAction(action: string | null, clickedBookCard: HTMLElement): Promise<void> {
    const bookId = Number(clickedBookCard.getAttribute('data-book-id'));
    if (!Number.isSafeInteger(bookId)) throw new Error('Invalid book ID');
-   
+
    switch (action) {
       case 'rename': {
          const title = await openFormFor('book-name') as string;

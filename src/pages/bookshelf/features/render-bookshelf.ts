@@ -1,13 +1,12 @@
 import { defaultCategory } from '@src/database/database.ts';
 import { getBooksByCategory } from '@src/database/book-repository.ts';
 import { getAllCategories } from '@src/database/category-repository.ts';
-import { getUserPreferences } from '@src/database/user-preference-repository.ts';
-import type { TitleSortOrder } from '@src/database/user-preference-repository.ts';
+import { getUserPreferences } from '../../../database/user-setting-repository.ts';
+import type { TitleSortOrder } from '../../../database/user-setting-repository.ts';
 import type { BookRecord } from '@src/database/book-repository.ts';
 import type { CategoryRecord } from '@src/database/category-repository.ts';
 
-import { STRING_FORM_RULES } from './open-forms.ts';
-import EpubBook from '@src/epub/epub-book.ts';
+import { STRING_FORM_RULES } from './overlays.ts';
 
 function normalizeTitle(title: string | null | undefined): string {
    if (!title) return 'Unknown';
@@ -15,20 +14,19 @@ function normalizeTitle(title: string | null | undefined): string {
 }
 
 function renderBookCard(record: BookRecord): HTMLElement {
-   const epub = EpubBook.fromRecord(record);
-
    const template = document.getElementById('book-card-template')! as HTMLTemplateElement;
    const clone = template.content.cloneNode(true) as DocumentFragment;
-   const container = clone.querySelector('.book-card')! as HTMLElement;
-   container.setAttribute('data-book-id', String(epub.getId()));
 
-   const metadata = epub.getMetadata();
+   const container = clone.querySelector('.book-card')! as HTMLElement;
+   container.setAttribute('data-book-id', record.id?.toString() ?? '');
+
+   const metadata = record.metadata;
 
    const title = normalizeTitle(metadata.title);
-   const cover = epub.getCover();
+   const cover = record.cover;
    const coverUrl = cover ? URL.createObjectURL(cover) : `cover of ${title} not found`;
-   const creator = metadata.creator ?? 'Unknown';
-   const language = metadata.language ?? 'Unknown';
+   const creator = metadata.creator;
+   const language = metadata.language;
 
    const coverElement = container.querySelector('.cover-wrapper > img')! as HTMLImageElement;
    coverElement.src = coverUrl;
@@ -54,9 +52,9 @@ function sortAndFilterBooks(books: BookRecord[], searchText: string | null, sort
          const metadata = book.metadata;
          if (!metadata) return false;
 
-         const title = metadata.title?.toLowerCase() ?? '';
-         const creator = metadata.creator?.toLowerCase() ?? '';
-         const language = metadata.language?.toLowerCase() ?? '';
+         const title = metadata.title.toLowerCase();
+         const creator = metadata.creator?.toLowerCase();
+         const language = metadata.language?.toLowerCase();
 
          return (
             title.includes(lowerSearchText)
@@ -67,15 +65,14 @@ function sortAndFilterBooks(books: BookRecord[], searchText: string | null, sort
    }
 
    return books.sort((a, b) => {
-      const titleA = a.metadata?.title?.toLowerCase() ?? '';
-      const titleB = b.metadata?.title?.toLowerCase() ?? '';
+      const titleA = a.metadata?.title?.toLowerCase();
+      const titleB = b.metadata?.title?.toLowerCase();
 
       return sortOrder === 'title-desc' ? titleB.localeCompare(titleA) : titleA.localeCompare(titleB);
    });
 }
 
 function renderCategory(categoryRecord: CategoryRecord, bookRecords: BookRecord[]): HTMLElement {
-
    const categoryName = normalizeTitle(categoryRecord.name);
 
    const template = document.getElementById('category-template')! as HTMLTemplateElement;

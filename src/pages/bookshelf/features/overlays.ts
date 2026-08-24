@@ -11,7 +11,7 @@ type FormType =
    | 'category-selection'
    | 'confirmation'
    | 'search-book';
-export default async function openFormFor(type: FormType): Promise<string | boolean | null> {
+export async function openFormFor(type: FormType): Promise<string | boolean | null> {
    switch (type) {
       case 'book-name':
          return await getNewBookNameForm();
