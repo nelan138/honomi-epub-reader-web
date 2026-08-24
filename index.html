@@ -1,119 +1,167 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+   <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<head>
-   <meta charset="UTF-8">
-   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <link
+         rel="stylesheet"
+         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+      />
 
-   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+      <title>Honomi — Bookshelf</title>
+   </head>
 
-   <title>Honomi — Bookshelf</title>
-</head>
+   <body>
+      <header class="bookshelf-header">
+         <div class="primary-actions">
+            <input
+               id="epub-file-input"
+               type="file"
+               accept=".epub,application/epub+zip"
+               multiple
+               hidden
+            />
+            <button type="button" id="import-book-btn">
+               <i class="fa-solid fa-upload"></i>
+            </button>
+            <button type="button" id="open-github-repo-btn">
+               <i class="fa-brands fa-github"></i>
+            </button>
+         </div>
 
-<body>
-   <header class="bookshelf-header">
-      <div class="primary-actions">
-         <input id="epub-file-input" type="file" accept=".epub,application/epub+zip" multiple hidden>
-         <button type="button" id="import-book-btn">
-            <i class="fa-solid fa-upload"></i>
-         </button>
-         <button type="button" id="open-github-repo-btn">
-            <i class="fa-brands fa-github"></i>
-         </button>
-      </div>
+         <div class="more-actions">
+            <button type="button" id="find-book-btn">
+               <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
 
-      <div class="more-actions">
-         <button type="button" id="find-book-btn">
-            <i class="fa-solid fa-magnifying-glass"></i>
-         </button>
+            <button type="button" id="sort-books-btn">
+               <i class="fa-solid fa-sort"></i>
+            </button>
 
-         <button type="button" id="sort-books-btn">
-            <i class="fa-solid fa-sort"></i>
-         </button>
+            <button type="button" id="add-category-btn">
+               <i class="fa-solid fa-folder-plus"></i>
+            </button>
 
-         <button type="button" id="add-category-btn">
-            <i class="fa-solid fa-folder-plus"></i>
-         </button>
+            <button type="button" id="toggle-theme-btn">
+               <i class="fa-solid fa-circle-half-stroke"></i>
+            </button>
 
-         <button type="button" id="toggle-theme-btn">
-            <i class="fa-solid fa-circle-half-stroke"></i>
-         </button>
+            <button type="button" id="toggle-settings-btn">
+               <i class="fa-solid fa-gear"></i>
+            </button>
+         </div>
+      </header>
 
-         <button type="button" id="toggle-settings-btn">
-            <i class="fa-solid fa-gear"></i>
-         </button>
-      </div>
-   </header>
+      <!-- Library: Entry point -->
+      <main id="bookshelf">
+         <!-- Categories go here -->
+      </main>
 
-   <!-- Library: Entry point -->
-   <main id="bookshelf">
-      <!-- Categories go here -->
-   </main>
+      <!-- Category -->
+      <template id="category-template">
+         <section class="category" data-category-name="">
+            <header class="category-header">
+               <h2></h2>
 
-   <!-- Category -->
-   <template id="category-template">
-      <section class="category" data-category-name="">
-         <header class="category-header">
-            <h2></h2>
+               <div class="category-actions">
+                  <button
+                     type="button"
+                     class="move-category-up-btn"
+                     data-action="move-up"
+                  >
+                     <i class="fa-solid fa-circle-up"></i>
+                  </button>
 
-            <div class="category-actions">
-               <button type="button" class="move-category-up-btn">
-                  <i class="fa-solid fa-circle-up"></i>
+                  <button
+                     type="button"
+                     class="move-category-down-btn"
+                     data-action="move-down"
+                  >
+                     <i class="fa-solid fa-circle-down"></i>
+                  </button>
+
+                  <button
+                     type="button"
+                     class="rename-category-btn"
+                     data-action="rename"
+                  >
+                     <i class="fa-solid fa-pencil"></i>
+                  </button>
+
+                  <button
+                     type="button"
+                     class="collapse-category-btn"
+                     data-action="collapse"
+                  >
+                     <i class="fa-solid fa-caret-down"></i>
+                  </button>
+
+                  <button
+                     type="button"
+                     class="expand-category-btn"
+                     data-action="expand"
+                  >
+                     <i class="fa-solid fa-caret-right"></i>
+                  </button>
+
+                  <button
+                     type="button"
+                     class="delete-category-btn"
+                     data-action="delete"
+                  >
+                     <i class="fa-solid fa-x"></i>
+                  </button>
+               </div>
+            </header>
+
+            <div class="book-card-list">
+               <!-- Book cards go here -->
+            </div>
+         </section>
+      </template>
+
+      <!-- Book card -->
+      <template id="book-card-template">
+         <article class="book-card" data-book-id="">
+            <div class="cover-wrapper">
+               <img src="" alt="" />
+            </div>
+
+            <div class="metadata">
+               <h3 class="title"></h3>
+               <p class="creator"></p>
+               <p class="language"></p>
+            </div>
+
+            <div class="book-card-actions">
+               <button
+                  type="button"
+                  class="rename-book-btn"
+                  data-action="rename"
+               >
+                  <i class="fa-solid fa-pen-to-square"></i>
                </button>
-               <button type="button" class="move-category-down-btn">
-                  <i class="fa-solid fa-circle-down"></i>
+               <button
+                  type="button"
+                  class="change-book-category-btn"
+                  data-action="change-category"
+               >
+                  <i class="fa-solid fa-right-left"></i>
                </button>
-               <button type="button" class="rename-category-btn">
-                  <i class="fa-solid fa-pencil"></i>
-               </button>
-               <button type="button" class="collapse-category-btn">
-                  <i class="fa-solid fa-caret-down"></i>
-               </button>
-               <button type="button" class="expand-category-btn">
-                  <i class="fa-solid fa-caret-right"></i>
-               </button>
-               <button type="button" class="delete-category-btn">
-                  <i class="fa-solid fa-x"></i>
+               <button
+                  type="button"
+                  class="delete-book-btn"
+                  data-action="delete"
+               >
+                  <i class="fa-solid fa-trash"></i>
                </button>
             </div>
-         </header>
 
-         <div class="book-card-list">
-            <!-- Book cards go here -->
-         </div>
-      </section>
-   </template>
+            <div class="progress-bar"></div>
+         </article>
+      </template>
 
-   <!-- Book card -->
-   <template id="book-card-template">
-      <article class="book-card" data-book-id="">
-         <div class="cover-wrapper">
-            <img src="" alt="">
-         </div>
-
-         <div class="metadata">
-            <h3 class="title"></h3>
-            <p class="creator"></p>
-            <p class="language"></p>
-         </div>
-
-         <div class="book-card-actions">
-            <button type="button" class="rename-book-btn">
-               <i class="fa-solid fa-pen-to-square"></i>
-            </button>
-            <button type="button" class="change-book-category-btn">
-               <i class="fa-solid fa-right-left"></i>
-            </button>
-            <button type="button" class="delete-book-btn">
-               <i class="fa-solid fa-trash"></i>
-            </button>
-         </div>
-
-         <div class="progress-bar"> </div>
-      </article>
-   </template>
-
-   <script type="module" src="./src/main.js"></script>
-</body>
-
+      <script type="module" src="./src/main.js"></script>
+   </body>
 </html>

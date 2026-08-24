@@ -1,4 +1,4 @@
-import type { BookRecord } from '../database/book-repository.ts';
+import type { BookRecord } from '@src/database/book-repository.ts';
 import { strFromU8, unzipSync } from 'fflate';
 
 type Path = string;
@@ -15,7 +15,7 @@ export interface ManifestItem {
 
 export interface SpineItem {
    idref: ManifestItemId;
-   linear: boolean; // * false = (footnotes, appendices, etc.)
+   linear: boolean; // * false <=> (footnotes, appendices, etc.)
 }
 
 export interface NavigationItem {
@@ -64,7 +64,7 @@ export default class EpubBook {
       book.#epubFile = file;
       const buffer = await file.arrayBuffer();
       book.#epubData = unzipSync(new Uint8Array(buffer), {});
-      
+
       book.#version = book.getVersion();
       book.#opfPath = book.getOpfPath();
       book.#manifest = book.getManifest();
@@ -454,7 +454,8 @@ export default class EpubBook {
             tocItem = [...manifest.values()].find((item) =>
                item.mediaType === 'application/x-dtbncx+xml'
             ) ?? [...manifest.values()].find((item) => item.href.endsWith('.ncx'));
-         } else { tocItem = manifest.get(tocId); }
+         }
+         else { tocItem = manifest.get(tocId); }
 
          if (!tocItem) return [];
 

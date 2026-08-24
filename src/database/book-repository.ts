@@ -1,4 +1,4 @@
-import type { ManifestItem, Metadata, NavigationItem, SpineItem } from '../epub/epub-book.ts';
+import type { ManifestItem, Metadata, NavigationItem, SpineItem } from '@src/epub/epub-book.ts';
 
 import { openDatabase, STORES } from './database.ts';
 import type { CategoryRecord } from './category-repository.ts';

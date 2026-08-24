@@ -7,6 +7,7 @@ export interface UserPreferences {
    theme: Theme;
    titleSortOrder: TitleSortOrder;
 }
+
 export async function getUserPreferences(): Promise<UserPreferences> {
    const db = await openDatabase();
 
@@ -19,16 +20,15 @@ export async function getUserPreferences(): Promise<UserPreferences> {
          if (request.result) {
             resolve(request.result);
             return;
-         } else { reject(new Error('User preferences not found')); }
+         }
+         else { reject(new Error('User preferences not found')); }
       };
 
       request.onerror = () => reject(request.error);
    });
 }
 
-export async function setUserPreferences(
-   record = defaultPreferences,
-): Promise<void> {
+export async function setUserPreferences(record = defaultPreferences): Promise<void> {
    const db = await openDatabase();
 
    return new Promise((resolve, reject) => {

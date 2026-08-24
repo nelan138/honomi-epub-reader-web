@@ -1,4 +1,4 @@
-import { getAllCategories } from '../../../database/category-repository.ts';
+import { getAllCategories } from '@src/database/category-repository.ts';
 
 export const STRING_FORM_RULES = {
    maxLength: 20,
@@ -135,10 +135,7 @@ function getStringForm(title: string, placeholder = 'Enter text here'): Promise<
    });
 }
 
-function getOptionForm(
-   title: string,
-   options: string[],
-): Promise<string | null> {
+function getOptionForm(title: string, options: string[]): Promise<string | null> {
    return new Promise((resolve) => {
       const { overlay, modal } = createModal();
 
@@ -164,7 +161,8 @@ function getOptionForm(
 
       modal.querySelectorAll('.form-option-btn').forEach((btn, i) => {
          btn.addEventListener('click', () => {
-            closeModal(overlay, () => resolve(options[i]));
+            const selectedOption = options[i];
+            if (selectedOption) closeModal(overlay, () => resolve(selectedOption));
          });
       });
 

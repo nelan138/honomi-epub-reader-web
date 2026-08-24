@@ -2,14 +2,14 @@ import type { CategoryRecord } from './category-repository.ts';
 import type { UserPreferences } from './user-preference-repository.ts';
 
 export const DB_NAME = 'Honomi';
-export const DB_VERSION = 2;
+export const DB_VERSION = 1;
 
-export enum STORES {
-   BOOKS = 'books',
-   CATEGORIES = 'categories',
-   PREFERENCES = 'userPreferences',
+export const STORES = {
+   BOOKS: 'books',
+   CATEGORIES: 'categories',
+   PREFERENCES: 'userPreferences',
 }
-export const PREFERENCES_KEY = 'user-preferences';
+export const PREFERENCES_KEY = 'userPreferences';
 
 export const defaultPreferences: UserPreferences = {
    theme: 'light',
@@ -50,6 +50,7 @@ function createSchemas(db: IDBDatabase): void {
 }
 
 let database: IDBDatabase | null = null;
+// * The database connection is cached in the `database`
 export function openDatabase(): Promise<IDBDatabase> {
    if (database) return Promise.resolve(database);
 
@@ -72,9 +73,7 @@ export function openDatabase(): Promise<IDBDatabase> {
          const categoryStore = transaction.objectStore(STORES.CATEGORIES);
          categoryStore.put(defaultCategory);
 
-         const userPreferencesStore = transaction.objectStore(
-            STORES.PREFERENCES,
-         );
+         const userPreferencesStore = transaction.objectStore(STORES.PREFERENCES);
          userPreferencesStore.put(defaultPreferences, PREFERENCES_KEY);
       };
 

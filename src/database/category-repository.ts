@@ -2,6 +2,7 @@ import { openDatabase, STORES } from './database.ts';
 
 export type CategoryState = false | true;
 type DisplayOrders = { min: number; max: number };
+
 export interface CategoryRecord {
    id?: number;
    name: string;
@@ -50,7 +51,8 @@ export async function addCategory(record: CategoryRecord): Promise<number> {
             record.displayOrder = record.displayOrder ?? max + 1;
             const addRequest = store.add(record) as IDBRequest<number>;
             addRequest.onsuccess = () => categoryId = addRequest.result;
-         } else { categoryId = category.id!; }
+         }
+         else { categoryId = category.id!; }
       };
    });
 }
@@ -143,10 +145,7 @@ export async function deleteCategory(id: number): Promise<void> {
    });
 }
 
-export async function renameCategory(
-   id: number,
-   newCategoryName: string,
-): Promise<void> {
+export async function renameCategory(id: number, newCategoryName: string): Promise<void> {
    const db = await openDatabase();
 
    return new Promise((resolve, reject) => {
@@ -172,10 +171,7 @@ export async function renameCategory(
    });
 }
 
-export async function updateCategoryState(
-   id: number,
-   newState: CategoryState,
-): Promise<void> {
+export async function updateCategoryState(id: number, newState: CategoryState): Promise<void> {
    const db = await openDatabase();
 
    return new Promise((resolve, reject) => {
@@ -201,10 +197,7 @@ export async function updateCategoryState(
 }
 
 // * The lower the displayOrder, the higher the category is displayed in the list.
-export async function shiftCategoryDisplayOrder(
-   id: number,
-   delta: 1 | -1,
-): Promise<void> {
+export async function shiftCategoryDisplayOrder(id: number, delta: 1 | -1): Promise<void> {
    const db = await openDatabase();
 
    return new Promise((resolve, reject) => {

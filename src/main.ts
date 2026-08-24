@@ -1,5 +1,5 @@
-import { defaultPreferences, openDatabase } from './database/database.ts';
-import { getUserPreferences, setUserPreferences } from './database/user-preference-repository.ts';
+import { openDatabase } from './database/database.ts';
+import { getUserPreferences } from './database/user-preference-repository.ts';
 
 import bindBookshelfHeaderEvents from './pages/bookshelf/events/bookshelf-header-events.ts';
 import bindBookImportEvents from './pages/bookshelf/features/import-books.ts';
@@ -12,12 +12,9 @@ import renderBookshelf from './pages/bookshelf/features/render-bookshelf.ts';
 
 await openDatabase();
 await renderBookshelf();
-try {
-   const userPreferences = await getUserPreferences();
-   document.documentElement.setAttribute('data-theme', userPreferences.theme);
-} catch {
-   setUserPreferences(defaultPreferences);
-}
+
+const userPreferences = await getUserPreferences();
+document.documentElement.setAttribute('data-theme', userPreferences.theme);
 
 bindBookshelfHeaderEvents();
 bindCategoryEvents();

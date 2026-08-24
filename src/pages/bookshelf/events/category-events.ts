@@ -3,63 +3,68 @@ import {
    renameCategory,
    shiftCategoryDisplayOrder,
    updateCategoryState,
-} from '../../../database/category-repository.ts';
+} from '@src/database/category-repository.ts';
 import renderBookshelf from '../features/render-bookshelf.ts';
 import openFormFor from '../features/open-forms.ts';
 
-export default function bindCategoryEvents() {
-   const bookshelf = document.getElementById('bookshelf')!;
-
-   bookshelf.addEventListener('click', async (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-      if (!target) return;
-
-      const clickedButton = target.closest(
-         '.category button',
-      ) as HTMLButtonElement;
-      if (!clickedButton) return;
-
-      const clickedCategory = clickedButton.closest(
-         '.category',
-      )! as HTMLElement;
-      const categoryId = Number(
-         clickedCategory.getAttribute('data-category-id'),
-      );
-
-      if (
-         clickedButton.matches('.expand-category-btn')
-         || clickedButton.matches('.collapse-category-btn')
-      ) {
+async function handleCategoryAction(action: string | null, clickedCategory: HTMLElement): Promise<void> {
+   const categoryId = Number(clickedCategory?.getAttribute('data-category-id'));
+   if (!Number.isSafeInteger(categoryId)) throw new Error('Invalid category ID');
+   
+   switch (action) {
+      case 'expand':
+      case 'collapse': {
          const isExpanded = clickedCategory.classList.contains('expanded');
          await updateCategoryState(categoryId, !isExpanded);
          await renderBookshelf();
-      } else if (clickedButton.matches('.rename-category-btn')) {
+         break;
+      }
+      case 'rename': {
          const newCategoryName = await openFormFor('category-name') as string;
-         const clickedCategoryName = clickedCategory.getAttribute(
-            'data-category-name',
-         )!;
+         const clickedCategoryName = clickedCategory.querySelector('.category-name')
+            ?.textContent;
 
          if (newCategoryName && newCategoryName !== clickedCategoryName) {
             await renameCategory(categoryId, newCategoryName);
             await renderBookshelf();
          }
-      } else if (clickedButton.matches('.delete-category-btn')) {
+         break;
+      }
+      case 'delete': {
          const confirmation = await openFormFor('confirmation') as boolean;
          if (confirmation) {
             await deleteCategory(categoryId);
             await renderBookshelf();
          }
-      } else if (
-         clickedButton.matches('.move-category-up-btn') && !clickedButton.hidden
-      ) {
+         break;
+      }
+      case 'move-up': {
          await shiftCategoryDisplayOrder(categoryId, -1);
          await renderBookshelf();
-      } else if (
-         clickedButton.matches('.move-category-down-btn')
-         && !clickedButton.hidden
-      ) {
+         break;
+      }
+      case 'move-down': {
          await shiftCategoryDisplayOrder(categoryId, 1);
          await renderBookshelf();
+         break;
       }
+      default:
+         throw new Error(`Unknown action: ${action}`);
+   }
+}
+export default function bindCategoryEvents() {
+   const bookshelf = document.getElementById('bookshelf');
+   if (!bookshelf) throw new Error('Bookshelf element not found');
+
+   bookshelf.addEventListener('click', async (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      const clickedButton = target.closest('.category button');
+      if (!clickedButton) return;
+
+      const clickedCategory = clickedButton.closest('.category') as HTMLElement;
+      if (!clickedCategory) throw new Error('Clicked category not found');
+
+      const action = clickedButton.getAttribute('data-action');
+      await handleCategoryAction(action, clickedCategory);
    });
 }

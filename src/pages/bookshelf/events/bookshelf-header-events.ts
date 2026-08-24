@@ -1,10 +1,9 @@
 import {
    getUserPreferences,
    setUserPreferences,
-} from '../../../database/user-preference-repository.ts';
-import { addCategory } from '../../../database/category-repository.ts';
-import type { TitleSortOrder } from '../../../database/user-preference-repository.ts';
-import type { CategoryRecord } from '../../../database/category-repository.ts';
+} from '@src/database/user-preference-repository.ts';
+import { addCategory } from '@src/database/category-repository.ts';
+import type { CategoryRecord } from '@src/database/category-repository.ts';
 
 import renderBookshelf from '../features/render-bookshelf.ts';
 import openFormFor from '../features/open-forms.ts';
@@ -31,14 +30,11 @@ export default function bindBookshelfHeaderEvents() {
    document.getElementById('sort-books-btn')!.addEventListener(
       'click',
       async () => {
-         let userPreferences = await getUserPreferences();
-         const newSortOrder: TitleSortOrder = userPreferences.titleSortOrder === 'title-asc'
+         const userPreferences = await getUserPreferences();
+         userPreferences.titleSortOrder = userPreferences.titleSortOrder === 'title-asc'
             ? 'title-desc'
             : 'title-asc';
-         userPreferences = {
-            theme: userPreferences.theme,
-            titleSortOrder: newSortOrder,
-         };
+
          await setUserPreferences(userPreferences);
          await renderBookshelf();
       },
@@ -76,7 +72,6 @@ export default function bindBookshelfHeaderEvents() {
    document.getElementById('toggle-settings-btn')!.addEventListener(
       'click',
       async () => {
-         // TODO(@me)
       },
    );
 }

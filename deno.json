@@ -19,10 +19,11 @@
       "src/"
     ],
     "useTabs": false,
-    "lineWidth": 100,
+    "lineWidth": 120,
     "indentWidth": 3,
     "semiColons": true,
     "operatorPosition": "nextLine",
+    "nextControlFlowPosition": "nextLine",
     "singleQuote": true,
     "useBraces": "preferNone",
     "singleBodyPosition": "sameLine",
@@ -30,11 +31,13 @@
     "trailingCommas": "onlyMultiLine"
   },
   "lint": {
-    "include": [ 
+    "include": [
       "src/"
     ],
     "rules": {
-      "tags": ["recommended"]
+      "tags": [
+        "recommended"
+      ]
     }
   }
 }
