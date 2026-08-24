@@ -1,34 +1,16 @@
-import type { ManifestItem, Metadata, NavigationItem, SpineItem } from '@src/epub/epub-book.ts';
+import { openDatabase } from '../database.ts';
+import { STORES } from '../database.defaults.ts';
+import type { CategoryRecord } from '../categories/category.types..ts';
+import type { BookDraft, BookRecord } from './book.types.ts';
 
-import { openDatabase, STORES } from './database.ts';
-import type { CategoryRecord } from './category-repository.ts';
-import type { SupportedEpubVersion } from '@src/epub/epub-book.ts';
-
-export interface BookRecord {
-   id: number | null;
-   categoryId: number;
-   progress: number;
-
-   epubFile: Blob;
-   version: SupportedEpubVersion;
-
-   metadata: Metadata;
-   cover: Blob | null;
-
-   opfPath: string;
-   manifest: Map<string, ManifestItem>;
-   navigation: NavigationItem[];
-   spine: SpineItem[];
-}
-
-export async function addBook(bookRecord: BookRecord): Promise<number> {
+export async function addBook(bookDraft: BookDraft): Promise<number> {
    const db = await openDatabase();
 
    return new Promise((resolve, reject) => {
       const store = db.transaction(STORES.BOOKS, 'readwrite').objectStore(
          STORES.BOOKS,
       );
-      const request = store.add(bookRecord) as IDBRequest<number>;
+      const request = store.add(bookDraft) as IDBRequest<number>;
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error);
    });
@@ -166,9 +148,7 @@ export async function changeBookCategory(bookId: number, categoryId: number): Pr
          }
 
          const getCategoryRequest = transaction.objectStore(STORES.CATEGORIES)
-            .get(
-               categoryId,
-            ) as IDBRequest<CategoryRecord | undefined>;
+            .get(categoryId) as IDBRequest<CategoryRecord | undefined>;
          getCategoryRequest.onsuccess = () => {
             const category = getCategoryRequest.result;
             if (!category) {

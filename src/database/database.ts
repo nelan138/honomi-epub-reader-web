@@ -1,27 +1,11 @@
-import type { CategoryRecord } from './category-repository.ts';
-import type { UserSettingsRecord } from './user-setting-repository.ts';
-
-export const DB_NAME = 'Honomi';
-export const DB_VERSION = 1;
-
-export const STORES = {
-   BOOKS: 'books',
-   CATEGORIES: 'categories',
-   USER_SETTINGS: 'userSettings',
-};
-export const USER_SETTINGS_KEY = 'userPreferences';
-
-export const defaultUserSettings: UserSettingsRecord = {
-   theme: 'light',
-   titleSortOrder: 'title-asc',
-};
-
-export const defaultCategory: CategoryRecord = {
-   id: 1,
-   displayOrder: 0,
-   name: 'Your Library',
-   expanded: true,
-};
+import {
+   DB_NAME,
+   DB_VERSION,
+   defaultCategory,
+   defaultUserSettings,
+   STORES,
+   USER_SETTINGS_KEY,
+} from './database.defaults.ts';
 
 function createSchemas(db: IDBDatabase): void {
    // * BOOKS

@@ -1,6 +1,6 @@
-import { getUserPreferences, setUserPreferences } from '../../../database/user-setting-repository.ts';
-import { addCategory } from '@src/database/category-repository.ts';
-import type { CategoryRecord } from '@src/database/category-repository.ts';
+import { getUserPreferences, setUserPreferences } from '@src/database/user-settings/user-setting-repository.ts';
+import { addCategory } from '@src/database/categories/category-repository.ts';
+import type { CategoryDraft } from '@src/database/categories/category.types..ts';
 
 import renderBookshelf from '../features/render-bookshelf.ts';
 import { openFormFor } from '../features/overlays.ts';
@@ -40,7 +40,7 @@ export default function bindBookshelfHeaderEvents() {
       async () => {
          const categoryName = await openFormFor('category-name') as string;
          if (categoryName) {
-            const record: CategoryRecord = {
+            const record: CategoryDraft = {
                name: categoryName,
                expanded: true,
             };
@@ -66,7 +66,6 @@ export default function bindBookshelfHeaderEvents() {
 
    document.getElementById('toggle-settings-btn')!.addEventListener(
       'click',
-      async () => {
-      },
+      async () => {},
    );
 }

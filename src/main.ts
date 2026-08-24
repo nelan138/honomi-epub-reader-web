@@ -1,5 +1,5 @@
 import { openDatabase } from './database/database.ts';
-import { getUserPreferences } from './database/user-setting-repository.ts';
+import { getUserPreferences } from './database/user-settings/user-setting-repository.ts';
 
 import bindBookshelfHeaderEvents from './pages/bookshelf/events/bookshelf-header-events.ts';
 import bindBookImportEvents from './pages/bookshelf/features/import-books.ts';

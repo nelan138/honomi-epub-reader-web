@@ -3,7 +3,7 @@ import {
    renameCategory,
    shiftCategoryDisplayOrder,
    updateCategoryState,
-} from '@src/database/category-repository.ts';
+} from '@src/database/categories/category-repository.ts';
 import renderBookshelf from '../features/render-bookshelf.ts';
 import { openFormFor } from '../features/overlays.ts';
 
@@ -58,7 +58,7 @@ export default function bindCategoryEvents() {
 
    bookshelf.addEventListener('click', async (event: MouseEvent) => {
       const target = event.target as HTMLElement;
-      const clickedButton = target.closest('.category button');
+      const clickedButton = target.closest('.category-actions button');
       if (!clickedButton) return;
 
       const clickedCategory = clickedButton.closest('.category') as HTMLElement;

@@ -1,12 +1,7 @@
-import { defaultUserSettings, openDatabase, USER_SETTINGS_KEY } from './database.ts';
-import { STORES } from './database.ts';
-
-export type Theme = 'light' | 'dark';
-export type TitleSortOrder = 'title-asc' | 'title-desc';
-export interface UserSettingsRecord {
-   theme: Theme;
-   titleSortOrder: TitleSortOrder;
-}
+import { openDatabase } from '../database.ts';
+import { defaultUserSettings, USER_SETTINGS_KEY } from '../database.defaults.ts';
+import { STORES } from '../database.defaults.ts';
+import type { UserSettingsRecord } from './user-setting.types.ts';
 
 export async function getUserPreferences(): Promise<UserSettingsRecord> {
    const db = await openDatabase();

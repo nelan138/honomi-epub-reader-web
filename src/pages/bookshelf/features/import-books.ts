@@ -1,10 +1,11 @@
 import { EpubBook } from '@src/epub/epub-book.ts';
 
-import { defaultCategory } from '@src/database/database.ts';
-import { addBook } from '@src/database/book-repository.ts';
-import { getCategoryByName } from '@src/database/category-repository.ts';
+import { defaultCategory } from '@src/database/database.defaults.ts';
+import { addBook } from '@src/database/books/book-repository.ts';
+import { getCategoryByName } from '@src/database/categories/category-repository.ts';
 
 import renderBookshelf from './render-bookshelf.ts';
+import type { BookDraft } from '../../../database/books/book.types.ts';
 
 export default function bindBookImportEvents() {
    const importBtn = document.getElementById('import-book-btn');
@@ -26,9 +27,7 @@ export default function bindBookImportEvents() {
 
          const epub = new EpubBook(file);
          await epub.parse();
-
-         await addBook({
-            id: null,
+         const draft: BookDraft = {
             categoryId: categoryId,
             progress: 0,
             version: epub.getVersion(),
@@ -41,9 +40,11 @@ export default function bindBookImportEvents() {
             spine: epub.getSpine(),
             cover: epub.getCover(),
             metadata: epub.getMetadata(),
-         });
+         };
+
+         await addBook(draft);
       }
-      
+
       fileInput.value = '';
       await renderBookshelf();
    });

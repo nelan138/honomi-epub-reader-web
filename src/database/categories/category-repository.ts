@@ -1,14 +1,6 @@
-import { openDatabase, STORES } from './database.ts';
-
-export type CategoryState = false | true;
-type DisplayOrders = { min: number; max: number };
-
-export interface CategoryRecord {
-   id?: number;
-   name: string;
-   expanded: CategoryState;
-   displayOrder?: number;
-}
+import { openDatabase } from '../database.ts';
+import { STORES } from '../database.defaults.ts';
+import type { CategoryDraft, CategoryRecord, CategoryState, DisplayOrders } from './category.types..ts';
 
 // * Lower means higher in the list. The default category is always at the top (displayOrder = 0).
 async function getDisplayOrders(): Promise<DisplayOrders> {
@@ -30,7 +22,7 @@ async function getDisplayOrders(): Promise<DisplayOrders> {
  * Adds a new category to the database.
  * Returns ID if a category with the same name already exists.
  */
-export async function addCategory(record: CategoryRecord): Promise<number> {
+export async function addCategory(draft: CategoryDraft): Promise<number> {
    const db = await openDatabase();
    const { max } = await getDisplayOrders();
 
@@ -40,7 +32,7 @@ export async function addCategory(record: CategoryRecord): Promise<number> {
       transaction.onerror = () => reject(transaction.error);
 
       const store = transaction.objectStore(STORES.CATEGORIES);
-      const getRequest = store.index('by_name').get(record.name) as IDBRequest<
+      const getRequest = store.index('by_name').get(draft.name) as IDBRequest<
          CategoryRecord | undefined
       >;
 
@@ -48,8 +40,8 @@ export async function addCategory(record: CategoryRecord): Promise<number> {
       getRequest.onsuccess = () => {
          const category = getRequest.result;
          if (category === undefined) { // not exist
-            record.displayOrder = record.displayOrder ?? max + 1;
-            const addRequest = store.add(record) as IDBRequest<number>;
+            const displayOrder = max + 1;
+            const addRequest = store.add({ ...draft, displayOrder }) as IDBRequest<number>;
             addRequest.onsuccess = () => categoryId = addRequest.result;
          }
          else { categoryId = category.id!; }

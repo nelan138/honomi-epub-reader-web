@@ -1,5 +1,5 @@
-import { changeBookCategory, deleteBook, renameBook } from '@src/database/book-repository.ts';
-import { getCategoryByName } from '@src/database/category-repository.ts';
+import { changeBookCategory, deleteBook, renameBook } from '@src/database/books/book-repository.ts';
+import { getCategoryByName } from '@src/database/categories/category-repository.ts';
 
 import renderBookshelf from '../features/render-bookshelf.ts';
 import { openFormFor } from '../features/overlays.ts';
@@ -45,7 +45,7 @@ export default function bindBookCardEvents() {
 
    bookshelf.addEventListener('click', async (event: MouseEvent) => {
       const target = event.target as HTMLElement;
-      const clickedButton = target.closest('.book-card button') as HTMLButtonElement;
+      const clickedButton = target.closest('.book-card-actions button');
       if (!clickedButton) return;
 
       const clickedBookCard = clickedButton.closest('.book-card') as HTMLElement;

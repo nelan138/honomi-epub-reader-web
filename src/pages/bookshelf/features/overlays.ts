@@ -1,4 +1,4 @@
-import { getAllCategories } from '@src/database/category-repository.ts';
+import { getAllCategories } from '@src/database/categories/category-repository.ts';
 
 export const STRING_FORM_RULES = {
    maxLength: 20,

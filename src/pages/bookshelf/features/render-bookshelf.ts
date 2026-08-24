@@ -1,10 +1,10 @@
-import { defaultCategory } from '@src/database/database.ts';
-import { getBooksByCategory } from '@src/database/book-repository.ts';
-import { getAllCategories } from '@src/database/category-repository.ts';
-import { getUserPreferences } from '../../../database/user-setting-repository.ts';
-import type { TitleSortOrder } from '../../../database/user-setting-repository.ts';
-import type { BookRecord } from '@src/database/book-repository.ts';
-import type { CategoryRecord } from '@src/database/category-repository.ts';
+import { defaultCategory } from '@src/database/database.defaults.ts';
+import { getBooksByCategory } from '@src/database/books/book-repository.ts';
+import { getAllCategories } from '@src/database/categories/category-repository.ts';
+import { getUserPreferences } from '@src/database/user-settings/user-setting-repository.ts';
+import type { TitleSortOrder } from '@src/database/user-settings/user-setting.types.ts';
+import type { BookRecord } from '@src/database/books/book.types.ts';
+import type { CategoryRecord } from '@src/database/categories/category.types..ts';
 
 import { STRING_FORM_RULES } from './overlays.ts';
 
@@ -136,6 +136,32 @@ export default async function renderBookshelf(searchText = ''): Promise<void> {
       let books: BookRecord[] = [];
       try {
          books = await getBooksByCategory(category.id!);
+         for (const book of books) {
+            console.log('Manifest of', book.metadata.title);
+            console.table(
+               [...book.manifest.entries()].map(([id, item]) => ({
+                  id,
+                  href: item.href,
+                  resolvedPath: item.resolvedPath,
+                  mediaType: item.mediaType,
+                  properties: item.properties.join(', '),
+               })),
+            );
+
+            console.log('Navigation of', book.metadata.title);
+            console.table(
+               book.navigation.map((item) => ({
+                  label: item.label,
+                  href: item.href,
+                  resolvedPath: item.resolvedPath,
+                  fragment: item.fragment,
+                  childCount: item.children.length,
+               })),
+            );
+
+            console.log('Spine of', book.metadata.title);
+            console.table(book.spine);
+         }
       }
       catch (error) {
          console.error(`Error fetching books for category ${category.name}:`, error);
