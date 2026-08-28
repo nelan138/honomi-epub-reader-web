@@ -1,6 +1,6 @@
 import { openDatabase } from '../database.ts';
 import { STORES } from '../database.defaults.ts';
-import type { CategoryDraft, CategoryRecord, CategoryState, DisplayOrders } from './category.types..ts';
+import type { CategoryRecord, CategoryState, DisplayOrders } from './category.types.ts';
 
 // * Lower means higher in the list. The default category is always at the top (displayOrder = 0).
 async function getDisplayOrders(): Promise<DisplayOrders> {
@@ -22,7 +22,7 @@ async function getDisplayOrders(): Promise<DisplayOrders> {
  * Adds a new category to the database.
  * Returns ID if a category with the same name already exists.
  */
-export async function addCategory(draft: CategoryDraft): Promise<number> {
+export async function addCategory(name: string): Promise<number> {
    const db = await openDatabase();
    const { max } = await getDisplayOrders();
 
@@ -32,16 +32,19 @@ export async function addCategory(draft: CategoryDraft): Promise<number> {
       transaction.onerror = () => reject(transaction.error);
 
       const store = transaction.objectStore(STORES.CATEGORIES);
-      const getRequest = store.index('by_name').get(draft.name) as IDBRequest<
-         CategoryRecord | undefined
-      >;
+      const getRequest = store.index('by_name').get(name) as IDBRequest<CategoryRecord | undefined>;
 
       let categoryId: number | null = null;
       getRequest.onsuccess = () => {
          const category = getRequest.result;
          if (category === undefined) { // not exist
             const displayOrder = max + 1;
-            const addRequest = store.add({ ...draft, displayOrder }) as IDBRequest<number>;
+            const record: Omit<CategoryRecord, 'id'> = {
+               name,
+               expanded: true,
+               displayOrder,
+            }
+            const addRequest = store.add(record) as IDBRequest<number>;
             addRequest.onsuccess = () => categoryId = addRequest.result;
          }
          else { categoryId = category.id!; }

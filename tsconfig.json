@@ -1,12 +1,8 @@
 {
-   "include": [
-      "src/"
-   ],
+   "include": ["src/"],
    "compilerOptions": {
       "paths": {
-         "@src/*": [
-            "./src/*"
-         ],
+         "@src/*": ["./src/*"]
       },
       "esModuleInterop": true,
       "skipLibCheck": true,
@@ -34,10 +30,6 @@
       "module": "preserve",
       "noEmit": true,
       // * Runs in the DOM
-      "lib": [
-         "es2022",
-         "dom",
-         "dom.iterable"
-      ]
-   },
+      "lib": ["es2022", "dom", "dom.iterable"]
+   }
 }

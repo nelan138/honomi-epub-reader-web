@@ -4,7 +4,7 @@ import { getAllCategories } from '@src/database/categories/category-repository.t
 import { getUserPreferences } from '@src/database/user-settings/user-setting-repository.ts';
 import type { TitleSortOrder } from '@src/database/user-settings/user-setting.types.ts';
 import type { BookRecord } from '@src/database/books/book.types.ts';
-import type { CategoryRecord } from '@src/database/categories/category.types..ts';
+import type { CategoryRecord } from '@src/database/categories/category.types.ts';
 
 import { STRING_FORM_RULES } from './overlays.ts';
 
@@ -21,22 +21,25 @@ function renderBookCard(record: BookRecord): HTMLElement {
    container.setAttribute('data-book-id', record.id?.toString() ?? '');
 
    const metadata = record.metadata;
+   if (metadata) {
+      const title = normalizeTitle(metadata.title);
 
-   const title = normalizeTitle(metadata.title);
-   const cover = record.cover;
-   const coverUrl = cover ? URL.createObjectURL(cover) : `cover of ${title} not found`;
-   const creator = metadata.creator;
-   const language = metadata.language;
+      const cover = record.cover;
+      const coverUrl = cover ? URL.createObjectURL(cover) : `cover of ${title} not found`;
+      const creator = metadata.creator;
+      const language = metadata.language;
 
-   const coverElement = container.querySelector('.cover-wrapper > img')! as HTMLImageElement;
-   coverElement.src = coverUrl;
-   coverElement.setAttribute('alt', `Book cover of ${title}`);
-   coverElement.setAttribute('title', title);
+      const coverElement = container.querySelector('.cover-wrapper > img')! as HTMLImageElement;
+      coverElement.src = coverUrl;
+      coverElement.setAttribute('alt', `Book cover of ${title}`);
+      coverElement.setAttribute('title', title);
 
-   const metadataElement = container.querySelector('.metadata')!;
-   metadataElement.querySelector('.title')!.textContent = title;
-   metadataElement.querySelector('.creator')!.textContent = creator;
-   metadataElement.querySelector('.language')!.textContent = language;
+      const metadataElement = container.querySelector('.metadata')!;
+
+      metadataElement.querySelector('.title')!.textContent = title;
+      metadataElement.querySelector('.creator')!.textContent = creator ?? 'Unknown';
+      metadataElement.querySelector('.language')!.textContent = language ?? 'Unknown';
+   }
 
    const progressBarElement = container.querySelector('.progress-bar')! as HTMLElement;
    // todo: replace with actual progress value later
@@ -52,9 +55,9 @@ function sortAndFilterBooks(books: BookRecord[], searchText: string | null, sort
          const metadata = book.metadata;
          if (!metadata) return false;
 
-         const title = metadata.title.toLowerCase();
-         const creator = metadata.creator?.toLowerCase();
-         const language = metadata.language?.toLowerCase();
+         const title = metadata.title?.toLowerCase() ?? '';
+         const creator = metadata.creator?.toLowerCase() ?? '';
+         const language = metadata.language?.toLowerCase() ?? '';
 
          return (
             title.includes(lowerSearchText)
@@ -65,8 +68,8 @@ function sortAndFilterBooks(books: BookRecord[], searchText: string | null, sort
    }
 
    return books.sort((a, b) => {
-      const titleA = a.metadata?.title?.toLowerCase();
-      const titleB = b.metadata?.title?.toLowerCase();
+      const titleA = a.metadata?.title?.toLowerCase() ?? '';
+      const titleB = b.metadata?.title?.toLowerCase() ?? '';
 
       return sortOrder === 'title-desc' ? titleB.localeCompare(titleA) : titleA.localeCompare(titleB);
    });
@@ -136,32 +139,32 @@ export default async function renderBookshelf(searchText = ''): Promise<void> {
       let books: BookRecord[] = [];
       try {
          books = await getBooksByCategory(category.id!);
-         for (const book of books) {
-            console.log('Manifest of', book.metadata.title);
-            console.table(
-               [...book.manifest.entries()].map(([id, item]) => ({
-                  id,
-                  href: item.href,
-                  resolvedPath: item.resolvedPath,
-                  mediaType: item.mediaType,
-                  properties: item.properties.join(', '),
-               })),
-            );
+         // for (const book of books) {
+         //    console.log('Manifest of', book.metadata.title);
+         //    console.table(
+         //       [...book.manifest.entries()].map(([id, item]) => ({
+         //          id,
+         //          href: item.href,
+         //          resolvedPath: item.resolvedPath,
+         //          mediaType: item.mediaType,
+         //          properties: item.properties.join(', '),
+         //       })),
+         //    );
 
-            console.log('Navigation of', book.metadata.title);
-            console.table(
-               book.navigation.map((item) => ({
-                  label: item.label,
-                  href: item.href,
-                  resolvedPath: item.resolvedPath,
-                  fragment: item.fragment,
-                  childCount: item.children.length,
-               })),
-            );
+         //    console.log('Navigation of', book.metadata.title);
+         //    console.table(
+         //       book.navigation.map((item) => ({
+         //          label: item.label,
+         //          href: item.href,
+         //          resolvedPath: item.resolvedPath,
+         //          fragment: item.fragment,
+         //          childCount: item.children.length,
+         //       })),
+         //    );
 
-            console.log('Spine of', book.metadata.title);
-            console.table(book.spine);
-         }
+         //    console.log('Spine of', book.metadata.title);
+         //    console.table(book.spine);
+         // }
       }
       catch (error) {
          console.error(`Error fetching books for category ${category.name}:`, error);

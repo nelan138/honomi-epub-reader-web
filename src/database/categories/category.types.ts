@@ -1,11 +1,10 @@
 export type CategoryState = false | true;
 export type DisplayOrders = { min: number; max: number };
 
-export type CategoryDraft = {
-   name: string;
-   expanded: CategoryState;
-};
-export type CategoryRecord = CategoryDraft & {
+export type CategoryRecord = {
    id: number;
+   name: string;
+
    displayOrder: number;
+   expanded: CategoryState;
 };

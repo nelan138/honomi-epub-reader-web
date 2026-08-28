@@ -3,28 +3,19 @@
    <head>
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-      <link
-         rel="stylesheet"
-         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
-      />
-
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
       <title>Honomi — Bookshelf</title>
    </head>
 
    <body>
       <header class="bookshelf-header">
          <div class="primary-actions">
-            <input
-               id="epub-file-input"
-               type="file"
-               accept=".epub,application/epub+zip"
-               multiple
-               hidden
-            />
+            <input id="epub-file-input" type="file" accept=".epub,application/epub+zip" multiple hidden />
+
             <button type="button" id="import-book-btn">
                <i class="fa-solid fa-upload"></i>
             </button>
+
             <button type="button" id="open-github-repo-btn">
                <i class="fa-brands fa-github"></i>
             </button>
@@ -63,53 +54,28 @@
          <section class="category" data-category-name="">
             <header class="category-header">
                <h2></h2>
-
                <div class="category-actions">
-                  <button
-                     type="button"
-                     class="move-category-up-btn"
-                     data-action="move-up"
-                  >
+                  <button type="button" class="move-category-up-btn" data-action="move-up">
                      <i class="fa-solid fa-circle-up"></i>
                   </button>
 
-                  <button
-                     type="button"
-                     class="move-category-down-btn"
-                     data-action="move-down"
-                  >
+                  <button type="button" class="move-category-down-btn" data-action="move-down">
                      <i class="fa-solid fa-circle-down"></i>
                   </button>
 
-                  <button
-                     type="button"
-                     class="rename-category-btn"
-                     data-action="rename"
-                  >
+                  <button type="button" class="rename-category-btn" data-action="rename">
                      <i class="fa-solid fa-pencil"></i>
                   </button>
 
-                  <button
-                     type="button"
-                     class="collapse-category-btn"
-                     data-action="collapse"
-                  >
+                  <button type="button" class="collapse-category-btn" data-action="collapse">
                      <i class="fa-solid fa-caret-down"></i>
                   </button>
 
-                  <button
-                     type="button"
-                     class="expand-category-btn"
-                     data-action="expand"
-                  >
+                  <button type="button" class="expand-category-btn" data-action="expand">
                      <i class="fa-solid fa-caret-right"></i>
                   </button>
 
-                  <button
-                     type="button"
-                     class="delete-category-btn"
-                     data-action="delete"
-                  >
+                  <button type="button" class="delete-category-btn" data-action="delete">
                      <i class="fa-solid fa-x"></i>
                   </button>
                </div>
@@ -135,25 +101,15 @@
             </div>
 
             <div class="book-card-actions">
-               <button
-                  type="button"
-                  class="rename-book-btn"
-                  data-action="rename"
-               >
+               <button type="button" class="rename-book-btn" data-action="rename">
                   <i class="fa-solid fa-pen-to-square"></i>
                </button>
-               <button
-                  type="button"
-                  class="change-book-category-btn"
-                  data-action="change-category"
-               >
+
+               <button type="button" class="change-book-category-btn" data-action="change-category">
                   <i class="fa-solid fa-right-left"></i>
                </button>
-               <button
-                  type="button"
-                  class="delete-book-btn"
-                  data-action="delete"
-               >
+
+               <button type="button" class="delete-book-btn" data-action="delete">
                   <i class="fa-solid fa-trash"></i>
                </button>
             </div>

@@ -1,17 +1,18 @@
 import { openDatabase } from '../database.ts';
 import { STORES } from '../database.defaults.ts';
-import type { CategoryRecord } from '../categories/category.types..ts';
-import type { BookDraft, BookRecord } from './book.types.ts';
+import type { CategoryRecord } from '../categories/category.types.ts';
+import type { BookRecord } from './book.types.ts';
 
-export async function addBook(bookDraft: BookDraft): Promise<number> {
+export async function addBook(book: Omit<BookRecord, 'id'>): Promise<number> {
    const db = await openDatabase();
 
    return new Promise((resolve, reject) => {
       const store = db.transaction(STORES.BOOKS, 'readwrite').objectStore(
          STORES.BOOKS,
       );
-      const request = store.add(bookDraft) as IDBRequest<number>;
+      const request = store.add(book) as IDBRequest<number>;
       request.onsuccess = () => resolve(request.result);
+
       request.onerror = () => reject(request.error);
    });
 }
@@ -84,19 +85,7 @@ export async function renameBook(id: number, newTitle: string): Promise<void> {
             return;
          }
 
-         if (!book.metadata) {
-            book.metadata = {
-               title: newTitle,
-               creator: 'Unknown Creator',
-               publisher: 'Unknown Publisher',
-               language: 'Unknown',
-               identifier: null,
-               description: null,
-               subject: null,
-            };
-         }
-         else { book.metadata.title = newTitle; }
-
+         (book.metadata ??= {}).title = newTitle;
          store.put(book);
       };
    });

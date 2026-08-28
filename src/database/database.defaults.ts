@@ -1,4 +1,4 @@
-import type { CategoryRecord } from './categories/category.types..ts';
+import type { CategoryRecord } from './categories/category.types.ts';
 import type { UserSettingsRecord } from './user-settings/user-setting.types.ts';
 
 export const DB_NAME = 'Honomi';

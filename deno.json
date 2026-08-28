@@ -1,43 +1,35 @@
 {
-  "$schema": "https://raw.githubusercontent.com/denoland/deno/main/cli/schemas/config-file.v1.json",
-  "tasks": {
-    "dev": "deno run -A npm:vite",
-    "build": "deno run -A npm:vite build",
-    "preview": "deno run -A npm:vite preview",
-    "fmt": "deno fmt",
-    "lint": "deno lint"
-  },
-  "imports": {
-    "@deno/vite-plugin": "npm:@deno/vite-plugin@^2.0.3",
-    "fflate": "npm:fflate@^0.8.3",
-    "typescript": "npm:typescript@^6.0.3",
-    "vite": "npm:vite@^8.2.1"
-  },
-  "nodeModulesDir": "auto",
-  "fmt": {
-    "include": [
-      "src/"
-    ],
-    "useTabs": false,
-    "lineWidth": 120,
-    "indentWidth": 3,
-    "semiColons": true,
-    "operatorPosition": "nextLine",
-    "nextControlFlowPosition": "nextLine",
-    "singleQuote": true,
-    "useBraces": "preferNone",
-    "singleBodyPosition": "sameLine",
-    "proseWrap": "always",
-    "trailingCommas": "onlyMultiLine"
-  },
-  "lint": {
-    "include": [
-      "src/"
-    ],
-    "rules": {
-      "tags": [
-        "recommended"
-      ]
-    }
-  }
+   "$schema": "https://raw.githubusercontent.com/denoland/deno/main/cli/schemas/config-file.v1.json",
+   "tasks": {
+      "dev": "deno run -A npm:vite",
+      "build": "deno run -A npm:vite build",
+      "preview": "deno run -A npm:vite preview"
+   },
+   "imports": {
+      "@deno/vite-plugin": "npm:@deno/vite-plugin@^2.0.3",
+      "@tailwindcss/vite": "npm:@tailwindcss/vite@^4.3.3",
+      "fflate": "npm:fflate@^0.8.3",
+      "tailwindcss": "npm:tailwindcss@^4.3.3",
+      "typescript": "npm:typescript@^6.0.3",
+      "vite": "npm:vite@^8.2.1"
+   },
+   "nodeModulesDir": "auto",
+   "fmt": {
+      "useTabs": false,
+      "lineWidth": 120,
+      "indentWidth": 3,
+      "semiColons": true,
+      "operatorPosition": "nextLine",
+      "nextControlFlowPosition": "nextLine",
+      "singleQuote": true,
+      "useBraces": "preferNone",
+      "singleBodyPosition": "sameLine",
+      "proseWrap": "always",
+      "trailingCommas": "onlyMultiLine"
+   },
+   "lint": {
+      "rules": {
+         "tags": ["recommended"]
+      }
+   }
 }

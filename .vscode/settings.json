@@ -1,32 +1,45 @@
 {
-  "editor.fontFamily": "Cascadia Code, Fira Code, monospace",
-  "cSpell.ignorePaths": [
-    "tests/**",
-  ],
-  "cSpell.words": [
-    "Cascadia",
-    "denoland",
-    "dtbncx",
-    "esbenp",
-    "Fira",
-    "idref",
-    "itemref",
-    "maxlength",
-    "OEBPS",
-    "parsererror",
-    "vite"
-  ],
-  "deno.enable": true,
-  "deno.lint": true,
-  "editor.formatOnSave": true,
-  "[typescript]": {
-    "editor.defaultFormatter": "denoland.vscode-deno"
-  },
-  "[javascript]": {
-    "editor.defaultFormatter": "denoland.vscode-deno"
-  },
-  "[html]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "C_Cpp.errorSquiggles": "disabled"
+   "editor.fontFamily": "Cascadia Code, Fira Code, monospace",
+   "editor.formatOnSave": true,
+   "cSpell.ignorePaths": ["tests/**"],
+   "cSpell.words": [
+      "Cascadia",
+      "denoland",
+      "dtbncx",
+      "esbenp",
+      "fflate",
+      "Fira",
+      "Honomi",
+      "idref",
+      "itemref",
+      "maxlength",
+      "OEBPS",
+      "parsererror",
+      "rootfile",
+      "vite"
+   ],
+   "eslint.enable": false,
+   "deno.enable": true,
+   "deno.lint": true,
+   "editor.insertSpaces": true,
+   "editor.tabSize": 3,
+
+   "[typescript]": {
+      "editor.defaultFormatter": "denoland.vscode-deno"
+   },
+   "[javascript]": {
+      "editor.defaultFormatter": "denoland.vscode-deno"
+   },
+   "[html]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+   },
+   "[json]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+   },
+   "[jsonc]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+   },
+   "[css]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+   }
 }

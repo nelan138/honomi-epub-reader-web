@@ -6,8 +6,7 @@ import bindBookImportEvents from './pages/bookshelf/features/import-books.ts';
 import bindCategoryEvents from './pages/bookshelf/events/category-events.ts';
 import bindBookCardEvents from './pages/bookshelf/events/book-card-events.ts';
 
-import '../styles/bookshelf.css';
-import '../styles/forms.css';
+import './styles.css';
 import renderBookshelf from './pages/bookshelf/features/render-bookshelf.ts';
 
 await openDatabase();

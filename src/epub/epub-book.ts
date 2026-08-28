@@ -15,7 +15,7 @@ import type {
  */
 export class EpubBook {
    private epubFile: Blob;
-   private epubData: Record<ResourcePath, Uint8Array> | null = null;
+   private epubData?: Record<ResourcePath, Uint8Array>;
 
    // Epub Data
    private version!: SupportedEpubVersion;
@@ -25,8 +25,8 @@ export class EpubBook {
    private spine!: SpineItem[];
    private navigation!: NavigationItem[];
 
-   private metadata!: Metadata;
-   private cover: Blob | null = null;
+   private metadata?: Metadata;
+   private cover?: Blob;
 
    constructor(file: File) {
       this.epubFile = file;
@@ -151,31 +151,31 @@ export class EpubBook {
       return this.spine;
    }
 
-   getMetadata(): Metadata {
+   getMetadata(): Metadata | undefined {
       if (this.metadata) return this.metadata;
 
       const opfDocument = this.#getXmlDocument(this.getOpfPath());
 
       const metadataElement = opfDocument.getElementsByTagName('metadata')[0];
-      if (!metadataElement) throw new Error('EPUB package does not contain metadata');
+      if (!metadataElement) return undefined;
 
       this.metadata = {
-         title: this.#getElementText(metadataElement, 'title'),
-         creator: this.#getElementText(metadataElement, 'creator'),
-         language: this.#getElementText(metadataElement, 'language'),
-         identifier: this.#getElementText(metadataElement, 'identifier'),
-         publisher: this.#getElementText(metadataElement, 'publisher'),
-         description: this.#getElementText(metadataElement, 'description'),
+         title: this.#getElementText(metadataElement, 'title') || undefined,
+         creator: this.#getElementText(metadataElement, 'creator') || undefined,
+         language: this.#getElementText(metadataElement, 'language') || undefined,
+         identifier: this.#getElementText(metadataElement, 'identifier') || undefined,
+         publisher: this.#getElementText(metadataElement, 'publisher') || undefined,
+         description: this.#getElementText(metadataElement, 'description') || undefined,
          subject: Array.from(
             metadataElement.getElementsByTagNameNS('*', 'subject'),
             (element) => element.textContent?.trim() ?? '',
-         ).filter(Boolean),
+         ).filter(Boolean) || undefined,
       };
 
       return this.metadata;
    }
 
-   getCover(): Blob | null {
+   getCover(): Blob | undefined {
       if (this.cover) return this.cover;
 
       const manifest = this.getManifest();
@@ -193,11 +193,11 @@ export class EpubBook {
          if (coverId) coverItem = manifest.get(coverId);
       }
 
-      if (!coverItem) return null;
+      if (!coverItem) return undefined;
 
       if (!this.epubData) throw new Error('EPUB data is not loaded');
       const coverData = this.epubData[coverItem.resolvedPath];
-      if (!coverData) return null;
+      if (!coverData) return undefined;
 
       this.cover = new Blob([coverData as BlobPart], { type: coverItem.mediaType });
       return this.cover;
@@ -330,7 +330,7 @@ export class EpubBook {
                label,
                href,
                resolvedPath,
-               fragment: fragment || null,
+               fragment: fragment,
                children: [],
             };
 
@@ -369,7 +369,7 @@ export class EpubBook {
                label,
                href: contentSrc,
                resolvedPath,
-               fragment: fragment || null,
+               fragment: fragment,
                children: [],
             };
 

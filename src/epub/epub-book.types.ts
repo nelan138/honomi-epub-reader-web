@@ -19,16 +19,17 @@ export type NavigationItem = {
    label: string;
    href: Path;
    resolvedPath: ResourcePath;
-   fragment: string | null; // * Optional fragment identifier (e.g., #section1)
-   children: NavigationItem[] | [];
+   children: NavigationItem[];
+
+   fragment?: string; // * Optional fragment identifier (e.g., #section1)
 };
 
 export type Metadata = {
-   title: string;
-   creator: string;
-   publisher: string;
-   language: string;
-   identifier: string | null;
-   description: string | null;
-   subject: string[] | null;
+   title?: string;
+   creator?: string;
+   publisher?: string;
+   language?: string;
+   identifier?: string;
+   description?: string;
+   subject?: string[];
 };
