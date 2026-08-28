@@ -18,32 +18,30 @@ function renderBookCard(record: BookRecord): HTMLElement {
    const clone = template.content.cloneNode(true) as DocumentFragment;
 
    const container = clone.querySelector('.book-card')! as HTMLElement;
-   container.setAttribute('data-book-id', record.id?.toString() ?? '');
+   container.setAttribute('data-book-id', record.id.toString());
+
+   // todo: replace with actual progress value later
+   const progressBarElement = container.querySelector('.progress-bar')! as HTMLElement;
+   progressBarElement.style.setProperty('--progress', `${Math.random() * 100}%`);
 
    const metadata = record.metadata;
-   if (metadata) {
-      const title = normalizeTitle(metadata.title);
+   if (metadata === undefined) return container;
 
-      const cover = record.cover;
-      const coverUrl = cover ? URL.createObjectURL(cover) : `cover of ${title} not found`;
-      const creator = metadata.creator;
-      const language = metadata.language;
+   const normalizedTitle = normalizeTitle(metadata.title);
+   const coverUrl = record.cover ? URL.createObjectURL(record.cover) : null;
 
-      const coverElement = container.querySelector('.cover-wrapper > img')! as HTMLImageElement;
+   const coverElement = container.querySelector('.cover-wrapper > img')! as HTMLImageElement;
+   if (coverUrl) {
       coverElement.src = coverUrl;
-      coverElement.setAttribute('alt', `Book cover of ${title}`);
-      coverElement.setAttribute('title', title);
-
-      const metadataElement = container.querySelector('.metadata')!;
-
-      metadataElement.querySelector('.title')!.textContent = title;
-      metadataElement.querySelector('.creator')!.textContent = creator ?? 'Unknown';
-      metadataElement.querySelector('.language')!.textContent = language ?? 'Unknown';
+      coverElement.onload = () => URL.revokeObjectURL(coverUrl);
    }
 
-   const progressBarElement = container.querySelector('.progress-bar')! as HTMLElement;
-   // todo: replace with actual progress value later
-   progressBarElement.style.setProperty('--progress', `${Math.random() * 100}%`);
+   coverElement.setAttribute('alt', `Book cover of ${normalizedTitle}`);
+
+   const metadataElement = container.querySelector('.metadata')!;
+   metadataElement.querySelector('.title')!.textContent = normalizedTitle;
+   metadataElement.querySelector('.creator')!.textContent = metadata.creator ?? 'Unknown';
+   metadataElement.querySelector('.language')!.textContent = metadata.language ?? 'Unknown';
 
    return container;
 }
@@ -92,16 +90,16 @@ function renderCategory(categoryRecord: CategoryRecord, bookRecords: BookRecord[
    // * Buttons & Actions Availability
 
    if (categoryName === defaultCategory.name) {
-      categoryActionsElement.querySelector('.rename-category-btn')?.remove();
-      categoryActionsElement.querySelector('.delete-category-btn')?.remove();
-      categoryActionsElement.querySelector('.move-category-up-btn')?.remove();
-      categoryActionsElement.querySelector('.move-category-down-btn')?.remove();
+      categoryActionsElement.querySelector('.rename-category-btn')!.remove();
+      categoryActionsElement.querySelector('.delete-category-btn')!.remove();
+      categoryActionsElement.querySelector('.move-category-up-btn')!.remove();
+      categoryActionsElement.querySelector('.move-category-down-btn')!.remove();
    }
 
    const isExpanded = categoryRecord.expanded;
 
-   const expandBtn = categoryActionsElement.querySelector('.expand-category-btn')! as HTMLElement;
-   const collapseBtn = categoryActionsElement.querySelector('.collapse-category-btn')! as HTMLElement;
+   const expandBtn = categoryActionsElement.querySelector('.expand-category-btn') as HTMLElement;
+   const collapseBtn = categoryActionsElement.querySelector('.collapse-category-btn') as HTMLElement;
 
    expandBtn.hidden = isExpanded;
    collapseBtn.hidden = !isExpanded;
@@ -134,6 +132,7 @@ export default async function renderBookshelf(searchText = ''): Promise<void> {
    }
    categories = categories.sort((a, b) => (a.displayOrder ?? Infinity) - (b.displayOrder ?? Infinity));
 
+   const userPreferences = await getUserPreferences();
    const categoryElementArray = [];
    for (const category of categories) {
       let books: BookRecord[] = [];
@@ -170,7 +169,6 @@ export default async function renderBookshelf(searchText = ''): Promise<void> {
          console.error(`Error fetching books for category ${category.name}:`, error);
       }
 
-      const userPreferences = await getUserPreferences();
       books = sortAndFilterBooks(books, searchText, userPreferences.titleSortOrder);
 
       const categoryElement = renderCategory(category, books);

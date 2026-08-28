@@ -1,53 +1,38 @@
 import { openDatabase } from '../database.ts';
 import { STORES } from '../database.defaults.ts';
-import type { CategoryRecord, CategoryState, DisplayOrders } from './category.types.ts';
-
-// * Lower means higher in the list. The default category is always at the top (displayOrder = 0).
-async function getDisplayOrders(): Promise<DisplayOrders> {
-   const categories = await getAllCategories();
-
-   return categories.length === 0 ? { min: 0, max: 0 } : {
-      min: categories.reduce(
-         (min, c) => Math.min(min, c.displayOrder ?? 0),
-         Infinity,
-      ),
-      max: categories.reduce(
-         (max, c) => Math.max(max, c.displayOrder ?? 0),
-         -Infinity,
-      ),
-   };
-}
+import type { CategoryRecord, CategoryState } from './category.types.ts';
 
 /**
  * Adds a new category to the database.
  * Returns ID if a category with the same name already exists.
  */
-export async function addCategory(name: string): Promise<number> {
+export async function addCategory(name: string): Promise<void> {
    const db = await openDatabase();
-   const { max } = await getDisplayOrders();
 
    return new Promise((resolve, reject) => {
       const transaction = db.transaction(STORES.CATEGORIES, 'readwrite');
-      transaction.oncomplete = () => resolve(categoryId!);
+      transaction.oncomplete = () => resolve();
       transaction.onerror = () => reject(transaction.error);
-
+      
       const store = transaction.objectStore(STORES.CATEGORIES);
-      const getRequest = store.index('by_name').get(name) as IDBRequest<CategoryRecord | undefined>;
-
-      let categoryId: number | null = null;
-      getRequest.onsuccess = () => {
-         const category = getRequest.result;
-         if (category === undefined) { // not exist
-            const displayOrder = max + 1;
-            const record: Omit<CategoryRecord, 'id'> = {
-               name,
-               expanded: true,
-               displayOrder,
-            }
-            const addRequest = store.add(record) as IDBRequest<number>;
-            addRequest.onsuccess = () => categoryId = addRequest.result;
+      const request = store.getAll() as IDBRequest<CategoryRecord[]>;
+      request.onsuccess = () => {
+         const categories = request.result;
+         const existingCategory = categories.find((category) => category.name === name);
+         if (existingCategory) {
+            resolve();
+            return;
          }
-         else { categoryId = category.id!; }
+
+         const lastDisplayOrder = categories.reduce((max, category) => Math.max(max, category.displayOrder), 0);
+         const newCategory: Omit<CategoryRecord, 'id'> = {
+            name: name,
+            displayOrder: lastDisplayOrder + 1,
+            expanded: true,
+         };
+
+         const addRequest = store.add(newCategory);
+         addRequest.onsuccess = () => resolve();
       };
    });
 }
@@ -149,19 +134,23 @@ export async function renameCategory(id: number, newCategoryName: string): Promi
       transaction.onerror = () => reject(transaction.error);
 
       const store = transaction.objectStore(STORES.CATEGORIES);
-      const getRequest = store.get(id) as IDBRequest<
-         CategoryRecord | undefined
-      >;
-      getRequest.onsuccess = () => {
-         const category = getRequest.result;
+      const getRequestById = store.get(id) as IDBRequest<CategoryRecord | undefined>;
+
+      getRequestById.onsuccess = () => {
+         const category = getRequestById.result;
          if (!category) {
             reject(new Error(`Category not found (ID: ${id})`));
             transaction.abort();
             return;
          }
 
-         category.name = newCategoryName;
-         store.put(category);
+         const getRequestByName = store.index('by_name').get(newCategoryName) as IDBRequest<CategoryRecord | undefined>;
+         getRequestByName.onsuccess = () => {
+            if (getRequestByName.result === undefined) {
+               category.name = newCategoryName;
+               store.put(category);
+            }
+         };
       };
    });
 }

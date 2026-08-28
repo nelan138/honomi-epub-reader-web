@@ -3,7 +3,7 @@ import { STORES } from '../database.defaults.ts';
 import type { CategoryRecord } from '../categories/category.types.ts';
 import type { BookRecord } from './book.types.ts';
 
-export async function addBook(book: Omit<BookRecord, 'id'>): Promise<number> {
+export async function addBook(book: Omit<BookRecord, 'id'>): Promise<void> {
    const db = await openDatabase();
 
    return new Promise((resolve, reject) => {
@@ -11,7 +11,7 @@ export async function addBook(book: Omit<BookRecord, 'id'>): Promise<number> {
          STORES.BOOKS,
       );
       const request = store.add(book) as IDBRequest<number>;
-      request.onsuccess = () => resolve(request.result);
+      request.onsuccess = () => resolve();
 
       request.onerror = () => reject(request.error);
    });
@@ -56,7 +56,7 @@ export async function getBooksByCategory(id: number): Promise<BookRecord[]> {
    const db = await openDatabase();
 
    return new Promise((resolve, reject) => {
-      const store = db.transaction([STORES.BOOKS, STORES.CATEGORIES], 'readonly')
+      const store = db.transaction([STORES.BOOKS], 'readonly')
          .objectStore(STORES.BOOKS);
 
       const index = store.index('by_category');

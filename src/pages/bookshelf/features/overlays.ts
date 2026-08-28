@@ -5,12 +5,7 @@ export const STRING_FORM_RULES = {
    pattern: /^[^\p{C}/<>\\]+$/u, // no control chars or common injection chars
 };
 
-type FormType =
-   | 'book-name'
-   | 'category-name'
-   | 'category-selection'
-   | 'confirmation'
-   | 'search-book';
+type FormType = 'book-name' | 'category-name' | 'category-selection' | 'confirmation' | 'search-book';
 export async function openFormFor(type: FormType): Promise<string | boolean | null> {
    switch (type) {
       case 'book-name':

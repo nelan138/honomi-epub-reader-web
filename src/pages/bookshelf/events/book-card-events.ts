@@ -5,8 +5,8 @@ import renderBookshelf from '../features/render-bookshelf.ts';
 import { openFormFor } from '../features/overlays.ts';
 
 async function handleBookCardAction(action: string | null, clickedBookCard: HTMLElement): Promise<void> {
-   const bookId = Number(clickedBookCard.getAttribute('data-book-id'));
-   if (!Number.isSafeInteger(bookId)) throw new Error('Invalid book ID');
+   const bookId = Number(clickedBookCard.getAttribute('data-book-id')) || undefined;
+   if (bookId === undefined) throw new Error("Cannot find book id");
 
    switch (action) {
       case 'rename': {

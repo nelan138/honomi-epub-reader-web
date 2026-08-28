@@ -5,7 +5,7 @@ import { addBook } from '@src/database/books/book-repository.ts';
 import { getCategoryByName } from '@src/database/categories/category-repository.ts';
 
 import renderBookshelf from './render-bookshelf.ts';
-import type { BookRecord } from '../../../database/books/book.types.ts';
+import type { BookRecord } from '@src/database/books/book.types.ts';
 
 export default function bindBookImportEvents() {
    const importBtn = document.getElementById('import-book-btn');
@@ -19,11 +19,10 @@ export default function bindBookImportEvents() {
       const files = fileInput.files;
       if (!files || files.length === 0) return;
 
+      const categoryId = (await getCategoryByName(defaultCategory.name)).id;
+
       for (const file of files) {
          if (!file) continue;
-
-         const categoryId = (await getCategoryByName(defaultCategory.name)).id;
-         if (categoryId === undefined) throw new Error('Default category not found');
 
          const epub = new EpubBook(file);
          await epub.parse();

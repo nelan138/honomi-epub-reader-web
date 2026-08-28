@@ -29,10 +29,8 @@ function createSchemas(db: IDBDatabase): void {
 
    // * USER PREFERENCES: Only one record exists
    if (!db.objectStoreNames.contains(STORES.USER_SETTINGS)) db.createObjectStore(STORES.USER_SETTINGS);
-
-   console.log('Database schemas created or already exist.');
 }
-
+   
 let database: IDBDatabase | null = null;
 // * The database connection is cached in the `database`
 export function openDatabase(): Promise<IDBDatabase> {
