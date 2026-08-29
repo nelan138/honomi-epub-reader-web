@@ -21,7 +21,7 @@ async function handleBookCardAction(action: string | null, clickedBookCard: HTML
          const selectedCategory = await openFormFor('category-selection') as string;
          if (selectedCategory) {
             const category = await getCategoryByName(selectedCategory);
-            await changeBookCategory(bookId, category.id!);
+            await changeBookCategory(bookId, category.id);
             await renderBookshelf();
          }
          break;

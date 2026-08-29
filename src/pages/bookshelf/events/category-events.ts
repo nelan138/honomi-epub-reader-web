@@ -8,9 +8,9 @@ import renderBookshelf from '../features/render-bookshelf.ts';
 import { openFormFor } from '../features/overlays.ts';
 
 async function handleCategoryAction(action: string | null, clickedCategory: HTMLElement): Promise<void> {
-   const categoryId = Number(clickedCategory?.getAttribute('data-category-id'));
-   if (!Number.isSafeInteger(categoryId)) throw new Error('Invalid category ID');
-
+   const categoryId = Number(clickedCategory.getAttribute('data-category-id'));
+   if (isNaN(categoryId)) throw new Error("Cannot find category id");
+   
    switch (action) {
       case 'expand':
       case 'collapse': {
@@ -21,9 +21,7 @@ async function handleCategoryAction(action: string | null, clickedCategory: HTML
       }
       case 'rename': {
          const newCategoryName = await openFormFor('category-name') as string;
-         const clickedCategoryName = clickedCategory.querySelector('.category-name')
-            ?.textContent;
-
+         const clickedCategoryName = clickedCategory.getAttribute('data-category-name');
          if (newCategoryName && newCategoryName !== clickedCategoryName) {
             await renameCategory(categoryId, newCategoryName);
             await renderBookshelf();

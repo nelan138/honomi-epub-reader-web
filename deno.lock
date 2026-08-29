@@ -4,6 +4,8 @@
     "npm:@deno/vite-plugin@^2.0.3": "2.0.3_vite@8.2.1",
     "npm:@tailwindcss/vite@^4.3.3": "4.3.3_vite@8.2.1",
     "npm:fflate@~0.8.3": "0.8.3",
+    "npm:prettier-plugin-tailwindcss@~0.8.1": "0.8.1_prettier@3.9.6",
+    "npm:prettier@^3.9.6": "3.9.6",
     "npm:tailwindcss@^4.3.3": "4.3.3",
     "npm:typescript@^6.0.3": "6.0.3",
     "npm:vite@*": "8.2.1",
@@ -453,6 +455,16 @@
         "source-map-js"
       ]
     },
+    "prettier-plugin-tailwindcss@0.8.1_prettier@3.9.6": {
+      "integrity": "sha512-iaFMYqDsE4ffdDkn5qup0j5f2aCEBFZrdrZnvu9QKTlWx/iGPeQ4HHu7b7fCPMxeo9nwQBiOAh2nSypdFYWJkw==",
+      "dependencies": [
+        "prettier"
+      ]
+    },
+    "prettier@3.9.6": {
+      "integrity": "sha512-OpN0zzVdiaiAhxpuuj5efpIS4sY9j7bY6uR5mnj5yPzGkdkjNKSJeUThPb60Jw29QuAZgA4o+/iB49kFiaBX6g==",
+      "bin": true
+    },
     "rolldown@1.2.4": {
       "integrity": "sha512-rSr7irW0K7QRWzjdJXqZowkcRdDtjRduh43rBltnVKd0VFq839l1lJoDvGJb6gl7+4rTTCrPWu+YfujUL8Ug7w==",
       "dependencies": [
@@ -517,6 +529,8 @@
       "npm:@deno/vite-plugin@^2.0.3",
       "npm:@tailwindcss/vite@^4.3.3",
       "npm:fflate@~0.8.3",
+      "npm:prettier-plugin-tailwindcss@~0.8.1",
+      "npm:prettier@^3.9.6",
       "npm:tailwindcss@^4.3.3",
       "npm:typescript@^6.0.3",
       "npm:vite@^8.2.1"

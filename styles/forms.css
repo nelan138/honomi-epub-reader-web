@@ -19,13 +19,21 @@
 }
 
 @keyframes overlay-in {
-   from { opacity: 0; }
-   to   { opacity: 1; }
+   from {
+      opacity: 0;
+   }
+   to {
+      opacity: 1;
+   }
 }
 
 @keyframes overlay-out {
-   from { opacity: 1; }
-   to   { opacity: 0; }
+   from {
+      opacity: 1;
+   }
+   to {
+      opacity: 0;
+   }
 }
 
 /* ─── Modal ───────────────────────────────────────────────────── */
@@ -54,19 +62,31 @@
 }
 
 @keyframes modal-in {
-   from { opacity: 0; transform: translateY(6px) scale(0.98); }
-   to   { opacity: 1; transform: translateY(0)   scale(1);    }
+   from {
+      opacity: 0;
+      transform: translateY(6px) scale(0.98);
+   }
+   to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+   }
 }
 
 @keyframes modal-out {
-   from { opacity: 1; transform: translateY(0)   scale(1);    }
-   to   { opacity: 0; transform: translateY(6px) scale(0.98); }
+   from {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+   }
+   to {
+      opacity: 0;
+      transform: translateY(6px) scale(0.98);
+   }
 }
 
 /* ─── Title ───────────────────────────────────────────────────── */
 .form-title {
    color: var(--text-primary);
-   font-family: "Georgia", serif;
+   font-family: 'Georgia', serif;
    font-size: 15px;
    font-weight: normal;
    line-height: 1.3;
@@ -107,9 +127,16 @@
 }
 
 @keyframes shake {
-   0%, 100% { transform: translateX(0); }
-   25%       { transform: translateX(-4px); }
-   75%       { transform: translateX(4px); }
+   0%,
+   100% {
+      transform: translateX(0);
+   }
+   25% {
+      transform: translateX(-4px);
+   }
+   75% {
+      transform: translateX(4px);
+   }
 }
 
 /* ─── Option list ─────────────────────────────────────────────── */
@@ -186,30 +213,30 @@
 
 .form-btn--cancel:hover {
    background: var(--card);
-   border-color: #C4B8A8;
+   border-color: #c4b8a8;
    color: var(--text-primary);
 }
 
 .form-btn--submit {
    background: var(--sage);
    border-color: var(--sage);
-   color: #FFFDF7;
+   color: #fffdf7;
 }
 
 .form-btn--submit:hover {
-   background: #60755A;
-   border-color: #60755A;
+   background: #60755a;
+   border-color: #60755a;
 }
 
 .form-btn--danger {
    background: var(--terracotta);
    border-color: var(--terracotta);
-   color: #FFFDF7;
+   color: #fffdf7;
 }
 
 .form-btn--danger:hover {
-   background: #A05A44;
-   border-color: #A05A44;
+   background: #a05a44;
+   border-color: #a05a44;
 }
 
 .form-btn:focus-visible {
@@ -234,4 +261,63 @@
       max-width: calc(100% - 32px);
       padding: 20px;
    }
+}
+
+.form-input-wrapper {
+   position: relative;
+   display: flex;
+   flex-direction: column;
+   gap: 4px;
+}
+
+.form-char-count {
+   align-self: flex-end;
+   color: var(--color-muted);
+   font-family: var(--font-ui);
+   font-size: 11px;
+   transition: color 0.15s ease;
+}
+
+.form-char-count--near {
+   color: var(--color-gold);
+}
+
+.form-char-count--over {
+   color: var(--color-terracotta);
+}
+
+.form-error-msg {
+   min-height: 1em;
+   color: var(--color-terracotta);
+   font-family: var(--font-ui);
+   font-size: 12px;
+}
+
+.form-input-wrapper {
+   position: relative;
+   display: flex;
+   flex-direction: column;
+   gap: 4px;
+}
+
+.form-char-count {
+   align-self: flex-end;
+   color: var(--text-muted);
+   font-family: system-ui, sans-serif;
+   font-size: 11px;
+}
+
+.form-char-count--near {
+   color: var(--gold);
+}
+
+.form-char-count--over {
+   color: var(--terracotta);
+}
+
+.form-error-msg {
+   min-height: 1em;
+   color: var(--terracotta);
+   font-family: system-ui, sans-serif;
+   font-size: 12px;
 }

@@ -21,8 +21,8 @@ function renderBookCard(record: BookRecord): HTMLElement {
    container.setAttribute('data-book-id', record.id.toString());
 
    // todo: replace with actual progress value later
-   const progressBarElement = container.querySelector('.progress-bar')! as HTMLElement;
-   progressBarElement.style.setProperty('--progress', `${Math.random() * 100}%`);
+   // const progressBarElement = container.querySelector('.progress-bar')! as HTMLElement;
+   // progressBarElement.style.setProperty('--progress', `${Math.random() * 100}%`);
 
    const metadata = record.metadata;
    if (metadata === undefined) return container;
@@ -34,6 +34,7 @@ function renderBookCard(record: BookRecord): HTMLElement {
    if (coverUrl) {
       coverElement.src = coverUrl;
       coverElement.onload = () => URL.revokeObjectURL(coverUrl);
+      coverElement.onerror = () => URL.revokeObjectURL(coverUrl);
    }
 
    coverElement.setAttribute('alt', `Book cover of ${normalizedTitle}`);
@@ -88,7 +89,6 @@ function renderCategory(categoryRecord: CategoryRecord, bookRecords: BookRecord[
    categoryHeaderElement.querySelector('h2')!.textContent = categoryName;
 
    // * Buttons & Actions Availability
-
    if (categoryName === defaultCategory.name) {
       categoryActionsElement.querySelector('.rename-category-btn')!.remove();
       categoryActionsElement.querySelector('.delete-category-btn')!.remove();
@@ -138,32 +138,32 @@ export default async function renderBookshelf(searchText = ''): Promise<void> {
       let books: BookRecord[] = [];
       try {
          books = await getBooksByCategory(category.id!);
-         // for (const book of books) {
-         //    console.log('Manifest of', book.metadata.title);
-         //    console.table(
-         //       [...book.manifest.entries()].map(([id, item]) => ({
-         //          id,
-         //          href: item.href,
-         //          resolvedPath: item.resolvedPath,
-         //          mediaType: item.mediaType,
-         //          properties: item.properties.join(', '),
-         //       })),
-         //    );
+         for (const book of books) {
+            console.log('Manifest of', book.metadata!.title);
+            console.table(
+               [...book.manifest.entries()].map(([id, item]) => ({
+                  id,
+                  href: item.href,
+                  resolvedPath: item.resolvedPath,
+                  mediaType: item.mediaType,
+                  properties: item.properties.join(', '),
+               })),
+            );
 
-         //    console.log('Navigation of', book.metadata.title);
-         //    console.table(
-         //       book.navigation.map((item) => ({
-         //          label: item.label,
-         //          href: item.href,
-         //          resolvedPath: item.resolvedPath,
-         //          fragment: item.fragment,
-         //          childCount: item.children.length,
-         //       })),
-         //    );
+            console.log('Navigation of', book.metadata!.title);
+            console.table(
+               book.navigation.map((item) => ({
+                  label: item.label,
+                  href: item.href,
+                  resolvedPath: item.resolvedPath,
+                  fragment: item.fragment,
+                  childCount: item.children.length,
+               })),
+            );
 
-         //    console.log('Spine of', book.metadata.title);
-         //    console.table(book.spine);
-         // }
+            console.log('Spine of', book.metadata!.title);
+            console.table(book.spine);
+         }
       }
       catch (error) {
          console.error(`Error fetching books for category ${category.name}:`, error);

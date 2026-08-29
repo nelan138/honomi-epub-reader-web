@@ -7,12 +7,7 @@ import { openFormFor } from '../features/overlays.ts';
 export default function bindBookshelfHeaderEvents() {
    document.getElementById('open-github-repo-btn')!.addEventListener(
       'click',
-      () => {
-         globalThis.open(
-            'https://github.com/nelan138/honomi-epub-reader-web',
-            '_blank',
-         );
-      },
+      () => globalThis.open('https://github.com/nelan138/honomi-epub-reader-web', '_blank'),
    );
 
    document.getElementById('find-book-btn')!.addEventListener(
@@ -52,10 +47,7 @@ export default function bindBookshelfHeaderEvents() {
          userPreferences.theme = userPreferences.theme === 'light' ? 'dark' : 'light';
 
          await setUserPreferences(userPreferences);
-         document.documentElement.setAttribute(
-            'data-theme',
-            userPreferences.theme,
-         );
+         document.documentElement.setAttribute('data-theme', userPreferences.theme);
       },
    );
 

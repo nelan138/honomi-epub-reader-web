@@ -1,5 +1,6 @@
 import { openDatabase } from '../database.ts';
 import { STORES } from '../database.defaults.ts';
+import { defaultCategory } from '../database.defaults.ts';
 import type { CategoryRecord, CategoryState } from './category.types.ts';
 
 /**
@@ -13,7 +14,7 @@ export async function addCategory(name: string): Promise<void> {
       const transaction = db.transaction(STORES.CATEGORIES, 'readwrite');
       transaction.oncomplete = () => resolve();
       transaction.onerror = () => reject(transaction.error);
-      
+
       const store = transaction.objectStore(STORES.CATEGORIES);
       const request = store.getAll() as IDBRequest<CategoryRecord[]>;
       request.onsuccess = () => {
@@ -94,17 +95,12 @@ export async function deleteCategory(id: number): Promise<void> {
    const db = await openDatabase();
 
    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(
-         [STORES.CATEGORIES, STORES.BOOKS],
-         'readwrite',
-      );
+      const transaction = db.transaction([STORES.CATEGORIES, STORES.BOOKS], 'readwrite');
       transaction.oncomplete = () => resolve();
       transaction.onerror = () => reject(transaction.error);
 
       const categoryStore = transaction.objectStore(STORES.CATEGORIES);
-      const getCategoryRequest = categoryStore.get(id) as IDBRequest<
-         CategoryRecord | undefined
-      >;
+      const getCategoryRequest = categoryStore.get(id) as IDBRequest<CategoryRecord | undefined>;
       getCategoryRequest.onsuccess = () => {
          const category = getCategoryRequest.result;
          if (!category) {
@@ -112,13 +108,15 @@ export async function deleteCategory(id: number): Promise<void> {
             transaction.abort();
             return;
          }
+         if (category.id === defaultCategory.id) {
+            reject(new Error('Cannot delete the default category'));
+            transaction.abort();
+            return;
+         }
          const bookStore = transaction.objectStore(STORES.BOOKS);
-         const getBooksRequest = bookStore.index('by_category').getAllKeys(
-            id,
-         ) as IDBRequest<number[]>;
+         const getBooksRequest = bookStore.index('by_category').getAllKeys(id) as IDBRequest<number[]>;
          getBooksRequest.onsuccess = () => {
             for (const bookId of getBooksRequest.result) bookStore.delete(bookId);
-
             categoryStore.delete(id);
          };
       };

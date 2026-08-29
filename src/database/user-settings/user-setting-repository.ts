@@ -12,11 +12,8 @@ export async function getUserPreferences(): Promise<UserSettingsRecord> {
       );
       const request = store.get(USER_SETTINGS_KEY) as IDBRequest<UserSettingsRecord>;
       request.onsuccess = () => {
-         if (request.result) {
-            resolve(request.result);
-            return;
-         }
-         else { reject(new Error('User preferences not found')); }
+         if (request.result) resolve(request.result);
+         else reject(new Error('User preferences not found'));
       };
 
       request.onerror = () => reject(request.error);
