@@ -1,40 +1,35 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
-import Category from './components/bookshelf/Category.vue';
-import Header from './components/bookshelf/Header.vue';
-import { addCategory, getCategories } from './services/database/categories/category-repository.js';
-import type { CategoryRecord } from './services/database/categories/category.types.js';
-import type { BookRecord } from './services/database/books/book.types.js';
-import { addBook, getBooks } from './services/database/books/book-repository.js';
-import BookCard from './components/bookshelf/BookCard.vue';
-import { EpubBook } from './services/epub/epub-book.js';
-import { defaultCategory } from './services/database/database.defaults.js';
-
-const categories = ref<CategoryRecord[]>([]);
-const books = ref<BookRecord[]>([]);
+import Category from './components/Category.vue';
+import Header from './components/Header.vue';
+import BookCard from './components/BookCard.vue';
+import {
+   addCategoryToDB,
+   renameCategoryInDB,
+   changeCategoryStateInDB,
+   getCategoriesFromDB,
+   deleteCategoryFromDB,
+} from '@src/services/database/categoryRepo';
+import type { CategoryRecord } from '@src/types/category';
+import type { BookRecord } from '@src/types/book';
+import {
+   addBookToDB,
+   changeBookCategoryInDB,
+   deleteBookFromDB,
+   getBooksFromDB,
+   renameBookInDB,
+} from '@src/services/database/bookRepo';
+import { EpubBook } from './services/epub/epub.js';
+import { defaultCategory } from './constants/database.js';
 
 type Theme = 'dark' | 'light';
-const theme = ref<Theme>('dark');
-
-onMounted(async () => {
-   const savedTheme = (localStorage.getItem('theme') ?? 'dark') as Theme;
-   theme.value = savedTheme;
-   localStorage.setItem('theme', theme.value);
-   document.documentElement.classList.toggle('dark', theme.value === 'dark');
-
-   categories.value = await getCategories();
-   books.value = await getBooks();
-});
-
-function toggleTheme() {
-   theme.value = theme.value === 'dark' ? 'light' : 'dark';
-   localStorage.setItem('theme', theme.value);
-   document.documentElement.classList.toggle('dark', theme.value === 'dark');
-}
-
 type CategoryWithBooks = CategoryRecord & {
    books: BookRecord[];
 };
+
+const books = ref<BookRecord[]>([]);
+const categories = ref<CategoryRecord[]>([]);
+const theme = ref<Theme>('dark');
 
 const categoriesWithBooks = computed<CategoryWithBooks[]>(() => {
    return categories.value.map((category) => ({
@@ -44,7 +39,32 @@ const categoriesWithBooks = computed<CategoryWithBooks[]>(() => {
 });
 
 async function updateBooks() {
-   books.value = await getBooks();
+   books.value = await getBooksFromDB();
+}
+
+async function updateCategories() {
+   categories.value = await getCategoriesFromDB();
+}
+
+onMounted(async () => {
+   let savedTheme = localStorage.getItem('theme') as Theme;
+   savedTheme = savedTheme === 'light' || savedTheme === 'dark' ? savedTheme : 'dark';
+
+   theme.value = savedTheme;
+   applyTheme(theme.value);
+
+   categories.value = await getCategoriesFromDB();
+   books.value = await getBooksFromDB();
+});
+
+function applyTheme(currentTheme: Theme) {
+   localStorage.setItem('theme', currentTheme);
+   document.documentElement.classList.toggle('dark', currentTheme === 'dark');
+}
+
+function toggleTheme() {
+   theme.value = theme.value === 'dark' ? 'light' : 'dark';
+   applyTheme(theme.value);
 }
 
 async function importEpubFiles(files: FileList) {
@@ -65,23 +85,103 @@ async function importEpubFiles(files: FileList) {
          metadata: epubBook.getMetadata(),
          cover: epubBook.getCover(),
       };
-      addBook(record);
+      await addBookToDB(record);
    }
-
    await updateBooks();
 }
 
-async function addNewCategory() {
-   const input = prompt('Enter category name', 'idk');
+function categoryNameExists(name: string, ignoredId?: number): boolean {
+   const normalizedName = name.trim().toLocaleLowerCase();
 
-   if (input) {
-      const categoryName = input.trim();
-      const exists = categories.value.some((c) => c.name === categoryName);
+   return categories.value.some(
+      (category) => category.id !== ignoredId && category.name.trim().toLocaleLowerCase() === normalizedName
+   );
+}
 
-      if (!exists && categoryName !== '') {
-         await addCategory(categoryName);
-         categories.value = await getCategories();
+async function handleBookCardEvents(event: string, id: number) {
+   switch (event) {
+      case 'rename': {
+         const name = prompt('Enter new name', 'idk')?.trim();
+         if (name) {
+            await renameBookInDB(id, name);
+            books.value = await getBooksFromDB();
+         }
+         break;
       }
+      case 'delete': {
+         if (confirm('Are you sure you want to delete this book?')) {
+            await deleteBookFromDB(id);
+            books.value = await getBooksFromDB();
+         }
+         break;
+      }
+      case 'change-category': {
+         const name = prompt('Enter category name')?.trim();
+         if (!name) break;
+
+         const category = categories.value.find((category) => category.name === name);
+         if (!category) {
+            alert(`Category "${name}" does not exist.`);
+            break;
+         }
+
+         await changeBookCategoryInDB(id, category.id);
+         await updateBooks();
+         break;
+      }
+      default:
+         throw new Error('Feature not implemented yet');
+   }
+}
+
+async function addNewCategory() {
+   const name = prompt('Enter category name')?.trim();
+
+   if (!name) return;
+
+   if (categoryNameExists(name)) {
+      alert('A category with that name already exists.');
+      return;
+   }
+
+   await addCategoryToDB(name);
+   await updateCategories();
+}
+
+async function handleCategoryEvents(event: string, id: number) {
+   switch (event) {
+      case 'rename': {
+         const name = prompt('Enter new category name')?.trim();
+         if (!name) break;
+
+         if (categoryNameExists(name, id)) {
+            alert('A category with that name already exists.');
+            break;
+         }
+
+         await renameCategoryInDB(id, name);
+         await updateCategories();
+         break;
+      }
+      case 'delete': {
+         if (confirm('Are you sure you want to delete this categories and all of its content?')) {
+            await deleteCategoryFromDB(id);
+            await updateCategories();
+         }
+         break;
+      }
+      case 'collapse': {
+         await changeCategoryStateInDB(id, false);
+         await updateCategories();
+         break;
+      }
+      case 'expand': {
+         await changeCategoryStateInDB(id, true);
+         await updateCategories();
+         break;
+      }
+      default:
+         throw new Error('Feature not implemented yet >.<');
    }
 }
 </script>
@@ -92,8 +192,26 @@ async function addNewCategory() {
       class="bg-bg text-ink min-h-dvh max-w-dvw font-serif text-base leading-normal font-normal md:text-xl lg:text-base"
    >
       <Header @toggle-theme="toggleTheme" @add-category="addNewCategory" @import-files="importEpubFiles" />
-      <Category v-for="{ books, ...category } in categoriesWithBooks" :category="category" :key="category.id">
-         <BookCard v-for="book in books" :book="book" :key="book.id" />
+
+      <Category
+         @rename="(categoryId) => handleCategoryEvents('rename', categoryId)"
+         @delete="(categoryId) => handleCategoryEvents('delete', categoryId)"
+         @expand="(categoryId) => handleCategoryEvents('expand', categoryId)"
+         @collapse="(categoryId) => handleCategoryEvents('collapse', categoryId)"
+         v-for="{ books, ...category } in categoriesWithBooks"
+         :category="category"
+         :key="category.id"
+      >
+         <template v-if="category.expanded">
+            <BookCard
+               @rename="(bookId) => handleBookCardEvents('rename', bookId)"
+               @delete="(bookId) => handleBookCardEvents('delete', bookId)"
+               @change-category="(bookId) => handleBookCardEvents('change-category', bookId)"
+               v-for="book in books"
+               :book="book"
+               :key="book.id"
+            />
+         </template>
       </Category>
    </div>
 </template>

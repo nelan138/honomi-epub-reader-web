@@ -1,13 +1,13 @@
-import { openDatabase } from '../database.ts';
-import { STORES } from '../database.defaults.ts';
-import { defaultCategory } from '../database.defaults.ts';
-import type { CategoryRecord, CategoryState } from './category.types.ts';
+import { openDatabase } from './database';
+import { STORES } from '@src/services/database/database';
+import { defaultCategory } from '@src/constants/database';
+import type { CategoryRecord, CategoryState } from '@src/types/category';
 
 /**
  * Adds a new category to the database.
  * Returns ID if a category with the same name already exists.
  */
-export async function addCategory(name: string): Promise<void> {
+export async function addCategoryToDB(name: string): Promise<void> {
    const db = await openDatabase();
 
    return new Promise((resolve, reject) => {
@@ -38,38 +38,26 @@ export async function addCategory(name: string): Promise<void> {
    });
 }
 
-export async function getCategoryById(id: number): Promise<CategoryRecord> {
+export async function getCategoryFromDB(id: number): Promise<CategoryRecord>;
+export async function getCategoryFromDB(name: string): Promise<CategoryRecord>;
+export async function getCategoryFromDB(
+   idOrName: number | string,
+): Promise<CategoryRecord> {
    const db = await openDatabase();
 
    return new Promise((resolve, reject) => {
       const store = db.transaction(STORES.CATEGORIES, 'readonly').objectStore(
          STORES.CATEGORIES,
       );
-      const request = store.get(id) as IDBRequest<CategoryRecord | undefined>;
-      request.onsuccess = () => {
-         const category = request.result;
-         if (category === undefined) {
-            reject(new Error(`Category not found (ID: ${id})`));
-            return;
-         }
-         resolve(category);
-      };
-      request.onerror = () => reject(request.error);
-   });
-}
 
-export async function getCategoryByName(name: string): Promise<CategoryRecord> {
-   const db = await openDatabase();
+      const request = (
+         typeof idOrName === 'number' ? store : store.index('by_name')
+      ).get(idOrName) as IDBRequest<CategoryRecord | undefined>;
 
-   return new Promise((resolve, reject) => {
-      const store = db.transaction(STORES.CATEGORIES, 'readonly').objectStore(
-         STORES.CATEGORIES,
-      );
-      const index = store.index('by_name');
-      const request = index.get(name) as IDBRequest<CategoryRecord | undefined>;
       request.onsuccess = () => {
          if (request.result === undefined) {
-            reject(new Error(`Category not found (Name: ${name})`));
+            const label = typeof idOrName === 'number' ? 'ID' : 'Name';
+            reject(new Error(`Category not found (${label}: ${idOrName})`));
             return;
          }
          resolve(request.result);
@@ -78,7 +66,7 @@ export async function getCategoryByName(name: string): Promise<CategoryRecord> {
    });
 }
 
-export async function getCategories(): Promise<CategoryRecord[]> {
+export async function getCategoriesFromDB(): Promise<CategoryRecord[]> {
    const db = await openDatabase();
    return new Promise((resolve, reject) => {
       const store = db.transaction(STORES.CATEGORIES, 'readonly').objectStore(
@@ -91,7 +79,7 @@ export async function getCategories(): Promise<CategoryRecord[]> {
    });
 }
 
-export async function deleteCategory(id: number): Promise<void> {
+export async function deleteCategoryFromDB(id: number): Promise<void> {
    const db = await openDatabase();
 
    return new Promise((resolve, reject) => {
@@ -123,7 +111,7 @@ export async function deleteCategory(id: number): Promise<void> {
    });
 }
 
-export async function renameCategory(id: number, newCategoryName: string): Promise<void> {
+export async function renameCategoryInDB(id: number, newCategoryName: string): Promise<void> {
    const db = await openDatabase();
 
    return new Promise((resolve, reject) => {
@@ -153,7 +141,7 @@ export async function renameCategory(id: number, newCategoryName: string): Promi
    });
 }
 
-export async function updateCategoryState(id: number, newState: CategoryState): Promise<void> {
+export async function changeCategoryStateInDB(id: number, newState: CategoryState): Promise<void> {
    const db = await openDatabase();
 
    return new Promise((resolve, reject) => {

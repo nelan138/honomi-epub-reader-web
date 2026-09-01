@@ -1,9 +1,9 @@
-import { openDatabase } from '../database.ts';
-import { STORES } from '../database.defaults.ts';
-import type { CategoryRecord } from '../categories/category.types.ts';
-import type { BookRecord } from './book.types.ts';
+import { openDatabase } from './database';
+import { STORES } from '@src/services/database/database';
+import type { CategoryRecord } from '@src/types/category';
+import type { BookRecord } from '@src/types/book';
 
-export async function addBook(book: Omit<BookRecord, 'id'>): Promise<void> {
+export async function addBookToDB(book: Omit<BookRecord, 'id'>): Promise<void> {
    const db = await openDatabase();
 
    return new Promise((resolve, reject) => {
@@ -17,7 +17,7 @@ export async function addBook(book: Omit<BookRecord, 'id'>): Promise<void> {
    });
 }
 
-export async function getBookById(id: number): Promise<BookRecord> {
+export async function getBookFromDB(id: number): Promise<BookRecord> {
    const db = await openDatabase();
 
    return new Promise((resolve, reject) => {
@@ -38,7 +38,7 @@ export async function getBookById(id: number): Promise<BookRecord> {
    });
 }
 
-export async function getBooks(): Promise<BookRecord[]> {
+export async function getBooksFromDB(): Promise<BookRecord[]> {
    const db = await openDatabase();
 
    return new Promise((resolve, reject) => {
@@ -67,7 +67,7 @@ export async function getBooksByCategory(id: number): Promise<BookRecord[]> {
    });
 }
 
-export async function renameBook(id: number, newTitle: string): Promise<void> {
+export async function renameBookInDB(id: number, newTitle: string): Promise<void> {
    const db = await openDatabase();
 
    return new Promise((resolve, reject) => {
@@ -91,7 +91,7 @@ export async function renameBook(id: number, newTitle: string): Promise<void> {
    });
 }
 
-export async function deleteBook(id: number): Promise<void> {
+export async function deleteBookFromDB(id: number): Promise<void> {
    const db = await openDatabase();
    return new Promise((resolve, reject) => {
       const transaction = db.transaction(STORES.BOOKS, 'readwrite');
@@ -113,7 +113,7 @@ export async function deleteBook(id: number): Promise<void> {
    });
 }
 
-export async function changeBookCategory(bookId: number, categoryId: number): Promise<void> {
+export async function changeBookCategoryInDB(bookId: number, categoryId: number): Promise<void> {
    const db = await openDatabase();
 
    return new Promise((resolve, reject) => {

@@ -8,7 +8,7 @@ import type {
    ResourcePath,
    SpineItem,
    SupportedEpubVersion,
-} from './epub-book.types.ts';
+} from '@src/types/epub';
 
 /**
  * Represents an EPUB, only has data parsed from its content.

@@ -1,4 +1,11 @@
-import { DB_NAME, DB_VERSION, defaultCategory, STORES } from './database.defaults.ts';
+import { defaultCategory } from '@src/constants/database';
+export const DB_NAME = 'Honomi';
+export const DB_VERSION = 1;
+
+export const STORES = {
+   BOOKS: 'books',
+   CATEGORIES: 'categories',
+};
 
 function createSchemas(db: IDBDatabase): void {
    // * BOOKS

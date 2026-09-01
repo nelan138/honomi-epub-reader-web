@@ -3,7 +3,8 @@
    "tasks": {
       "dev": "deno run -A npm:vite",
       "build": "deno run -A npm:vite build",
-      "preview": "deno run -A npm:vite preview"
+      "preview": "deno run -A npm:vite preview",
+      "error-check": "deno run -A npm:vue-tsc --noEmit"
    },
    "imports": {
       "@src/": "./src/",
@@ -35,7 +36,8 @@
    "lint": {
       "rules": {
          "tags": ["recommended"],
-         "exclude": ["no-unused-vars", "no-unused-labels"]
+         "exclude": ["no-unused-vars", "no-unused-labels", "no-sloppy-imports"],
+         "include": ["no-duplicate-case", "no-case-declarations"]
       }
    }
 }

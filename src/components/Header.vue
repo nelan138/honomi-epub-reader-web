@@ -1,8 +1,8 @@
 <script setup lang="ts">
 const emit = defineEmits<{
-   (event: 'importFiles', files: FileList): void;
-   (event: 'addCategory'): void;
-   (event: 'toggleTheme'): void;
+   importFiles: [files: FileList];
+   addCategory: [];
+   toggleTheme: [];
 }>();
 </script>
 
@@ -16,7 +16,7 @@ const emit = defineEmits<{
                <i class="fa-solid fa-upload scale-[110%]"></i>
                <input
                   @change="
-                     (payload): void => {
+                     (payload) => {
                         const target = payload.target as HTMLInputElement;
                         if (target.files && target.files.length > 0) emit('importFiles', target.files);
                      }
