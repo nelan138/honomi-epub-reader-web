@@ -1,21 +1,10 @@
-import { openDatabase } from './database/database.ts';
-import { getUserPreferences } from './database/user-settings/user-setting-repository.ts';
+import { openDatabase } from './services/database/database.ts';
+import './main.css';
 
-import bindBookshelfHeaderEvents from './pages/bookshelf/events/bookshelf-header-events.ts';
-import bindBookImportEvents from './pages/bookshelf/features/import-books.ts';
-import bindCategoryEvents from './pages/bookshelf/events/category-events.ts';
-import bindBookCardEvents from './pages/bookshelf/events/book-card-events.ts';
-
-import './styles.css';
-import renderBookshelf from './pages/bookshelf/features/render-bookshelf.ts';
+import { createApp } from 'vue';
+import App from './App.vue';
 
 await openDatabase();
-await renderBookshelf();
 
-const userPreferences = await getUserPreferences();
-document.documentElement.setAttribute('data-theme', userPreferences.theme);
+createApp(App).mount('#app');
 
-bindBookshelfHeaderEvents();
-bindCategoryEvents();
-bindBookCardEvents();
-bindBookImportEvents();

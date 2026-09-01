@@ -38,7 +38,7 @@ export async function getBookById(id: number): Promise<BookRecord> {
    });
 }
 
-export async function getAllBooks(): Promise<BookRecord[]> {
+export async function getBooks(): Promise<BookRecord[]> {
    const db = await openDatabase();
 
    return new Promise((resolve, reject) => {

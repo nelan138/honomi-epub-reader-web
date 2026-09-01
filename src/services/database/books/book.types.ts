@@ -4,7 +4,7 @@ import type {
    NavigationItem,
    SpineItem,
    SupportedEpubVersion,
-} from '@src/epub/epub-book.types.ts';
+} from '@src/services/epub/epub-book.types.ts';
 
 export type BookRecord = {
    id: number;

@@ -78,7 +78,7 @@ export async function getCategoryByName(name: string): Promise<CategoryRecord> {
    });
 }
 
-export async function getAllCategories(): Promise<CategoryRecord[]> {
+export async function getCategories(): Promise<CategoryRecord[]> {
    const db = await openDatabase();
    return new Promise((resolve, reject) => {
       const store = db.transaction(STORES.CATEGORIES, 'readonly').objectStore(

@@ -1,11 +1,4 @@
-import {
-   DB_NAME,
-   DB_VERSION,
-   defaultCategory,
-   defaultUserSettings,
-   STORES,
-   USER_SETTINGS_KEY,
-} from './database.defaults.ts';
+import { DB_NAME, DB_VERSION, defaultCategory, STORES } from './database.defaults.ts';
 
 function createSchemas(db: IDBDatabase): void {
    // * BOOKS
@@ -26,9 +19,6 @@ function createSchemas(db: IDBDatabase): void {
       });
       categoryStore.createIndex('by_name', 'name', { unique: true });
    }
-
-   // * USER PREFERENCES: Only one record exists
-   if (!db.objectStoreNames.contains(STORES.USER_SETTINGS)) db.createObjectStore(STORES.USER_SETTINGS);
 }
 
 let database: IDBDatabase | null = null;
@@ -54,9 +44,6 @@ export function openDatabase(): Promise<IDBDatabase> {
 
          const categoryStore = transaction.objectStore(STORES.CATEGORIES);
          categoryStore.put(defaultCategory);
-
-         const userPreferencesStore = transaction.objectStore(STORES.USER_SETTINGS);
-         userPreferencesStore.put(defaultUserSettings, USER_SETTINGS_KEY);
       };
 
       request.onsuccess = () => resolve(request.result);

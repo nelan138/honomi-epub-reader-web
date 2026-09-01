@@ -6,14 +6,17 @@
       "preview": "deno run -A npm:vite preview"
    },
    "imports": {
+      "@src/": "./src/",
       "@deno/vite-plugin": "npm:@deno/vite-plugin@^2.0.3",
       "@tailwindcss/vite": "npm:@tailwindcss/vite@^4.3.3",
+      "@vitejs/plugin-vue": "npm:@vitejs/plugin-vue@^6.0.8",
       "fflate": "npm:fflate@^0.8.3",
       "prettier": "npm:prettier@^3.9.6",
       "prettier-plugin-tailwindcss": "npm:prettier-plugin-tailwindcss@^0.8.1",
       "tailwindcss": "npm:tailwindcss@^4.3.3",
       "typescript": "npm:typescript@^6.0.3",
-      "vite": "npm:vite@^8.2.1"
+      "vite": "npm:vite@^8.2.2",
+      "vue": "npm:vue@^3.5.42"
    },
    "nodeModulesDir": "auto",
    "fmt": {
