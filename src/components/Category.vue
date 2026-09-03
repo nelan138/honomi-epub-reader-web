@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import type { CategoryRecord } from '@src/types/category';
-import { defaultCategory } from '@src/constants/database';
+import { defaultCategory } from '@src/services/database/db';
 
 const props = defineProps<{
    category: CategoryRecord;
 }>();
 
 const emit = defineEmits<{
-   expand: [id: number];
-   collapse: [id: number];
-   rename: [id: number];
-   delete: [id: number];
+   expand: [categoryId: number];
+   collapse: [categoryId: number];
+   rename: [categoryId: number];
+   delete: [categoryId: number];
 }>();
 </script>
 

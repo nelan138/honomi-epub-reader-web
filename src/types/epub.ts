@@ -25,10 +25,10 @@ export type NavigationItem = {
 };
 
 export type Metadata = {
-   title?: string;
-   creator?: string;
+   title: string;
+   creator: string;
+   language: string;
    publisher?: string;
-   language?: string;
    identifier?: string;
    description?: string;
    subject?: string[];

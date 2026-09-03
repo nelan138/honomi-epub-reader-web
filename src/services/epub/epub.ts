@@ -25,7 +25,7 @@ export class EpubBook {
    private spine!: SpineItem[];
    private navigation!: NavigationItem[];
 
-   private metadata?: Metadata;
+   private metadata!: Metadata;
    private cover?: Blob;
 
    constructor(file: File) {
@@ -45,7 +45,11 @@ export class EpubBook {
       this.spine = this.getSpine();
       this.navigation = this.getNavigation();
 
-      this.metadata = this.getMetadata();
+      this.metadata = this.getMetadata() ?? {
+         title: 'No title',
+         creator: 'Unknown',
+         language: 'Unknown',
+      };
       this.cover = this.getCover();
    }
 
@@ -151,20 +155,30 @@ export class EpubBook {
       return this.spine;
    }
 
-   getMetadata(): Metadata | undefined {
+   getMetadata(): Metadata {
       if (this.metadata) return this.metadata;
 
       const opfDocument = this.#getXmlDocument(this.getOpfPath());
 
       const metadataElement = opfDocument.getElementsByTagName('metadata')[0];
-      if (!metadataElement) return undefined;
+      if (!metadataElement) {
+         return {
+            title: 'No title',
+            creator: 'Unknown',
+            language: 'Unknown',
+            publisher: 'Unknown',
+            identifier: undefined,
+            description: undefined,
+            subject: undefined,
+         };
+      }
 
       this.metadata = {
-         title: this.#getElementText(metadataElement, 'title') || undefined,
-         creator: this.#getElementText(metadataElement, 'creator') || undefined,
-         language: this.#getElementText(metadataElement, 'language') || undefined,
+         title: this.#getElementText(metadataElement, 'title') || 'No title',
+         creator: this.#getElementText(metadataElement, 'creator') || 'Unknown',
+         language: this.#getElementText(metadataElement, 'language') || 'Unknown',
+         publisher: this.#getElementText(metadataElement, 'publisher') || 'Unknown',
          identifier: this.#getElementText(metadataElement, 'identifier') || undefined,
-         publisher: this.#getElementText(metadataElement, 'publisher') || undefined,
          description: this.#getElementText(metadataElement, 'description') || undefined,
          subject: Array.from(
             metadataElement.getElementsByTagNameNS('*', 'subject'),

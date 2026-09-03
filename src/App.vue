@@ -1,36 +1,20 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed } from 'vue';
 import Category from './components/Category.vue';
 import Header from './components/Header.vue';
 import BookCard from './components/BookCard.vue';
-import {
-   addCategoryToDB,
-   renameCategoryInDB,
-   changeCategoryStateInDB,
-   getCategoriesFromDB,
-   deleteCategoryFromDB,
-} from '@src/services/database/categoryRepo';
 import type { CategoryRecord } from '@src/types/category';
 import type { BookRecord } from '@src/types/book';
-import {
-   addBookToDB,
-   changeBookCategoryInDB,
-   deleteBookFromDB,
-   getBooksFromDB,
-   renameBookInDB,
-} from '@src/services/database/bookRepo';
+import useCategories from './composables/useCategories.js';
+
 import { EpubBook } from './services/epub/epub.js';
-import { defaultCategory } from './constants/database.js';
+import { defaultCategory } from '@src/services/database/db';
+import useTheme from './composables/useTheme.js';
+import useBooks from './composables/useBooks.js';
 
-type Theme = 'dark' | 'light';
-type CategoryWithBooks = CategoryRecord & {
-   books: BookRecord[];
-};
+const { categories, addCategory, deleteCategory, renameCategory, collapseCategory, expandCategory } = useCategories();
 
-const books = ref<BookRecord[]>([]);
-const categories = ref<CategoryRecord[]>([]);
-const theme = ref<Theme>('dark');
-
+type CategoryWithBooks = CategoryRecord & { books: BookRecord[] };
 const categoriesWithBooks = computed<CategoryWithBooks[]>(() => {
    return categories.value.map((category) => ({
       ...category,
@@ -38,152 +22,91 @@ const categoriesWithBooks = computed<CategoryWithBooks[]>(() => {
    }));
 });
 
-async function updateBooks() {
-   books.value = await getBooksFromDB();
+async function addNewCategory() {
+   const name = prompt('Enter new category name')?.trim();
+   if (!name) return;
+   await addCategory({ name, expanded: true });
 }
 
-async function updateCategories() {
-   categories.value = await getCategoriesFromDB();
+async function handleCategoryEvents(event: string, categoryId: number): Promise<void> {
+   switch (event) {
+      case 'rename': {
+         const newName = prompt('Enter new category name')?.trim();
+         if (!newName) break;
+         return renameCategory(categoryId, newName);
+      }
+      case 'delete': {
+         if (confirm('Are you sure you want to delete this category?')) {
+            return deleteCategory(categoryId);
+         }
+         break;
+      }
+      case 'collapse': {
+         return collapseCategory(categoryId);
+      }
+      case 'expand': {
+         return expandCategory(categoryId);
+      }
+      default:
+         throw new Error('Feature not implemented yet >.<');
+   }
 }
 
-onMounted(async () => {
-   let savedTheme = localStorage.getItem('theme') as Theme;
-   savedTheme = savedTheme === 'light' || savedTheme === 'dark' ? savedTheme : 'dark';
-
-   theme.value = savedTheme;
-   applyTheme(theme.value);
-
-   categories.value = await getCategoriesFromDB();
-   books.value = await getBooksFromDB();
-});
-
-function applyTheme(currentTheme: Theme) {
-   localStorage.setItem('theme', currentTheme);
-   document.documentElement.classList.toggle('dark', currentTheme === 'dark');
-}
-
-function toggleTheme() {
-   theme.value = theme.value === 'dark' ? 'light' : 'dark';
-   applyTheme(theme.value);
-}
-
-async function importEpubFiles(files: FileList) {
+const { books, renameBook, changeBookCategory, deleteBook, addBook } = useBooks();
+async function handleImportingFiles(files: FileList) {
    for (const file of files) {
       if (!file) continue;
       const epubBook = new EpubBook(file);
       await epubBook.parse();
 
-      const record: Omit<BookRecord, 'id'> = {
+      await addBook({
          categoryId: defaultCategory.id,
          progress: 0,
-         version: epubBook.getVersion(),
          epubFile: epubBook.getEpubFile(),
+         version: epubBook.getVersion(),
          opfPath: epubBook.getOpfPath(),
          manifest: epubBook.getManifest(),
          navigation: epubBook.getNavigation(),
          spine: epubBook.getSpine(),
          metadata: epubBook.getMetadata(),
          cover: epubBook.getCover(),
-      };
-      await addBookToDB(record);
+      });
    }
-   await updateBooks();
 }
-
-function categoryNameExists(name: string, ignoredId?: number): boolean {
-   const normalizedName = name.trim().toLocaleLowerCase();
-
-   return categories.value.some(
-      (category) => category.id !== ignoredId && category.name.trim().toLocaleLowerCase() === normalizedName
-   );
-}
-
-async function handleBookCardEvents(event: string, id: number) {
+async function handleBookCardEvents(event: string, bookId: number): Promise<void> {
    switch (event) {
       case 'rename': {
-         const name = prompt('Enter new name', 'idk')?.trim();
-         if (name) {
-            await renameBookInDB(id, name);
-            books.value = await getBooksFromDB();
+         const newTitle = prompt('Enter new book title')?.trim();
+         if (!newTitle) break;
+         return renameBook(bookId, newTitle);
+      }
+      case 'change-category': {
+         const categoryName = prompt('Enter the new category name')?.trim();
+         if (!categoryName) break;
+
+         const targetCategory = categories.value.find(
+            (category) => category.name.trim().toLocaleLowerCase() === categoryName.toLocaleLowerCase()
+         );
+
+         if (!targetCategory) {
+            alert('Category does not exist!');
+            break;
          }
-         break;
+
+         return changeBookCategory(bookId, targetCategory.id);
       }
       case 'delete': {
          if (confirm('Are you sure you want to delete this book?')) {
-            await deleteBookFromDB(id);
-            books.value = await getBooksFromDB();
+            return deleteBook(bookId);
          }
          break;
       }
-      case 'change-category': {
-         const name = prompt('Enter category name')?.trim();
-         if (!name) break;
 
-         const category = categories.value.find((category) => category.name === name);
-         if (!category) {
-            alert(`Category "${name}" does not exist.`);
-            break;
-         }
-
-         await changeBookCategoryInDB(id, category.id);
-         await updateBooks();
-         break;
-      }
-      default:
-         throw new Error('Feature not implemented yet');
-   }
-}
-
-async function addNewCategory() {
-   const name = prompt('Enter category name')?.trim();
-
-   if (!name) return;
-
-   if (categoryNameExists(name)) {
-      alert('A category with that name already exists.');
-      return;
-   }
-
-   await addCategoryToDB(name);
-   await updateCategories();
-}
-
-async function handleCategoryEvents(event: string, id: number) {
-   switch (event) {
-      case 'rename': {
-         const name = prompt('Enter new category name')?.trim();
-         if (!name) break;
-
-         if (categoryNameExists(name, id)) {
-            alert('A category with that name already exists.');
-            break;
-         }
-
-         await renameCategoryInDB(id, name);
-         await updateCategories();
-         break;
-      }
-      case 'delete': {
-         if (confirm('Are you sure you want to delete this categories and all of its content?')) {
-            await deleteCategoryFromDB(id);
-            await updateCategories();
-         }
-         break;
-      }
-      case 'collapse': {
-         await changeCategoryStateInDB(id, false);
-         await updateCategories();
-         break;
-      }
-      case 'expand': {
-         await changeCategoryStateInDB(id, true);
-         await updateCategories();
-         break;
-      }
       default:
          throw new Error('Feature not implemented yet >.<');
    }
 }
+const { toggleTheme } = useTheme();
 </script>
 
 <template>
@@ -191,22 +114,22 @@ async function handleCategoryEvents(event: string, id: number) {
    <div
       class="bg-bg text-ink min-h-dvh max-w-dvw font-serif text-base leading-normal font-normal md:text-xl lg:text-base"
    >
-      <Header @toggle-theme="toggleTheme" @add-category="addNewCategory" @import-files="importEpubFiles" />
+      <Header @toggle-theme="toggleTheme" @add-category="addNewCategory" @import-files="handleImportingFiles" />
 
       <Category
-         @rename="(categoryId) => handleCategoryEvents('rename', categoryId)"
-         @delete="(categoryId) => handleCategoryEvents('delete', categoryId)"
-         @expand="(categoryId) => handleCategoryEvents('expand', categoryId)"
-         @collapse="(categoryId) => handleCategoryEvents('collapse', categoryId)"
+         @rename="() => handleCategoryEvents('rename', category.id)"
+         @delete="() => handleCategoryEvents('delete', category.id)"
+         @expand="() => handleCategoryEvents('expand', category.id)"
+         @collapse="() => handleCategoryEvents('collapse', category.id)"
          v-for="{ books, ...category } in categoriesWithBooks"
          :category="category"
          :key="category.id"
       >
          <template v-if="category.expanded">
             <BookCard
-               @rename="(bookId) => handleBookCardEvents('rename', bookId)"
-               @delete="(bookId) => handleBookCardEvents('delete', bookId)"
-               @change-category="(bookId) => handleBookCardEvents('change-category', bookId)"
+               @rename="(id) => handleBookCardEvents('rename', id)"
+               @delete="(id) => handleBookCardEvents('delete', id)"
+               @change-category="(id) => handleBookCardEvents('change-category', id)"
                v-for="book in books"
                :book="book"
                :key="book.id"

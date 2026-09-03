@@ -1,154 +1,55 @@
-import { openDatabase } from './database';
-import { STORES } from '@src/services/database/database';
-import type { CategoryRecord } from '@src/types/category';
+import { db } from './db';
 import type { BookRecord } from '@src/types/book';
+import { defaultCategory } from './db';
 
-export async function addBookToDB(book: Omit<BookRecord, 'id'>): Promise<void> {
-   const db = await openDatabase();
+async function addBookToDB(book: Omit<BookRecord, 'id'>): Promise<number> {
+   const store = db.books;
+   const addedBookId = await store.add({ ...book, categoryId: defaultCategory.id });
+   return addedBookId;
+}
 
-   return new Promise((resolve, reject) => {
-      const store = db.transaction(STORES.BOOKS, 'readwrite').objectStore(
-         STORES.BOOKS,
-      );
-      const request = store.add(book) as IDBRequest<number>;
-      request.onsuccess = () => resolve();
+async function getBooksFromDB(): Promise<BookRecord[]> {
+   const store = db.books;
+   const books = await store.toArray() as Required<BookRecord>[];
+   return books;
+}
 
-      request.onerror = () => reject(request.error);
+async function deleteBookFromDB(id: number): Promise<void> {
+   await db.transaction('readwrite', db.books, async () => {
+      const store = db.books;
+      const existingBook = await store.get(id) as Required<BookRecord> | undefined;
+      if (existingBook) await store.delete(id);
+      else throw new Error('Book does not exist!');
    });
 }
 
-export async function getBookFromDB(id: number): Promise<BookRecord> {
-   const db = await openDatabase();
+async function renameBookInDB(bookId: number, newTitle: string): Promise<void> {
+   const store = db.books;
 
-   return new Promise((resolve, reject) => {
-      const store = db.transaction(STORES.BOOKS, 'readonly').objectStore(
-         STORES.BOOKS,
-      );
-      const request = store.get(id) as IDBRequest<BookRecord | undefined>;
+   const bookRecord = await store.get(bookId) as Required<BookRecord> | undefined;
+   if (!bookRecord) throw new Error('Book does not exist!');
 
-      request.onsuccess = () => {
-         const book = request.result;
-         if (book === undefined) {
-            reject(new Error(`Book not found (ID: ${id})`));
-            return;
-         }
-         resolve(book);
-      };
-      request.onerror = () => reject(request.error);
+   bookRecord.metadata.title = newTitle;
+   await store.put(bookRecord);
+}
+
+async function changeBookCategoryInDB(
+   bookId: number,
+   categoryId: number,
+): Promise<void> {
+   const bookStore = db.books;
+   const categoryStore = db.categories;
+
+   await db.transaction('readwrite', categoryStore, bookStore, async () => {
+      const bookRecord = await bookStore.get(bookId) as Required<BookRecord> | undefined;
+      if (bookRecord === undefined) throw new Error('Book does not exist!');
+
+      const categoryExists = await categoryStore.where(':id').equals(categoryId).firstKey();
+      if (!categoryExists) throw new Error('Category does not exist');
+
+      bookRecord.categoryId = categoryId;
+      await bookStore.put(bookRecord);
    });
 }
 
-export async function getBooksFromDB(): Promise<BookRecord[]> {
-   const db = await openDatabase();
-
-   return new Promise((resolve, reject) => {
-      const store = db.transaction(STORES.BOOKS, 'readonly').objectStore(
-         STORES.BOOKS,
-      ) as IDBObjectStore;
-      const request = store.getAll() as IDBRequest<BookRecord[]>;
-
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
-   });
-}
-
-export async function getBooksByCategory(id: number): Promise<BookRecord[]> {
-   const db = await openDatabase();
-
-   return new Promise((resolve, reject) => {
-      const store = db.transaction([STORES.BOOKS], 'readonly')
-         .objectStore(STORES.BOOKS);
-
-      const index = store.index('by_category');
-      const request = index.getAll(id) as IDBRequest<BookRecord[]>;
-
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
-   });
-}
-
-export async function renameBookInDB(id: number, newTitle: string): Promise<void> {
-   const db = await openDatabase();
-
-   return new Promise((resolve, reject) => {
-      const transaction = db.transaction(STORES.BOOKS, 'readwrite');
-      transaction.oncomplete = () => resolve();
-      transaction.onerror = () => reject(transaction.error);
-
-      const store = transaction.objectStore(STORES.BOOKS);
-      const getRequest = store.get(id) as IDBRequest<BookRecord | undefined>;
-      getRequest.onsuccess = () => {
-         const book = getRequest.result;
-         if (!book) {
-            reject(new Error(`Book not found (ID: ${id})`));
-            transaction.abort();
-            return;
-         }
-
-         (book.metadata ??= {}).title = newTitle;
-         store.put(book);
-      };
-   });
-}
-
-export async function deleteBookFromDB(id: number): Promise<void> {
-   const db = await openDatabase();
-   return new Promise((resolve, reject) => {
-      const transaction = db.transaction(STORES.BOOKS, 'readwrite');
-      transaction.oncomplete = () => resolve();
-      transaction.onerror = () => reject(transaction.error);
-
-      const store = transaction.objectStore(STORES.BOOKS);
-      const getRequest = store.get(id) as IDBRequest<BookRecord | undefined>;
-      getRequest.onsuccess = () => {
-         const book = getRequest.result;
-         if (!book) {
-            reject(new Error(`Book not found (ID: ${id})`));
-            transaction.abort();
-            return;
-         }
-
-         store.delete(id);
-      };
-   });
-}
-
-export async function changeBookCategoryInDB(bookId: number, categoryId: number): Promise<void> {
-   const db = await openDatabase();
-
-   return new Promise((resolve, reject) => {
-      const transaction = db.transaction(
-         [STORES.BOOKS, STORES.CATEGORIES],
-         'readwrite',
-      );
-      transaction.oncomplete = () => resolve();
-      transaction.onerror = () => reject(transaction.error);
-
-      const bookStore = transaction.objectStore(STORES.BOOKS);
-      const getBookRequest = bookStore.get(bookId) as IDBRequest<
-         BookRecord | undefined
-      >;
-      getBookRequest.onsuccess = () => {
-         const book = getBookRequest.result;
-         if (!book) {
-            reject(new Error(`Book not found (ID: ${bookId})`));
-            transaction.abort();
-            return;
-         }
-
-         const getCategoryRequest = transaction.objectStore(STORES.CATEGORIES)
-            .get(categoryId) as IDBRequest<CategoryRecord | undefined>;
-         getCategoryRequest.onsuccess = () => {
-            const category = getCategoryRequest.result;
-            if (!category) {
-               reject(new Error(`Category not found (ID: ${categoryId})`));
-               transaction.abort();
-               return;
-            }
-
-            book.categoryId = categoryId;
-            bookStore.put(book);
-         };
-      };
-   });
-}
+export { addBookToDB, changeBookCategoryInDB, deleteBookFromDB, getBooksFromDB, renameBookInDB };

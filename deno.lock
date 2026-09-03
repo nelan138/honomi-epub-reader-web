@@ -4,6 +4,7 @@
     "npm:@deno/vite-plugin@^2.0.3": "2.0.3_vite@8.2.2",
     "npm:@tailwindcss/vite@^4.3.3": "4.3.3_vite@8.2.2",
     "npm:@vitejs/plugin-vue@^6.0.8": "6.0.8_vite@8.2.2_vue@3.5.42",
+    "npm:dexie@^4.4.5": "4.4.5",
     "npm:fflate@~0.8.3": "0.8.3",
     "npm:prettier-plugin-tailwindcss@~0.8.1": "0.8.1_prettier@3.9.6",
     "npm:prettier@^3.9.6": "3.9.6",
@@ -389,6 +390,9 @@
     "detect-libc@2.1.2": {
       "integrity": "sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ=="
     },
+    "dexie@4.4.5": {
+      "integrity": "sha512-wWCHdihT3dmlUSuNhn5mMZDWSpG0suxjAni7YjjiZdzabZcKmy3uNZGZ7AeYYXBoLbpSXX35fikPLkPC44Osiw=="
+    },
     "enhanced-resolve@5.24.5": {
       "integrity": "sha512-L1l8TNvomm6UVW5B253AGxQagSQr+vGwhMlrrfRS2qmhx46AMpMVJKQYLvWYbysTMY8VoicOvzHzoHMbyzB+4A==",
       "dependencies": [
@@ -704,6 +708,7 @@
       "npm:@deno/vite-plugin@^2.0.3",
       "npm:@tailwindcss/vite@^4.3.3",
       "npm:@vitejs/plugin-vue@^6.0.8",
+      "npm:dexie@^4.4.5",
       "npm:fflate@~0.8.3",
       "npm:prettier-plugin-tailwindcss@~0.8.1",
       "npm:prettier@^3.9.6",

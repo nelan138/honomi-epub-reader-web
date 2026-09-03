@@ -11,6 +11,7 @@
       "@deno/vite-plugin": "npm:@deno/vite-plugin@^2.0.3",
       "@tailwindcss/vite": "npm:@tailwindcss/vite@^4.3.3",
       "@vitejs/plugin-vue": "npm:@vitejs/plugin-vue@^6.0.8",
+      "dexie": "npm:dexie@^4.4.5",
       "fflate": "npm:fflate@^0.8.3",
       "prettier": "npm:prettier@^3.9.6",
       "prettier-plugin-tailwindcss": "npm:prettier-plugin-tailwindcss@^0.8.1",

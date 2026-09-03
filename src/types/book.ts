@@ -19,6 +19,6 @@ export type BookRecord = {
    navigation: NavigationItem[];
    spine: SpineItem[];
 
-   metadata?: Metadata;
+   metadata: Metadata;
    cover?: Blob;
 };
