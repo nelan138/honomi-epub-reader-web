@@ -6,9 +6,12 @@ import type {
    SupportedEpubVersion,
 } from '@src/types/epub';
 
-export type BookRecord = {
+/**
+ * * Represents a record in the database.
+ */
+type BookRecord = {
    id: number;
-   categoryId: number;
+   shelfId: number;
    progress: number;
 
    epubFile: Blob;
@@ -22,3 +25,13 @@ export type BookRecord = {
    metadata: Metadata;
    cover?: Blob;
 };
+
+/**
+ * Use for UI
+ */
+type UIBookCard = Pick<
+   BookRecord,
+   'id' | 'shelfId' | 'progress' | 'metadata' | 'cover'
+>;
+
+export type { BookRecord, UIBookCard };

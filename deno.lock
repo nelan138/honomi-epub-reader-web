@@ -2,6 +2,7 @@
   "version": "5",
   "specifiers": {
     "npm:@deno/vite-plugin@^2.0.3": "2.0.3_vite@8.2.2",
+    "npm:@fortawesome/fontawesome-free@^7.3.1": "7.3.1",
     "npm:@tailwindcss/vite@^4.3.3": "4.3.3_vite@8.2.2",
     "npm:@vitejs/plugin-vue@^6.0.8": "6.0.8_vite@8.2.2_vue@3.5.42",
     "npm:dexie@^4.4.5": "4.4.5",
@@ -43,6 +44,9 @@
         "@std/jsonc@npm:@jsr/std__jsonc@1.0.2",
         "vite"
       ]
+    },
+    "@fortawesome/fontawesome-free@7.3.1": {
+      "integrity": "sha512-wmglKKPDIkgV3aWlZzWECCPoGIkYCulzBwxG9+w7rc5BGapZ6cPMpoPOT8k36J0Ni7PPX6c/rsoMWfS4d1MUMg=="
     },
     "@jridgewell/gen-mapping@0.3.13": {
       "integrity": "sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==",
@@ -706,6 +710,7 @@
   "workspace": {
     "dependencies": [
       "npm:@deno/vite-plugin@^2.0.3",
+      "npm:@fortawesome/fontawesome-free@^7.3.1",
       "npm:@tailwindcss/vite@^4.3.3",
       "npm:@vitejs/plugin-vue@^6.0.8",
       "npm:dexie@^4.4.5",

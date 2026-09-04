@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import type { BookRecord } from '@src/types/book';
+import type { UIBookCard } from '@src/types/book';
 
 const props = defineProps<{
-   book: BookRecord;
+   book: UIBookCard;
 }>();
 
 const emit = defineEmits<{
    rename: [bookId: number];
-   changeCategory: [bookId: number];
+   changeShelf: [bookId: number];
    delete: [bookId: number];
 }>();
 
@@ -52,7 +52,7 @@ function cleanUpCoverUrl() {
 
             <li>
                <button
-                  @click="() => emit('changeCategory', book.id)"
+                  @click="() => emit('changeShelf', book.id)"
                   type="button"
                   class="hover:text-highlight aspect-square transition-colors hover:cursor-pointer"
                >

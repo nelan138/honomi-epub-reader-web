@@ -1,8 +1,6 @@
-import './main.css';
+import '@fortawesome/fontawesome-free/css/all.min.css';
 
 import { createApp } from 'vue';
 import App from './App.vue';
-import { db } from '@src/services/database/db.ts';
 
-await db.open();
-createApp(App).mount('#app');
+createApp(App).mount('body');

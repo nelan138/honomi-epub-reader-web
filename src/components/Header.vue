@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const emit = defineEmits<{
    importFiles: [files: FileList];
-   addCategory: [];
+   addShelf: [];
    toggleTheme: [];
 }>();
 </script>
@@ -43,7 +43,7 @@ const emit = defineEmits<{
       <ul class="text-ink/70 flex gap-6">
          <li>
             <button
-               @click="() => emit('addCategory')"
+               @click="() => emit('addShelf')"
                type="button"
                class="hover:text-highlight transition-colors hover:cursor-pointer"
             >

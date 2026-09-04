@@ -12,6 +12,7 @@
       "esbenp",
       "fflate",
       "Fira",
+      "fontawesome",
       "Honomi",
       "idref",
       "itemref",
@@ -47,6 +48,9 @@
       "editor.defaultFormatter": "esbenp.prettier-vscode"
    },
    "files.associations": {
-      "*.css": "tailwindcss"
-   }
+      "*.css": "tailwindcss",
+      "*.vue": "vue"
+   },
+   "css.lint.unknownAtRules": "ignore",
+   "scss.lint.unknownAtRules": "ignore"
 }

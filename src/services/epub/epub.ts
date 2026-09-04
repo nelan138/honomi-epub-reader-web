@@ -67,7 +67,8 @@ export class EpubBook {
       if (!version) throw new Error('EPUB container does not define a version');
 
       const supportedVersion = parseInt(version);
-      if (supportedVersion !== 2 && supportedVersion !== 3) throw new Error(`Unsupported EPUB version: ${version}`);
+      if (supportedVersion !== 2 && supportedVersion !== 3)
+         throw new Error(`Unsupported EPUB version: ${version}`);
 
       this.version = supportedVersion as SupportedEpubVersion;
 
@@ -81,7 +82,8 @@ export class EpubBook {
       const rootfile = containerDocument.getElementsByTagName('rootfile')[0];
       const opfPath = rootfile?.getAttribute('full-path') as ResourcePath;
 
-      if (!opfPath) throw new Error('EPUB container does not define an OPF package path');
+      if (!opfPath)
+         throw new Error('EPUB container does not define an OPF package path');
       this.opfPath = this.#normalizePath(opfPath);
 
       return this.opfPath;
@@ -93,7 +95,8 @@ export class EpubBook {
       const opfDocument = this.#getXmlDocument(this.getOpfPath());
 
       const manifestElement = opfDocument.getElementsByTagName('manifest')[0];
-      if (!manifestElement) throw new Error('EPUB package does not contain a manifest');
+      if (!manifestElement)
+         throw new Error('EPUB package does not contain a manifest');
 
       this.manifest = new Map<ManifestItemId, ManifestItem>();
 
@@ -104,17 +107,22 @@ export class EpubBook {
       for (const item of manifestItemElements) {
          const id: ManifestItemId | null = item.getAttribute('id');
          if (!id) throw new Error('EPUB manifest item does not define an id');
-         if (this.manifest.has(id)) throw new Error(`Duplicate manifest item id: ${id}`);
+         if (this.manifest.has(id))
+            throw new Error(`Duplicate manifest item id: ${id}`);
 
          const href: Path | null = item.getAttribute('href');
-         if (!href) throw new Error('EPUB manifest item does not define an href');
+         if (!href)
+            throw new Error('EPUB manifest item does not define an href');
 
          const mediaType = item.getAttribute('media-type');
-         if (!mediaType) throw new Error('EPUB manifest item does not define a media-type');
+         if (!mediaType)
+            throw new Error('EPUB manifest item does not define a media-type');
 
          const propertiesAttribute = item.getAttribute('properties')?.trim();
 
-         const properties = propertiesAttribute ? propertiesAttribute.split(/\s+/) : [];
+         const properties = propertiesAttribute
+            ? propertiesAttribute.split(/\s+/)
+            : [];
 
          const manifestItem: ManifestItem = {
             href,
@@ -134,7 +142,8 @@ export class EpubBook {
       const opfDocument = this.#getXmlDocument(this.getOpfPath());
 
       const spineElement = opfDocument.getElementsByTagName('spine')[0];
-      if (!spineElement) throw new Error('EPUB package does not contain a spine');
+      if (!spineElement)
+         throw new Error('EPUB package does not contain a spine');
 
       const spineItemElements = [...spineElement.children].filter(
          (element) => element.localName === 'itemref',
@@ -142,10 +151,15 @@ export class EpubBook {
 
       this.spine = Array.from(spineItemElements, (itemref): SpineItem => {
          const idref = itemref.getAttribute('idref');
-         if (!idref) throw new Error('EPUB spine item does not define an idref');
+         if (!idref)
+            throw new Error('EPUB spine item does not define an idref');
 
          if (!this.manifest) this.manifest = this.getManifest();
-         if (!this.manifest.has(idref)) throw new Error(`EPUB spine references missing manifest item: ${idref}`);
+         if (!this.manifest.has(idref)) {
+            throw new Error(
+               `EPUB spine references missing manifest item: ${idref}`,
+            );
+         }
 
          return {
             idref,
@@ -176,10 +190,14 @@ export class EpubBook {
       this.metadata = {
          title: this.#getElementText(metadataElement, 'title') || 'No title',
          creator: this.#getElementText(metadataElement, 'creator') || 'Unknown',
-         language: this.#getElementText(metadataElement, 'language') || 'Unknown',
-         publisher: this.#getElementText(metadataElement, 'publisher') || 'Unknown',
-         identifier: this.#getElementText(metadataElement, 'identifier') || undefined,
-         description: this.#getElementText(metadataElement, 'description') || undefined,
+         language: this.#getElementText(metadataElement, 'language')
+            || 'Unknown',
+         publisher: this.#getElementText(metadataElement, 'publisher')
+            || 'Unknown',
+         identifier: this.#getElementText(metadataElement, 'identifier')
+            || undefined,
+         description: this.#getElementText(metadataElement, 'description')
+            || undefined,
          subject: Array.from(
             metadataElement.getElementsByTagNameNS('*', 'subject'),
             (element) => element.textContent?.trim() ?? '',
@@ -195,7 +213,9 @@ export class EpubBook {
       const manifest = this.getManifest();
 
       // * EPUB 3
-      let coverItem = [...manifest.values()].find((item) => item.properties.includes('cover-image'));
+      let coverItem = [...manifest.values()].find((item) =>
+         item.properties.includes('cover-image')
+      );
 
       // * EPUB 2 fallback
       if (!coverItem) {
@@ -213,7 +233,9 @@ export class EpubBook {
       const coverData = this.epubData[coverItem.resolvedPath];
       if (!coverData) return undefined;
 
-      this.cover = new Blob([coverData as BlobPart], { type: coverItem.mediaType });
+      this.cover = new Blob([coverData as BlobPart], {
+         type: coverItem.mediaType,
+      });
       return this.cover;
    }
 
@@ -226,7 +248,9 @@ export class EpubBook {
       const version = this.getVersion();
       // * EPUB 3
       if (version === 3) {
-         let navItem = [...this.getManifest().values()].find((item) => item.properties.includes('nav'));
+         let navItem = [...this.getManifest().values()].find((item) =>
+            item.properties.includes('nav')
+         );
          if (!navItem) {
             // ? Last resort
             const tocItem = [...manifest.values()].find((item) =>
@@ -238,7 +262,10 @@ export class EpubBook {
             navItem = tocItem;
          }
          const navDocument = this.#getXmlDocument(navItem.resolvedPath);
-         this.navigation = this.#parseEpub3Navigation(navDocument, navItem.resolvedPath);
+         this.navigation = this.#parseEpub3Navigation(
+            navDocument,
+            navItem.resolvedPath,
+         );
 
          return this.navigation;
       }
@@ -249,15 +276,22 @@ export class EpubBook {
          let tocItem: ManifestItem | undefined;
          if (!tocId) {
             // ? last resort
-            tocItem = [...manifest.values()].find((item) => item.mediaType === 'application/x-dtbncx+xml')
-               ?? [...manifest.values()].find((item) => item.href.endsWith('.ncx'));
+            tocItem = [...manifest.values()].find((item) =>
+               item.mediaType === 'application/x-dtbncx+xml'
+            )
+               ?? [...manifest.values()].find((item) =>
+                  item.href.endsWith('.ncx')
+               );
          }
          else { tocItem = manifest.get(tocId); }
 
          if (!tocItem) return [];
 
          const navDocument = this.#getXmlDocument(tocItem.resolvedPath);
-         this.navigation = this.#parseEpub2Navigation(navDocument, tocItem.resolvedPath);
+         this.navigation = this.#parseEpub2Navigation(
+            navDocument,
+            tocItem.resolvedPath,
+         );
 
          return this.navigation;
       }
@@ -304,7 +338,11 @@ export class EpubBook {
          if (!part || part === '.') continue;
 
          if (part === '..') {
-            if (parts.length === 0) throw new Error(`EPUB resource path escapes package root: ${path}`);
+            if (parts.length === 0) {
+               throw new Error(
+                  `EPUB resource path escapes package root: ${path}`,
+               );
+            }
             parts.pop();
             continue;
          }
@@ -313,12 +351,18 @@ export class EpubBook {
       return parts.join('/');
    }
 
-   #parseEpub3Navigation(navDocument: Document, navPath: ResourcePath): NavigationItem[] {
+   #parseEpub3Navigation(
+      navDocument: Document,
+      navPath: ResourcePath,
+   ): NavigationItem[] {
       const navElements = navDocument.getElementsByTagName('nav');
       let tocNav: Element | null = null;
 
       for (const nav of navElements) {
-         const epubType = nav.getAttributeNS('http://www.idpf.org/2007/ops', 'type');
+         const epubType = nav.getAttributeNS(
+            'http://www.idpf.org/2007/ops',
+            'type',
+         );
          if (epubType?.split(/\s+/).includes('toc')) {
             tocNav = nav;
             break;
@@ -360,7 +404,10 @@ export class EpubBook {
       return rootOl ? parseOl(rootOl) : [];
    }
 
-   #parseEpub2Navigation(tocDocument: Document, tocPath: ResourcePath): NavigationItem[] {
+   #parseEpub2Navigation(
+      tocDocument: Document,
+      tocPath: ResourcePath,
+   ): NavigationItem[] {
       const navMap = tocDocument.getElementsByTagName('navMap')[0];
       if (!navMap) return [];
 
@@ -373,8 +420,9 @@ export class EpubBook {
                ?.getElementsByTagName('text')[0]
                ?.textContent?.trim() ?? '';
 
-            const contentSrc = navPoint.getElementsByTagName('content')[0]?.getAttribute('src')
-               ?? '';
+            const contentSrc =
+               navPoint.getElementsByTagName('content')[0]?.getAttribute('src')
+                  ?? '';
 
             const [hrefPath, fragment] = contentSrc.split('#');
             const resolvedPath = this.#resolvePath(tocPath, hrefPath!);
@@ -387,8 +435,9 @@ export class EpubBook {
                children: [],
             };
 
-            if ([...navPoint.children].some((el) => el.localName === 'navPoint'))
-               item.children = parseNavPoints(navPoint);
+            if (
+               [...navPoint.children].some((el) => el.localName === 'navPoint')
+            ) { item.children = parseNavPoints(navPoint); }
 
             items.push(item);
          }
