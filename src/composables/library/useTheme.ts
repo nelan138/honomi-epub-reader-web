@@ -7,6 +7,11 @@ function useTheme() {
       (localStorage.getItem('theme') as Theme | null) || 'dark',
    );
 
+   watch(theme, (newValue) => {
+      localStorage.setItem('theme', newValue);
+      document.documentElement.classList.toggle('dark', newValue === 'dark');
+   }, { immediate: true });
+
    const updateTheme = (value: Theme) => {
       theme.value = value;
    };
@@ -14,12 +19,9 @@ function useTheme() {
    const toggleTheme = () => {
       const nextTheme = theme.value === 'dark' ? 'light' : 'dark';
 
-      if (!document.startViewTransition) {
-         updateTheme(nextTheme);
-         return;
-      }
+      if (!document.startViewTransition) return updateTheme(nextTheme);
 
-      // Exact viewport diagonal from top-right to bottom-left
+      // top-right to bottom-left
       const endRadius = Math.hypot(
          globalThis.innerWidth,
          globalThis.innerHeight,
@@ -49,11 +51,6 @@ function useTheme() {
          );
       });
    };
-
-   watch(theme, (newValue) => {
-      localStorage.setItem('theme', newValue);
-      document.documentElement.classList.toggle('dark', newValue === 'dark');
-   }, { immediate: true });
 
    return { toggleTheme };
 }

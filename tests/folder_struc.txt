@@ -1,0 +1,38 @@
+└── honomi-epub-reader-web/
+    ├── .gitignore
+    ├── .prettierrc.json
+    ├── deno.json
+    ├── deno.lock
+    ├── index.html
+    ├── README.md
+    ├── tsconfig.json
+    ├── vite.config.ts
+    ├── src/
+    │   ├── App.vue
+    │   ├── main.ts
+    │   ├── types/
+    │   │   ├── book.ts
+    │   │   ├── epub.ts
+    │   │   └── shelf.ts
+    │   ├── composables/
+    │   │   ├── useBooks.ts
+    │   │   ├── useShelves.ts
+    │   │   └── useTheme.ts
+    │   ├── assets/
+    │   │   └── default-book-cover.jpeg
+    │   ├── services/
+    │   │   ├── epub/
+    │   │   │   └── epub.ts
+    │   │   └── dexie/
+    │   │       ├── bookRepo.ts
+    │   │       ├── database.ts
+    │   │       └── shelfRepo.ts
+    │   └── components/
+    │       └── library-view/
+    │           ├── BookCard.vue
+    │           ├── Bookcase.vue
+    │           ├── Header.vue
+    │           └── Shelf.vue
+    └── .vscode/
+        ├── extensions.json
+        └── settings.json

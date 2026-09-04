@@ -10,6 +10,11 @@ import type {
    SupportedEpubVersion,
 } from '@src/types/epub';
 
+const defaultMetadata: Metadata = {
+   title: 'No title',
+   creator: 'Unknown',
+   language: '',
+};
 /**
  * Represents an EPUB, only has data parsed from its content.
  */
@@ -45,11 +50,7 @@ export class EpubBook {
       this.spine = this.getSpine();
       this.navigation = this.getNavigation();
 
-      this.metadata = this.getMetadata() ?? {
-         title: 'No title',
-         creator: 'Unknown',
-         language: 'Unknown',
-      };
+      this.metadata = this.getMetadata() ?? defaultMetadata;
       this.cover = this.getCover();
    }
 
@@ -175,17 +176,7 @@ export class EpubBook {
       const opfDocument = this.#getXmlDocument(this.getOpfPath());
 
       const metadataElement = opfDocument.getElementsByTagName('metadata')[0];
-      if (!metadataElement) {
-         return {
-            title: 'No title',
-            creator: 'Unknown',
-            language: 'Unknown',
-            publisher: 'Unknown',
-            identifier: undefined,
-            description: undefined,
-            subject: undefined,
-         };
-      }
+      if (!metadataElement) return defaultMetadata;
 
       this.metadata = {
          title: this.#getElementText(metadataElement, 'title') || 'No title',

@@ -1,6 +1,6 @@
-import { db } from '@src/services/dexie/database.ts';
+import { db } from '@src/services/dexie/database';
 import type { BookRecord } from '@src/types/book';
-import { defaultShelf } from '@src/services/dexie/database.ts';
+import { defaultShelf } from '@src/services/dexie/database';
 
 async function addBookToDB(
    book: Omit<BookRecord, 'id' | 'shelfId'>,

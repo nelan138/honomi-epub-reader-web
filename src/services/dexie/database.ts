@@ -1,7 +1,7 @@
 import { Dexie, type EntityTable } from 'dexie';
 import type { BookRecord } from '@src/types/book';
-import type { ShelfRecord } from '@src/types/shelf.ts';
-import { addShelfToDB } from '@src/services/dexie/shelfRepo.ts';
+import type { ShelfRecord } from '@src/types/shelf';
+import { addShelfToDB } from '@src/services/dexie/shelfRepo';
 
 const DB_NAME = 'Honomi';
 const DB_VERSION = 1;
@@ -17,8 +17,8 @@ db.version(DB_VERSION).stores({
 });
 
 const defaultShelf: ShelfRecord = {
-   id: 1, // ? maybe not
-   displayOrder: 1, // ? maybe not
+   id: 1, // ? maybe not but will be updated
+   displayOrder: 1, // ? maybe not but will be updated
    name: 'Your Books',
    expanded: true,
 };

@@ -6,9 +6,12 @@ import {
    deleteBookFromDB,
    getBooksFromDB,
    renameBookInDB,
-} from '@src/services/dexie/bookRepo.ts';
+} from '@src/services/dexie/bookRepo';
+import { useRouter } from 'vue-router';
 
 function useBooks() {
+   const router = useRouter();
+
    const books = ref<UIBookCard[]>([]);
 
    const syncWithDB = async () => {
@@ -46,9 +49,8 @@ function useBooks() {
          books.value.push(addedBook);
       }
       catch (error) {
-         alert('Failed to add book: ' + (error as Error).message);
          await syncWithDB();
-         return;
+         alert('Failed to add book: ' + (error as Error).message);
       }
    };
    const deleteBook = async (id: number) => {
@@ -65,19 +67,14 @@ function useBooks() {
 
    const renameBook = async (id: number, newTitle: string) => {
       const targetBook = books.value.find((book) => book.id === id);
-      if (!targetBook) {
-         alert('Book does not exist!');
-         return;
-      }
+      if (!targetBook) return alert('Book does not exist!');
 
-      // Update UI
       targetBook.metadata.title = newTitle;
 
       try {
          await renameBookInDB(id, newTitle);
       }
       catch (error) {
-         // Rollback UI update if renaming fails
          await syncWithDB();
          alert('Failed to rename book: ' + (error as Error).message);
       }
@@ -85,7 +82,7 @@ function useBooks() {
 
    const changeBookShelf = async (bookId: number, shelfId: number) => {
       const targetBook = books.value.find((book) => book.id === bookId);
-      if (!targetBook) throw new Error('Book does not exist!');
+      if (!targetBook) return alert('Book does not exist!');
 
       targetBook.shelfId = shelfId;
 
@@ -98,7 +95,16 @@ function useBooks() {
       }
    };
 
-   return { books, renameBook, changeBookShelf, deleteBook, addBook };
+   const openBook = (bookId: number) => {
+      try {
+         router.push(`/read/${bookId}`);
+      }
+      catch (error) {
+         alert('Failed to open book: ' + (error as Error).message);
+      }
+   };
+
+   return { books, renameBook, changeBookShelf, deleteBook, addBook, openBook };
 }
 
 export default useBooks;

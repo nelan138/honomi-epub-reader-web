@@ -3,52 +3,65 @@ import Shelf from './Shelf.vue';
 import Header from './Header.vue';
 import BookCard from './BookCard.vue';
 
-import useShelves from '@src/composables/useShelves';
-import useTheme from '@src/composables/useTheme';
-import useBooks from '@src/composables/useBooks';
+import useShelves from '@src/composables/library/useShelves';
+import useTheme from '@src/composables/library/useTheme';
+import useBooks from '@src/composables/library/useBooks';
 import { EpubBook } from '@src/services/epub/epub';
 import type { BookRecord } from '@src/types/book.js';
+import type { UIShelf } from '@src/types/shelf.js';
 
+// * * *
 const { toggleTheme } = useTheme();
 const { shelves, addShelf, deleteShelf, renameShelf, collapseShelf, expandShelf, moveShelfUp, moveShelfDown } =
    useShelves();
-const { books, renameBook, changeBookShelf, deleteBook, addBook } = useBooks();
+const { books, openBook, renameBook, changeBookShelf, deleteBook, addBook } = useBooks();
+// * * * * * *
 
 async function handleAddingShelf() {
-   const name = prompt("Enter new shelf's name")?.trim();
-   if (!name) return;
-   await addShelf({ name, expanded: true });
+   const categoryname = prompt("Enter new shelf's name")?.trim();
+   if (!categoryname) return;
+
+   const shelf: Omit<UIShelf, 'id' | 'displayOrder'> = {
+      name: categoryname,
+      expanded: true,
+   };
+
+   await addShelf(shelf);
 }
 
 async function onShelfAction(event: string, shelfId: number): Promise<void> {
    switch (event) {
       case 'rename': {
          const newName = prompt('Enter new shelf name')?.trim();
-         if (!newName) break;
-         return await renameShelf(shelfId, newName);
+         if (newName) await renameShelf(shelfId, newName);
+         return;
       }
       case 'delete': {
-         if (confirm('Are you sure you want to delete this shelf?')) {
-            return await deleteShelf(shelfId);
-         }
-         break;
+         const userAgreed = confirm('Are you sure you want to delete this shelf?');
+         if (userAgreed) return await deleteShelf(shelfId);
+         else return;
       }
       case 'collapse':
          return await collapseShelf(shelfId);
+
       case 'expand':
          return await expandShelf(shelfId);
+
       case 'move-up':
          return await moveShelfUp(shelfId);
+
       case 'move-down':
          return await moveShelfDown(shelfId);
+
       default:
-         throw new Error('Feature not implemented yet >.<');
+         alert('Feature not implemented yet >.<');
    }
 }
 
-async function handleImportingFiles(files: FileList) {
+const handleImportingFiles = async (files: FileList) => {
    for (const file of files) {
       if (!file) continue;
+
       const epubBook = new EpubBook(file);
       await epubBook.parse();
 
@@ -66,37 +79,36 @@ async function handleImportingFiles(files: FileList) {
 
       await addBook(book);
    }
-}
+};
+
 async function onBookAction(event: string, bookId: number): Promise<void> {
    switch (event) {
       case 'rename': {
          const newTitle = prompt('Enter new book title')?.trim();
-         if (!newTitle) break;
+         if (!newTitle) return;
 
          return await renameBook(bookId, newTitle);
       }
       case 'change-shelf': {
          const shelfName = prompt('Enter the new shelf name')?.trim();
-         if (!shelfName) break;
+         if (!shelfName) return;
 
          const targetShelf = shelves.value.find(
             (shelf) => shelf.name.trim().toLocaleLowerCase() === shelfName.toLocaleLowerCase()
          );
-         if (!targetShelf) {
-            alert('Shelf does not exist!');
-            break;
-         }
+         if (!targetShelf) return alert('Shelf does not exist!');
 
          return await changeBookShelf(bookId, targetShelf.id);
       }
       case 'delete': {
-         if (confirm('Are you sure you want to delete this book?')) {
-            return await deleteBook(bookId);
-         }
-         break;
+         const userAgreed = confirm('Are you sure you want to delete this book?');
+         if (userAgreed) await deleteBook(bookId);
+         return;
       }
+      case 'open':
+         return openBook(bookId);
       default:
-         throw new Error('Feature not implemented yet >.<');
+         alert('Feature not implemented yet >.<');
    }
 }
 
@@ -129,6 +141,7 @@ const getBooksByShelf = (shelfId: number) => {
             class="grid w-full grid-cols-1 gap-4 lg:grid-cols-3 2xl:grid-cols-4"
          >
             <BookCard
+               @open="onBookAction('open', $event)"
                @rename="onBookAction('rename', $event)"
                @delete="onBookAction('delete', $event)"
                @change-shelf="onBookAction('change-shelf', $event)"
@@ -141,7 +154,7 @@ const getBooksByShelf = (shelfId: number) => {
    </div>
 </template>
 
-<style lang="css" scoped>
+<style scoped>
 .book-list-enter-active,
 .book-list-leave-active {
    transition: all 0.25s ease;

@@ -1,5 +1,5 @@
-import { db } from '@src/services/dexie/database.ts';
-import type { ShelfRecord } from '@src/types/shelf.ts';
+import { db } from '@src/services/dexie/database';
+import type { ShelfRecord } from '@src/types/shelf';
 
 async function addShelfToDB(
    shelf: Pick<ShelfRecord, 'name' | 'expanded'>,

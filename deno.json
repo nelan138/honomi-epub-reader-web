@@ -19,7 +19,8 @@
       "tailwindcss": "npm:tailwindcss@^4.3.3",
       "typescript": "npm:typescript@^6.0.3",
       "vite": "npm:vite@^8.2.2",
-      "vue": "npm:vue@^3.5.42"
+      "vue": "npm:vue@^3.5.42",
+      "vue-router": "npm:vue-router@^4.6.4"
    },
    "nodeModulesDir": "auto",
    "fmt": {
