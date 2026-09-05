@@ -1,102 +1,175 @@
 <script setup lang="ts">
+import ContentChunk from '@src/components/reader/ContentChunk.vue';
 import Header from '@src/components/reader/Header.vue';
 import { getBookFromDB } from '@src/services/dexie/bookRepo';
+import type { ManifestItem, ResourcePath, SpineItem } from '@src/types/epub';
 
-import type { ManifestItem, SpineItem } from '@src/types/epub';
-import { strFromU8, unzipSync } from 'fflate';
-import { onMounted, onUnmounted, ref } from 'vue';
+import { nextTick, onMounted, onUnmounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute();
 const router = useRouter();
 
-const spine = ref<SpineItem[]>([]);
-const manifest = ref<Map<string, ManifestItem>>();
-const epubFile = ref<Blob>();
-let unzippedEpubFile: Record<string, Uint8Array>;
+const params = route.params.bookId as string | undefined;
+const bookId = params ? parseInt(params) : NaN;
 
-type ContentChunk = string; // for sake of simplicity
+type Idref = string;
+type SpineItemContent = string;
 
-async function getSpineItemContent(item: SpineItem) {
-   if (!manifest.value || !epubFile.value) {
-      throw new Error('Sth went really wrong');
-   }
-   const manifestItem = manifest.value.get(item.idref);
-   if (!manifestItem) {
-      throw new Error('Item not found');
-   }
-
-   const path = manifestItem.resolvedPath;
-   const content = unzippedEpubFile[path];
-
-   if (content) {
-      const rawString = strFromU8(content);
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(rawString, 'application/xhtml+xml');
-      return doc.body.innerHTML;
-   } else {
-      throw new Error('Content not found');
-   }
-}
-
-const loadedChunks = ref<ContentChunk[]>([]);
-
-let currentSpineIndex = 0;
-let isLoading = false;
-async function loadNextChunk() {
-   if (isLoading) return;
-
-   if (currentSpineIndex >= spine.value.length) {
-      alert('End of content');
-      return;
-   }
-
-   isLoading = true;
-
-   try {
-      const currentItem = spine.value[currentSpineIndex];
-      if (currentItem === undefined) {
-         alert('Sth went really wrong');
-         return;
-      }
-
-      const content = await getSpineItemContent(currentItem);
-      loadedChunks.value.push(content);
-      currentSpineIndex++;
-   } finally {
-      isLoading = false;
-   }
-}
-
-const reachedBottom = ref<HTMLDivElement | null>(null);
+let epubData: Record<ResourcePath, Uint8Array> = {};
+let manifest = new Map<string, ManifestItem>();
+let spineItems: SpineItem[] = [];
+const spineItemContentMap = new Map<Idref, SpineItemContent>();
 
 let observer: IntersectionObserver | null = null;
+const reachedBottom = ref<HTMLElement | null>(null);
 
-onMounted(async () => {
-   const params = route.params.bookId as string | undefined;
-   const bookId = params ? parseInt(params) : NaN;
-   try {
-      const result = await getBookFromDB(bookId);
+let currentSpinItemIndex = 0;
+let contentIsLoading = false;
 
-      spine.value = result.spine;
-      manifest.value = result.manifest;
-      epubFile.value = result.epubFile;
+// Fixed the naming collision here!
+const loadedChunks = ref<{ idref: Idref; content: string }[]>([]);
 
-      const buffer = await epubFile.value.arrayBuffer();
-      unzippedEpubFile = unzipSync(new Uint8Array(buffer));
-   } catch (e) {
-      router.push('/book-not-found');
+// --- HELPERS & PARSERS ---
+
+const normalizePath = (path: string): string => {
+   const parts: string[] = [];
+   for (const part of path.replaceAll('\\', '/').split('/')) {
+      if (!part || part === '.') continue;
+      if (part === '..') {
+         if (parts.length === 0) throw new Error(`Path escapes root: ${path}`);
+         parts.pop();
+         continue;
+      }
+      parts.push(part);
+   }
+   return parts.join('/');
+};
+
+const resolvePath = (basePath: string, relativePath: string): string => {
+   const baseParts = normalizePath(basePath).split('/');
+   baseParts.pop();
+   return normalizePath([...baseParts, relativePath].join('/'));
+};
+
+const fetchAndParseChapter = async (idref: string): Promise<string> => {
+   const manifestItem = manifest.get(idref);
+   if (!manifestItem) return `<p>Error: ${idref} not found</p>`;
+
+   const chapterPath = manifestItem.resolvedPath;
+   const fileData = epubData[chapterPath];
+   if (!fileData) return `<p>Error: File missing</p>`;
+
+   const rawXhtml = new TextDecoder('utf-8').decode(fileData);
+   const doc = new DOMParser().parseFromString(rawXhtml, 'application/xhtml+xml');
+
+   if (doc.getElementsByTagName('parsererror').length > 0) {
+      console.error(`Invalid XML in EPUB entry: ${chapterPath}`);
+      return `<p>Error parsing chapter.</p>`;
+   }
+
+   const body = doc.querySelector('body');
+   if (!body) return '';
+
+   const images = body.querySelectorAll('img, image');
+   for (const img of images) {
+      const src = img.getAttribute('src') || img.getAttribute('href') || img.getAttribute('xlink:href');
+      if (!src) continue;
+
+      const imgZipPath = resolvePath(chapterPath, src);
+      const imgData = epubData[imgZipPath];
+
+      if (imgData) {
+         const safeBytes = new Uint8Array(imgData);
+         const blobUrl = URL.createObjectURL(new Blob([safeBytes.buffer]));
+         img.tagName.toLowerCase() === 'image' ? img.setAttribute('href', blobUrl) : img.setAttribute('src', blobUrl);
+      }
+   }
+
+   return body.innerHTML;
+};
+
+// --- LAZY LOADING CACHE ---
+
+const loadNextContentToChunks = async (): Promise<boolean> => {
+   if (currentSpinItemIndex >= spineItems.length) return false;
+
+   const spineItem = spineItems[currentSpinItemIndex++];
+   if (!spineItem) return false;
+
+   let content = spineItemContentMap.get(spineItem.idref);
+   if (!content) {
+      content = await fetchAndParseChapter(spineItem.idref);
+      spineItemContentMap.set(spineItem.idref, content);
+   }
+
+   loadedChunks.value.push({ idref: spineItem.idref, content });
+   return true;
+};
+
+// --- OBSERVER TRIGGER ---
+
+const appendNextChunk = async () => {
+   if (contentIsLoading) return;
+   if (currentSpinItemIndex >= spineItems.length) {
+      observer?.disconnect();
       return;
    }
 
-   console.table(spine.value);
-   console.table(Object.fromEntries(manifest.value));
+   contentIsLoading = true;
 
-   observer = new IntersectionObserver(async ([entry]: IntersectionObserverEntry[]) => {
-      if (entry?.isIntersecting) {
-         await loadNextChunk();
+   await loadNextContentToChunks();
+
+   await nextTick();
+   contentIsLoading = false;
+
+   requestAnimationFrame(() => {
+      if (!reachedBottom.value) return;
+      const rect = reachedBottom.value.getBoundingClientRect();
+      if (rect.top <= window.innerHeight + 800) {
+         appendNextChunk();
       }
    });
+};
+
+// --- LIFECYCLE ---
+
+onMounted(async () => {
+   try {
+      const bookRecord = await getBookFromDB(bookId);
+      spineItems = bookRecord.spine;
+      manifest = bookRecord.manifest;
+      epubData = bookRecord.epubData;
+   } catch (e) {
+      router.push('/error/book-not-found');
+      return;
+   }
+
+   const BUFFER_ZONE = 800;
+   while (currentSpinItemIndex < spineItems.length) {
+      await loadNextContentToChunks();
+      await nextTick();
+
+      if (reachedBottom.value) {
+         const rect = reachedBottom.value.getBoundingClientRect();
+         if (rect.top > window.innerHeight + BUFFER_ZONE) {
+            break;
+         }
+      }
+   }
+
+   observer = new IntersectionObserver(
+      ([entry]) => {
+         if (entry?.isIntersecting) {
+            appendNextChunk();
+         }
+      },
+      {
+         root: null,
+         rootMargin: '800px 0px',
+         threshold: 0,
+      }
+   );
 
    if (reachedBottom.value) observer.observe(reachedBottom.value);
 });
@@ -113,16 +186,21 @@ onUnmounted(() => {
       <Header />
 
       <div class="reader-content px-4 md:px-10">
-         <div
-            v-for="(chunk, index) in loadedChunks"
-            :key="index"
-            v-html="chunk"
-            class="mb-10 min-h-[50vh] border-b border-gray-300 pb-10"
-         ></div>
+         <ContentChunk
+            v-for="item in loadedChunks"
+            :key="item.idref"
+            :chunk="item.content"
+            class="content-chunk mb-10 min-h-[50vh] border-b border-gray-300 pb-10"
+         />
       </div>
 
       <div ref="reachedBottom" class="flex h-16 w-full items-center justify-center"></div>
    </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.content-chunk {
+   content-visibility: auto;
+   contain-intrinsic-size: 0 800px;
+}
+</style>

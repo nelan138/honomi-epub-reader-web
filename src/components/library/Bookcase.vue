@@ -67,7 +67,7 @@ const handleImportingFiles = async (files: FileList) => {
 
       const book: Omit<BookRecord, 'id' | 'shelfId'> = {
          progress: 0,
-         epubFile: epubBook.getEpubFile(),
+         epubData: epubBook.getEpubData(),
          version: epubBook.getVersion(),
          opfPath: epubBook.getOpfPath(),
          manifest: epubBook.getManifest(),

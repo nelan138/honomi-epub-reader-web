@@ -2,6 +2,7 @@ import type {
    ManifestItem,
    Metadata,
    NavigationItem,
+   ResourcePath,
    SpineItem,
    SupportedEpubVersion,
 } from '@src/types/epub';
@@ -14,7 +15,7 @@ type BookRecord = {
    shelfId: number;
    progress: number;
 
-   epubFile: Blob;
+   epubData: Record<ResourcePath, Uint8Array>;
    version: SupportedEpubVersion;
 
    opfPath: string;

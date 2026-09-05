@@ -20,7 +20,7 @@ const defaultMetadata: Metadata = {
  */
 export class EpubBook {
    private epubFile: Blob;
-   private epubData?: Record<ResourcePath, Uint8Array>;
+   private epubData!: Record<ResourcePath, Uint8Array>;
 
    // Epub Data
    private version!: SupportedEpubVersion;
@@ -56,6 +56,10 @@ export class EpubBook {
 
    getEpubFile(): Blob {
       return this.epubFile;
+   }
+
+   getEpubData(): Record<ResourcePath, Uint8Array> {
+      return this.epubData;
    }
 
    getVersion(): SupportedEpubVersion {
