@@ -18,6 +18,14 @@ async function getBooksFromDB(): Promise<BookRecord[]> {
    return books;
 }
 
+async function getBookFromDB(bookId: number): Promise<BookRecord> {
+   const store = db.books;
+   const book = await store.get(bookId);
+   if (book === undefined) throw new Error('Book does not exist!');
+
+   return book;
+}
+
 async function deleteBookFromDB(id: number): Promise<void> {
    await db.transaction('readwrite', db.books, async () => {
       const store = db.books;
@@ -63,4 +71,5 @@ export {
    deleteBookFromDB,
    getBooksFromDB,
    renameBookInDB,
+   getBookFromDB
 };

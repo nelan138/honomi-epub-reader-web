@@ -1,196 +1,196 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <package
-        xmlns="http://www.idpf.org/2007/opf"
-        version="3.0"
-        xml:lang="ja"
-        unique-identifier="unique-id"
-        prefix="ebpaj: http://www.ebpaj.jp/
+   xmlns="http://www.idpf.org/2007/opf"
+   version="3.0"
+   xml:lang="ja"
+   unique-identifier="unique-id"
+   prefix="ebpaj: http://www.ebpaj.jp/
         ibooks: http://vocabulary.itunes.apple.com/rdf/ibooks/vocabulary-extensions-1.0/"
 >
 
-        <metadata
-                xmlns:dc="http://purl.org/dc/elements/1.1/"
-        >
+   <metadata
+      xmlns:dc="http://purl.org/dc/elements/1.1/"
+   >
 
-                <!-- 作品名 -->
-                <dc:title id="title">悪魔公女４</dc:title>
-                <meta refines="#title" property="file-as">アクマコウジョ4</meta>
+      <!-- 作品名 -->
+      <dc:title id="title">悪魔公女４</dc:title>
+      <meta refines="#title" property="file-as">アクマコウジョ4</meta>
 
-                <!-- 著者名 -->
-                <dc:creator id="creator01">春の日びより</dc:creator>
-                <meta refines="#creator01" property="file-as">ハルノヒビヨリ</meta>
-                <meta refines="#creator01" property="role" scheme="marc:relators">aut</meta>
-                <meta refines="#creator01" property="display-seq">1</meta>
+      <!-- 著者名 -->
+      <dc:creator id="creator01">春の日びより</dc:creator>
+      <meta refines="#creator01" property="file-as">ハルノヒビヨリ</meta>
+      <meta refines="#creator01" property="role" scheme="marc:relators">aut</meta>
+      <meta refines="#creator01" property="display-seq">1</meta>
 
-                <dc:creator id="creator02">海鵜 げそ</dc:creator>
-                <meta refines="#creator02" property="file-as">ウミウ ゲソ</meta>
-                <meta refines="#creator02" property="role" scheme="marc:relators">ill</meta>
-                <meta refines="#creator02" property="display-seq">2</meta>
+      <dc:creator id="creator02">海鵜 げそ</dc:creator>
+      <meta refines="#creator02" property="file-as">ウミウ ゲソ</meta>
+      <meta refines="#creator02" property="role" scheme="marc:relators">ill</meta>
+      <meta refines="#creator02" property="display-seq">2</meta>
 
-                <!-- 出版社名 -->
-                <dc:publisher id="publisher">講談社</dc:publisher>
-                <meta refines="#publisher" property="file-as">コウダンシャ</meta>
+      <!-- 出版社名 -->
+      <dc:publisher id="publisher">講談社</dc:publisher>
+      <meta refines="#publisher" property="file-as">コウダンシャ</meta>
 
-                <!-- 言語 -->
-                <dc:language>ja</dc:language>
+      <!-- 言語 -->
+      <dc:language>ja</dc:language>
 
-                <!-- ファイルid -->
-                <dc:identifier id="unique-id">urn:jdcn:06A0000000000788131Y</dc:identifier>
+      <!-- ファイルid -->
+      <dc:identifier id="unique-id">urn:jdcn:06A0000000000788131Y</dc:identifier>
 
-                <!-- 更新日 -->
-                <meta property="dcterms:modified">2024-05-14T00:00:00Z</meta>
+      <!-- 更新日 -->
+      <meta property="dcterms:modified">2024-05-14T00:00:00Z</meta>
 
-                <!-- etc. -->
-                <!-- Kodansha ver. 1.10 -->
-                <meta property="ebpaj:guide-version">1.1.3</meta>
-                <meta name="cover" content="cover" />
+      <!-- etc. -->
+      <!-- Kodansha ver. 1.10 -->
+      <meta property="ebpaj:guide-version">1.1.3</meta>
+      <meta name="cover" content="cover" />
 
-                <meta property="ibooks:specified-fonts">true</meta>
+      <meta property="ibooks:specified-fonts">true</meta>
 
-                <meta name="Ripped By" content="AthK#0422" />
-        </metadata>
+      <meta name="Ripped By" content="AthK#0422" />
+   </metadata>
 
-        <manifest>
+   <manifest>
 
-                <!-- navigation -->
-                <item media-type="application/xhtml+xml" id="toc" href="toc.xhtml" properties="nav" />
+      <!-- navigation -->
+      <item media-type="application/xhtml+xml" id="toc" href="toc.xhtml" properties="nav" />
 
-                <!-- style -->
-                <item media-type="text/css" id="book-style" href="style/book-style.css" />
-                <item media-type="text/css" id="style-reset" href="style/style-reset.css" />
-                <item media-type="text/css" id="style-standard" href="style/style-standard.css" />
-                <item media-type="text/css" id="style-advance" href="style/style-advance.css" />
-                <item media-type="text/css" id="style-kodansha" href="style/style-kodansha.css" />
-                <item media-type="text/css" id="style-check" href="style/style-check.css" />
+      <!-- style -->
+      <item media-type="text/css" id="book-style" href="style/book-style.css" />
+      <item media-type="text/css" id="style-reset" href="style/style-reset.css" />
+      <item media-type="text/css" id="style-standard" href="style/style-standard.css" />
+      <item media-type="text/css" id="style-advance" href="style/style-advance.css" />
+      <item media-type="text/css" id="style-kodansha" href="style/style-kodansha.css" />
+      <item media-type="text/css" id="style-check" href="style/style-check.css" />
 
-                <!-- image -->
-                <item media-type="image/jpeg" id="cover" href="image/cover.jpg"
-                        properties="cover-image" />
-                <item media-type="image/jpeg" id="end" href="image/end.jpg" />
-                <item media-type="image/jpeg" id="p001" href="image/p001.jpg" />
-                <item media-type="image/jpeg" id="p002-003" href="image/p002-003.jpg" />
-                <item media-type="image/jpeg" id="p004" href="image/p004.jpg" />
-                <item media-type="image/jpeg" id="p005" href="image/p005.jpg" />
-                <item media-type="image/jpeg" id="p006" href="image/p006.jpg" />
-                <item media-type="image/jpeg" id="p007" href="image/p007.jpg" />
-                <item media-type="image/jpeg" id="p027" href="image/p027.jpg" />
-                <item media-type="image/jpeg" id="p042" href="image/p042.jpg" />
-                <item media-type="image/jpeg" id="p063" href="image/p063.jpg" />
-                <item media-type="image/jpeg" id="p108" href="image/p108.jpg" />
-                <item media-type="image/jpeg" id="p141" href="image/p141.jpg" />
-                <item media-type="image/jpeg" id="p151" href="image/p151.jpg" />
-                <item media-type="image/jpeg" id="p192" href="image/p192.jpg" />
-                <item media-type="image/jpeg" id="p204" href="image/p204.jpg" />
-                <item media-type="image/jpeg" id="p218" href="image/p218.jpg" />
-                <item media-type="image/jpeg" id="p272" href="image/p272.jpg" />
-                <item media-type="image/jpeg" id="p324" href="image/p324.jpg" />
+      <!-- image -->
+      <item media-type="image/jpeg" id="cover" href="image/cover.jpg"
+         properties="cover-image" />
+      <item media-type="image/jpeg" id="end" href="image/end.jpg" />
+      <item media-type="image/jpeg" id="p001" href="image/p001.jpg" />
+      <item media-type="image/jpeg" id="p002-003" href="image/p002-003.jpg" />
+      <item media-type="image/jpeg" id="p004" href="image/p004.jpg" />
+      <item media-type="image/jpeg" id="p005" href="image/p005.jpg" />
+      <item media-type="image/jpeg" id="p006" href="image/p006.jpg" />
+      <item media-type="image/jpeg" id="p007" href="image/p007.jpg" />
+      <item media-type="image/jpeg" id="p027" href="image/p027.jpg" />
+      <item media-type="image/jpeg" id="p042" href="image/p042.jpg" />
+      <item media-type="image/jpeg" id="p063" href="image/p063.jpg" />
+      <item media-type="image/jpeg" id="p108" href="image/p108.jpg" />
+      <item media-type="image/jpeg" id="p141" href="image/p141.jpg" />
+      <item media-type="image/jpeg" id="p151" href="image/p151.jpg" />
+      <item media-type="image/jpeg" id="p192" href="image/p192.jpg" />
+      <item media-type="image/jpeg" id="p204" href="image/p204.jpg" />
+      <item media-type="image/jpeg" id="p218" href="image/p218.jpg" />
+      <item media-type="image/jpeg" id="p272" href="image/p272.jpg" />
+      <item media-type="image/jpeg" id="p324" href="image/p324.jpg" />
 
-                <!-- xhtml -->
-                <item media-type="application/xhtml+xml" id="p-0001" href="xhtml/p-0001.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0002" href="xhtml/p-0002.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0003" href="xhtml/p-0003.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0004" href="xhtml/p-0004.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0005" href="xhtml/p-0005.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0006" href="xhtml/p-0006.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0007" href="xhtml/p-0007.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0008" href="xhtml/p-0008.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0009" href="xhtml/p-0009.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0010" href="xhtml/p-0010.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0011" href="xhtml/p-0011.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0012" href="xhtml/p-0012.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0013" href="xhtml/p-0013.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0014" href="xhtml/p-0014.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0015" href="xhtml/p-0015.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0016" href="xhtml/p-0016.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0017" href="xhtml/p-0017.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0018" href="xhtml/p-0018.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0019" href="xhtml/p-0019.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0020" href="xhtml/p-0020.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0021" href="xhtml/p-0021.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0022" href="xhtml/p-0022.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0023" href="xhtml/p-0023.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0024" href="xhtml/p-0024.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0025" href="xhtml/p-0025.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0026" href="xhtml/p-0026.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0027" href="xhtml/p-0027.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0028" href="xhtml/p-0028.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0029" href="xhtml/p-0029.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0030" href="xhtml/p-0030.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0031" href="xhtml/p-0031.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0032" href="xhtml/p-0032.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0033" href="xhtml/p-0033.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0034" href="xhtml/p-0034.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0035" href="xhtml/p-0035.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0036" href="xhtml/p-0036.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0037" href="xhtml/p-0037.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0038" href="xhtml/p-0038.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0039" href="xhtml/p-0039.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0040" href="xhtml/p-0040.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0041" href="xhtml/p-0041.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0042" href="xhtml/p-0042.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0043" href="xhtml/p-0043.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0044" href="xhtml/p-0044.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0045" href="xhtml/p-0045.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0046" href="xhtml/p-0046.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0047" href="xhtml/p-0047.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0048" href="xhtml/p-0048.xhtml" />
-                <item media-type="application/xhtml+xml" id="p-0049" href="xhtml/p-0049.xhtml" />
+      <!-- xhtml -->
+      <item media-type="application/xhtml+xml" id="p-0001" href="xhtml/p-0001.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0002" href="xhtml/p-0002.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0003" href="xhtml/p-0003.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0004" href="xhtml/p-0004.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0005" href="xhtml/p-0005.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0006" href="xhtml/p-0006.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0007" href="xhtml/p-0007.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0008" href="xhtml/p-0008.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0009" href="xhtml/p-0009.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0010" href="xhtml/p-0010.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0011" href="xhtml/p-0011.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0012" href="xhtml/p-0012.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0013" href="xhtml/p-0013.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0014" href="xhtml/p-0014.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0015" href="xhtml/p-0015.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0016" href="xhtml/p-0016.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0017" href="xhtml/p-0017.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0018" href="xhtml/p-0018.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0019" href="xhtml/p-0019.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0020" href="xhtml/p-0020.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0021" href="xhtml/p-0021.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0022" href="xhtml/p-0022.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0023" href="xhtml/p-0023.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0024" href="xhtml/p-0024.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0025" href="xhtml/p-0025.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0026" href="xhtml/p-0026.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0027" href="xhtml/p-0027.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0028" href="xhtml/p-0028.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0029" href="xhtml/p-0029.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0030" href="xhtml/p-0030.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0031" href="xhtml/p-0031.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0032" href="xhtml/p-0032.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0033" href="xhtml/p-0033.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0034" href="xhtml/p-0034.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0035" href="xhtml/p-0035.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0036" href="xhtml/p-0036.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0037" href="xhtml/p-0037.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0038" href="xhtml/p-0038.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0039" href="xhtml/p-0039.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0040" href="xhtml/p-0040.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0041" href="xhtml/p-0041.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0042" href="xhtml/p-0042.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0043" href="xhtml/p-0043.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0044" href="xhtml/p-0044.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0045" href="xhtml/p-0045.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0046" href="xhtml/p-0046.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0047" href="xhtml/p-0047.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0048" href="xhtml/p-0048.xhtml" />
+      <item media-type="application/xhtml+xml" id="p-0049" href="xhtml/p-0049.xhtml" />
 
-        </manifest>
+   </manifest>
 
-        <spine page-progression-direction="rtl">
+   <spine page-progression-direction="rtl">
 
-                <itemref linear="yes" idref="p-0001" />
-                <itemref linear="yes" idref="p-0002" />
-                <itemref linear="yes" idref="p-0003" />
-                <itemref linear="yes" idref="p-0004" />
-                <itemref linear="yes" idref="p-0005" />
-                <itemref linear="yes" idref="p-0006" />
-                <itemref linear="yes" idref="p-0007" />
-                <itemref linear="yes" idref="p-0008" />
-                <itemref linear="yes" idref="p-0009" />
-                <itemref linear="yes" idref="p-0010" />
-                <itemref linear="yes" idref="p-0011" />
-                <itemref linear="yes" idref="p-0012" />
-                <itemref linear="yes" idref="p-0013" />
-                <itemref linear="yes" idref="p-0014" />
-                <itemref linear="yes" idref="p-0015" />
-                <itemref linear="yes" idref="p-0016" />
-                <itemref linear="yes" idref="p-0017" />
-                <itemref linear="yes" idref="p-0018" />
-                <itemref linear="yes" idref="p-0019" />
-                <itemref linear="yes" idref="p-0020" />
-                <itemref linear="yes" idref="p-0021" />
-                <itemref linear="yes" idref="p-0022" />
-                <itemref linear="yes" idref="p-0023" />
-                <itemref linear="yes" idref="p-0024" />
-                <itemref linear="yes" idref="p-0025" />
-                <itemref linear="yes" idref="p-0026" />
-                <itemref linear="yes" idref="p-0027" />
-                <itemref linear="yes" idref="p-0028" />
-                <itemref linear="yes" idref="p-0029" />
-                <itemref linear="yes" idref="p-0030" />
-                <itemref linear="yes" idref="p-0031" />
-                <itemref linear="yes" idref="p-0032" />
-                <itemref linear="yes" idref="p-0033" />
-                <itemref linear="yes" idref="p-0034" />
-                <itemref linear="yes" idref="p-0035" />
-                <itemref linear="yes" idref="p-0036" />
-                <itemref linear="yes" idref="p-0037" />
-                <itemref linear="yes" idref="p-0038" />
-                <itemref linear="yes" idref="p-0039" />
-                <itemref linear="yes" idref="p-0040" />
-                <itemref linear="yes" idref="p-0041" />
-                <itemref linear="yes" idref="p-0042" />
-                <itemref linear="yes" idref="p-0043" />
-                <itemref linear="yes" idref="p-0044" />
-                <itemref linear="yes" idref="p-0045" />
-                <itemref linear="yes" idref="p-0046" />
-                <itemref linear="yes" idref="p-0047" />
-                <itemref linear="yes" idref="p-0048" />
-                <itemref linear="yes" idref="p-0049" />
+      <itemref linear="yes" idref="p-0001" />
+      <itemref linear="yes" idref="p-0002" />
+      <itemref linear="yes" idref="p-0003" />
+      <itemref linear="yes" idref="p-0004" />
+      <itemref linear="yes" idref="p-0005" />
+      <itemref linear="yes" idref="p-0006" />
+      <itemref linear="yes" idref="p-0007" />
+      <itemref linear="yes" idref="p-0008" />
+      <itemref linear="yes" idref="p-0009" />
+      <itemref linear="yes" idref="p-0010" />
+      <itemref linear="yes" idref="p-0011" />
+      <itemref linear="yes" idref="p-0012" />
+      <itemref linear="yes" idref="p-0013" />
+      <itemref linear="yes" idref="p-0014" />
+      <itemref linear="yes" idref="p-0015" />
+      <itemref linear="yes" idref="p-0016" />
+      <itemref linear="yes" idref="p-0017" />
+      <itemref linear="yes" idref="p-0018" />
+      <itemref linear="yes" idref="p-0019" />
+      <itemref linear="yes" idref="p-0020" />
+      <itemref linear="yes" idref="p-0021" />
+      <itemref linear="yes" idref="p-0022" />
+      <itemref linear="yes" idref="p-0023" />
+      <itemref linear="yes" idref="p-0024" />
+      <itemref linear="yes" idref="p-0025" />
+      <itemref linear="yes" idref="p-0026" />
+      <itemref linear="yes" idref="p-0027" />
+      <itemref linear="yes" idref="p-0028" />
+      <itemref linear="yes" idref="p-0029" />
+      <itemref linear="yes" idref="p-0030" />
+      <itemref linear="yes" idref="p-0031" />
+      <itemref linear="yes" idref="p-0032" />
+      <itemref linear="yes" idref="p-0033" />
+      <itemref linear="yes" idref="p-0034" />
+      <itemref linear="yes" idref="p-0035" />
+      <itemref linear="yes" idref="p-0036" />
+      <itemref linear="yes" idref="p-0037" />
+      <itemref linear="yes" idref="p-0038" />
+      <itemref linear="yes" idref="p-0039" />
+      <itemref linear="yes" idref="p-0040" />
+      <itemref linear="yes" idref="p-0041" />
+      <itemref linear="yes" idref="p-0042" />
+      <itemref linear="yes" idref="p-0043" />
+      <itemref linear="yes" idref="p-0044" />
+      <itemref linear="yes" idref="p-0045" />
+      <itemref linear="yes" idref="p-0046" />
+      <itemref linear="yes" idref="p-0047" />
+      <itemref linear="yes" idref="p-0048" />
+      <itemref linear="yes" idref="p-0049" />
 
-        </spine>
+   </spine>
 
-        <!-- AthK#0422 -->
+   <!-- AthK#0422 -->
 </package>

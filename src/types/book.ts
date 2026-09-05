@@ -34,4 +34,6 @@ type UIBookCard = Pick<
    'id' | 'shelfId' | 'progress' | 'metadata' | 'cover'
 >;
 
-export type { BookRecord, UIBookCard };
+type ContentBook = Omit<BookRecord, keyof UIBookCard>;
+
+export type { BookRecord, UIBookCard, ContentBook };
