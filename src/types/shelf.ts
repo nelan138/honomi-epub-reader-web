@@ -1,7 +1,7 @@
 /**
  * * Represents a record in the database.
  */
-type ShelfRecord = {
+export type ShelfRecord = {
    id: number;
    name: string;
 
@@ -12,6 +12,4 @@ type ShelfRecord = {
 /**
  * Use for UI
  */
-type UIShelf = ShelfRecord;
-
-export type { ShelfRecord, UIShelf };
+export type UIShelf = ShelfRecord;

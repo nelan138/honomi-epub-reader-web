@@ -1,24 +1,31 @@
 import { db } from '@src/services/dexie/database';
 import type { BookRecord } from '@src/types/book';
 import { defaultShelf } from '@src/services/dexie/database';
+import type { EpubBook } from '@src/types/book';
 
-async function addBookToDB(
-   book: Omit<BookRecord, 'id' | 'shelfId'>,
+export async function addBookToDB(
+   book: EpubBook,
 ): Promise<{ bookId: number; shelfId: number }> {
    const store = db.books;
-   const record = { ...book, shelfId: defaultShelf.id };
+
+   const record: Omit<BookRecord, 'id'> = {
+      ...book,
+      progress: 0,
+      shelfId: defaultShelf.id,
+   };
+
    const bookId = await store.add(record);
    const shelfId = defaultShelf.id;
    return { bookId, shelfId };
 }
 
-async function getBooksFromDB(): Promise<BookRecord[]> {
+export async function getBooksFromDB(): Promise<BookRecord[]> {
    const store = db.books;
    const books = await store.toArray() as BookRecord[];
    return books;
 }
 
-async function getBookFromDB(bookId: number): Promise<BookRecord> {
+export async function getBookFromDB(bookId: number): Promise<BookRecord> {
    const store = db.books;
    const book = await store.get(bookId);
    if (book === undefined) throw new Error('Book does not exist!');
@@ -26,7 +33,7 @@ async function getBookFromDB(bookId: number): Promise<BookRecord> {
    return book;
 }
 
-async function deleteBookFromDB(id: number): Promise<void> {
+export async function deleteBookFromDB(id: number): Promise<void> {
    await db.transaction('readwrite', db.books, async () => {
       const store = db.books;
       const existingBook = await store.get(id) as BookRecord | undefined;
@@ -35,17 +42,20 @@ async function deleteBookFromDB(id: number): Promise<void> {
    });
 }
 
-async function renameBookInDB(bookId: number, newTitle: string): Promise<void> {
+export async function renameBookInDB(
+   bookId: number,
+   newTitle: string,
+): Promise<void> {
    const store = db.books;
 
    const bookRecord = await store.get(bookId) as BookRecord | undefined;
    if (!bookRecord) throw new Error('Book does not exist!');
 
-   bookRecord.metadata.title = newTitle;
+   bookRecord.title = newTitle;
    await store.put(bookRecord);
 }
 
-async function changeBookShelfInDB(
+export async function changeBookShelfInDB(
    bookId: number,
    shelfId: number,
 ): Promise<void> {
@@ -64,12 +74,3 @@ async function changeBookShelfInDB(
       await bookStore.put(bookRecord);
    });
 }
-
-export {
-   addBookToDB,
-   changeBookShelfInDB,
-   deleteBookFromDB,
-   getBooksFromDB,
-   renameBookInDB,
-   getBookFromDB
-};

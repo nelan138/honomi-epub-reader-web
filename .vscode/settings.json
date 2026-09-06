@@ -21,7 +21,9 @@
       "parsererror",
       "rgba",
       "rootfile",
-      "vite"
+      "vite",
+      "xlink",
+      "XTHML"
    ],
    "eslint.enable": false,
    "deno.enable": true,
@@ -53,4 +55,11 @@
    },
    "css.lint.unknownAtRules": "ignore",
    "scss.lint.unknownAtRules": "ignore",
+   "js/ts.tsserver.experimental.enableProjectDiagnostics": true,
+   "tailwindCSS.includeLanguages": {
+      "vue": "html"
+   },
+   "editor.quickSuggestions": {
+      "strings": true
+   }
 }

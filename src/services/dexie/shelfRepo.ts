@@ -1,13 +1,12 @@
 import { db } from '@src/services/dexie/database';
 import type { ShelfRecord } from '@src/types/shelf';
 
-async function addShelfToDB(
+export async function addShelfToDB(
    shelf: Pick<ShelfRecord, 'name' | 'expanded'>,
 ): Promise<{ id: number; displayOrder: number }> {
    const store = db.shelves;
    const last = await db.shelves.orderBy('displayOrder').last();
    const maxDisplayOrder = last?.displayOrder ?? 0;
-
 
    const id = await store.add({
       ...shelf,
@@ -17,12 +16,12 @@ async function addShelfToDB(
    return { id, displayOrder: maxDisplayOrder + 1 };
 }
 
-async function getShelvesFromDB(): Promise<ShelfRecord[]> {
+export async function getShelvesFromDB(): Promise<ShelfRecord[]> {
    const store = db.shelves;
    return await store.toArray();
 }
 
-async function swapShelfDisplayOrdersInDB(
+export async function swapShelfDisplayOrdersInDB(
    shelfId1: number,
    shelfId2: number,
 ): Promise<void> {
@@ -46,7 +45,7 @@ async function swapShelfDisplayOrdersInDB(
  * ! Also makes sure display orders are updated after deletion
  * For example (1->2->3->4->5) becomes (1->2->3->4) if shelf 2 is deleted
  */
-async function deleteShelfFromDB(shelfId: number): Promise<void> {
+export async function deleteShelfFromDB(shelfId: number): Promise<void> {
    const shelfStore = db.shelves;
    const bookStore = db.books;
    await db.transaction('readwrite', bookStore, shelfStore, async () => {
@@ -63,7 +62,7 @@ async function deleteShelfFromDB(shelfId: number): Promise<void> {
    });
 }
 
-async function renameShelfInDB(
+export async function renameShelfInDB(
    shelfId: number,
    newName: string,
 ): Promise<void> {
@@ -92,20 +91,10 @@ async function updateShelfExpanded(
    await store.update(shelfId, { expanded });
 }
 
-async function expandShelfInDB(shelfId: number): Promise<void> {
+export async function expandShelfInDB(shelfId: number): Promise<void> {
    return await updateShelfExpanded(shelfId, true);
 }
 
-async function collapseShelfInDB(shelfId: number): Promise<void> {
+export async function collapseShelfInDB(shelfId: number): Promise<void> {
    return await updateShelfExpanded(shelfId, false);
 }
-
-export {
-   addShelfToDB,
-   collapseShelfInDB,
-   deleteShelfFromDB,
-   expandShelfInDB,
-   getShelvesFromDB,
-   renameShelfInDB,
-   swapShelfDisplayOrdersInDB,
-};

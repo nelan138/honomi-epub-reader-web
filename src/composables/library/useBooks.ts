@@ -1,5 +1,5 @@
 import { onMounted, ref } from 'vue';
-import type { BookRecord, UIBookCard } from '@src/types/book';
+import type { EpubBook, UIBookCard } from '@src/types/book';
 import {
    addBookToDB,
    changeBookShelfInDB,
@@ -21,7 +21,10 @@ function useBooks() {
          id: bookRecord.id,
          shelfId: bookRecord.shelfId,
          progress: bookRecord.progress,
-         metadata: bookRecord.metadata,
+         title: bookRecord.title,
+         creator: bookRecord.creator,
+         publisher: bookRecord.publisher,
+         language: bookRecord.language,
          cover: bookRecord.cover,
       }));
    };
@@ -34,17 +37,20 @@ function useBooks() {
       ! 3. If database update fails, rollback with syncWithDB() and alert the user
    */
 
-   const addBook = async (book: Omit<BookRecord, 'id' | 'shelfId'>) => {
+   const addBook = async (book: EpubBook) => {
       try {
          const { bookId: id, shelfId } = await addBookToDB(book);
-         const { progress, metadata, cover } = book;
+         const { title, creator, cover, publisher, language } = book;
 
          const addedBook: UIBookCard = {
             id,
             shelfId,
-            progress,
-            metadata,
+            title,
+            creator,
             cover,
+            publisher,
+            language,
+            progress: 0,
          };
          books.value.push(addedBook);
       }
@@ -69,7 +75,7 @@ function useBooks() {
       const targetBook = books.value.find((book) => book.id === id);
       if (!targetBook) return alert('Book does not exist!');
 
-      targetBook.metadata.title = newTitle;
+      targetBook.title = newTitle;
 
       try {
          await renameBookInDB(id, newTitle);

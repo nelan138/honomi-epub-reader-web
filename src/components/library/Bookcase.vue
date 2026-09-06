@@ -6,8 +6,7 @@ import BookCard from './BookCard.vue';
 import useShelves from '@src/composables/library/useShelves';
 import useTheme from '@src/composables/library/useTheme';
 import useBooks from '@src/composables/library/useBooks';
-import { EpubBook } from '@src/services/epub/epub';
-import type { BookRecord } from '@src/types/book.js';
+import { Epub } from '@src/services/epub/epub';
 import type { UIShelf } from '@src/types/shelf.js';
 
 // * * *
@@ -62,22 +61,9 @@ const handleImportingFiles = async (files: FileList) => {
    for (const file of files) {
       if (!file) continue;
 
-      const epubBook = new EpubBook(file);
-      await epubBook.parse();
-
-      const book: Omit<BookRecord, 'id' | 'shelfId'> = {
-         progress: 0,
-         epubData: epubBook.getEpubData(),
-         version: epubBook.getVersion(),
-         opfPath: epubBook.getOpfPath(),
-         manifest: epubBook.getManifest(),
-         navigation: epubBook.getNavigation(),
-         spine: epubBook.getSpine(),
-         metadata: epubBook.getMetadata(),
-         cover: epubBook.getCover(),
-      };
-
+      const book = await Epub.parse(file);
       await addBook(book);
+      // logEpubBook(book);
    }
 };
 

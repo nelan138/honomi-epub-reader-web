@@ -11,6 +11,7 @@
       "resolveJsonModule": true,
       "moduleDetection": "force",
       "isolatedModules": true,
+      "allowUnreachableCode": false,
       "verbatimModuleSyntax": true,
       // * TS Rules
       "strict": true,
@@ -19,12 +20,10 @@
       "noImplicitReturns": true,
       "noUncheckedSideEffectImports": true,
       "noImplicitOverride": true,
-      // *
-      "noUnusedLocals": false,
-      "noUnusedParameters": false,
-      // *
-      "allowUnreachableCode": false,
-      // * NOT transpiling with TypeScript
+      // ! Toggle on-off when needed
+      "noUnusedLocals": true,
+      "noUnusedParameters": true,
+      // NOT transpiling with TypeScript
       "moduleResolution": "bundler",
       "module": "preserve",
       "noEmit": true,

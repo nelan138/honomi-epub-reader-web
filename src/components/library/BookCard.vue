@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { UIBookCard } from '@src/types/book';
+import { onUnmounted } from 'vue';
 
 const props = defineProps<{
    book: UIBookCard;
@@ -15,26 +16,27 @@ const emit = defineEmits<{
 const defaultCover = '../assets/default-book-cover.jpeg';
 const coverUrl = props.book.cover ? URL.createObjectURL(props.book.cover) : new URL(defaultCover, import.meta.url).href;
 
-function cleanUpCoverUrl() {
+onUnmounted(() => {
    URL.revokeObjectURL(coverUrl);
-}
+});
 </script>
 
 <template>
-   <article @click="emit('open', book.id)"
+   <article
+      @click="emit('open', book.id)"
       class="bg-card border-stroke/20 hover:border-highlight/50 grid min-w-0 grid-cols-[1fr_2fr] rounded-md border p-2 shadow-sm transition-colors md:p-4"
    >
       <!-- Cover -->
       <div class="border-stroke/15 flex aspect-2/3 h-full items-center overflow-hidden rounded-sm border">
-         <img class="h-full w-full object-cover" :src="coverUrl" @load="cleanUpCoverUrl" @error="cleanUpCoverUrl" />
+         <img class="h-full w-full object-cover" :src="coverUrl" />
       </div>
 
-      <div  class="bg-card flex flex-col gap-4 pl-4">
+      <div class="bg-card flex flex-col gap-4 pl-4">
          <!-- Metadata -->
          <div class="flex flex-1 flex-col md:gap-2 md:text-[100%]">
-            <h3 class="font-label line-clamp-2 font-medium">{{ book.metadata?.title ?? 'No title' }}</h3>
-            <p class="text-muted line-clamp-1 text-[80%]">{{ book.metadata?.creator ?? 'Unknown' }}</p>
-            <p class="text-muted line-clamp-1 text-[80%] uppercase">{{ book.metadata?.language ?? '' }}</p>
+            <h3 class="font-label line-clamp-2 font-medium">{{ book.title }}</h3>
+            <p class="text-muted line-clamp-1 text-[80%]">{{ book.creator }}</p>
+            <p class="text-muted line-clamp-1 text-[80%] uppercase">{{ book.language }}</p>
          </div>
 
          <!-- Todo: Progress bar -->

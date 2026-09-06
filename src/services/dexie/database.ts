@@ -6,7 +6,7 @@ import { addShelfToDB } from '@src/services/dexie/shelfRepo';
 const DB_NAME = 'Honomi';
 const DB_VERSION = 1;
 
-const db = new Dexie(DB_NAME) as Dexie & {
+export const db = new Dexie(DB_NAME) as Dexie & {
    books: EntityTable<BookRecord, 'id'>;
    shelves: EntityTable<ShelfRecord, 'id'>;
 };
@@ -16,7 +16,7 @@ db.version(DB_VERSION).stores({
    shelves: '++id, &name, &displayOrder',
 });
 
-const defaultShelf: ShelfRecord = {
+export const defaultShelf: ShelfRecord = {
    id: 1, // ? maybe not but will be updated
    displayOrder: 1, // ? maybe not but will be updated
    name: 'Your Books',
@@ -42,5 +42,3 @@ db.on('populate', async () => {
       console.log('Default shelf already initialized');
    }
 });
-
-export { db, defaultShelf };
