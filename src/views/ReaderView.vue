@@ -1,26 +1,18 @@
 <script setup lang="ts">
-import { onUnmounted, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { ref } from 'vue';
+import { useRoute } from 'vue-router';
 import Header from '@src/components/reader/Header.vue';
-import { useEpubReader } from '@src/composables/reader/useEpubReader';
+import { useReader } from '@src/composables/reader/useReader';
+import { useBottomSentinel } from '@src/composables/reader/useSentinel';
 
 const route = useRoute();
-const router = useRouter();
-
 const params = route.params.bookId as string | undefined;
 const bookId = params ? parseInt(params) : NaN;
 
-const reachedBottom = ref<HTMLElement | null>(null);
-const { loadedChunks } = useEpubReader(bookId, reachedBottom, () => router.push('/error/book-not-found'));
+const { loadedChunks, loadNextContentToChunks, isReady: databaseLoaded } = useReader(bookId);
 
-onUnmounted(() => {
-   loadedChunks.value.forEach((chunk) => {
-      const urls = chunk.blobUrls;
-      if (urls) {
-         for (const url of urls) URL.revokeObjectURL(url);
-      }
-   });
-});
+const sentinel = ref<Element>();
+useBottomSentinel(sentinel, loadNextContentToChunks, { executeWhileVisible: true });
 </script>
 
 <template>
@@ -38,7 +30,7 @@ onUnmounted(() => {
             <div v-html="content"></div>
          </div>
       </div>
-      <div ref="reachedBottom" class="flex h-16 w-full items-center justify-center"></div>
+      <div v-if="databaseLoaded" ref="sentinel" class="flex h-16 w-full items-center justify-center"></div>
    </div>
 </template>
 

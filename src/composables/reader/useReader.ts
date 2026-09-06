@@ -1,4 +1,4 @@
-import { nextTick, onMounted, onUnmounted, type Ref, ref } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 import { getBookFromDB } from '@src/services/dexie/bookRepo';
 import { resolvePath } from '@src/utilities';
 import type {
@@ -7,6 +7,9 @@ import type {
    ResolvedPath,
    SpineItem,
 } from '@src/types/book';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 type HTMLContentAsString = string;
 
@@ -16,21 +19,16 @@ type ContentChunk = {
    blobUrls?: string[];
 };
 
-export function useEpubReader(
-   bookId: number,
-   reachedBottom: Ref<HTMLElement | null>,
-   onError: () => void,
-) {
+export function useReader(bookId: number) {
    const loadedChunks = ref<ContentChunk[]>([]);
+   const isReady = ref(false);
 
    // Runtime caches
    let assets: Record<ResolvedPath, Uint8Array> = {};
    let spineItems: SpineItem[] = [];
    let contentMap = new Map<Idref, RawXTHMLContent>();
 
-   let observer: IntersectionObserver | null = null;
    let currentSpineItemIndex = 0;
-   let contentIsLoading = false;
 
    const processRuntimeImages = (
       spineItem: SpineItem,
@@ -78,37 +76,19 @@ export function useEpubReader(
       return { content: wrapper.innerHTML, blobUrls };
    };
 
-   const loadNextContentToChunks = () => {
-      if (currentSpineItemIndex >= spineItems.length) return;
+   const loadNextContentToChunks = (): boolean => {
+      if (currentSpineItemIndex >= spineItems.length) return false;
 
       const spineItem = spineItems[currentSpineItemIndex++];
-      if (!spineItem) return;
+      if (!spineItem) return false;
 
       // Process images on-the-fly right before pushing to Vue
       const { content, blobUrls } = processRuntimeImages(spineItem);
-      loadedChunks.value.push({
+      return loadedChunks.value.push({
          idref: spineItem.idref,
          content: content,
          blobUrls,
-      });
-   };
-
-   const appendNextChunk = async () => {
-      if (contentIsLoading || currentSpineItemIndex >= spineItems.length) {
-         if (currentSpineItemIndex >= spineItems.length) observer?.disconnect();
-         return;
-      }
-
-      contentIsLoading = true;
-      loadNextContentToChunks();
-      await nextTick();
-      contentIsLoading = false;
-
-      requestAnimationFrame(() => {
-         if (!reachedBottom.value) return;
-         const rect = reachedBottom.value.getBoundingClientRect();
-         if (rect.top <= globalThis.innerHeight + 800) appendNextChunk();
-      });
+      }) > 0;
    };
 
    onMounted(async () => {
@@ -117,35 +97,27 @@ export function useEpubReader(
          spineItems = bookRecord.spine;
          assets = bookRecord.assets;
          contentMap = bookRecord.spineItemContentMap;
+
+         isReady.value = true;
       }
-      catch (e) {
-         return onError();
+      catch {
+         router.push('/error/book-not-found');
       }
-
-      const BUFFER_ZONE = 800;
-      while (currentSpineItemIndex < spineItems.length) {
-         loadNextContentToChunks();
-         await nextTick();
-
-         if (reachedBottom.value) {
-            const rect = reachedBottom.value.getBoundingClientRect();
-            if (rect.top > globalThis.innerHeight + BUFFER_ZONE) break;
-         }
-      }
-
-      observer = new IntersectionObserver(
-         ([entry]) => {
-            if (entry?.isIntersecting) appendNextChunk();
-         },
-         { root: null, rootMargin: `${BUFFER_ZONE}px 0px`, threshold: 0 },
-      );
-
-      if (reachedBottom.value) observer.observe(reachedBottom.value);
    });
 
    onUnmounted(() => {
-      if (observer) observer.disconnect();
+      loadedChunks.value.forEach((chunk) => {
+         const urls = chunk.blobUrls;
+         if (urls) {
+            for (const url of urls) URL.revokeObjectURL(url);
+         }
+      });
    });
 
-   return { loadedChunks };
+   return {
+      loadedChunks,
+      loadNextContentToChunks,
+      spineItems,
+      isReady,
+   };
 }
