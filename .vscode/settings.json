@@ -3,6 +3,7 @@
    "editor.formatOnSave": true,
    "cSpell.ignorePaths": ["tests/**"],
    "cSpell.words": [
+      "bradlc",
       "Cascadia",
       "dbaeumer",
       "denoland",
@@ -25,7 +26,6 @@
       "xlink",
       "XTHML"
    ],
-   "eslint.enable": false,
    "deno.enable": true,
    "deno.lint": true,
    "editor.insertSpaces": true,
@@ -34,8 +34,8 @@
    "[typescript]": {
       "editor.defaultFormatter": "denoland.vscode-deno"
    },
-   "[javascript]": {
-      "editor.defaultFormatter": "denoland.vscode-deno"
+   "[vue]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
    },
    "[html]": {
       "editor.defaultFormatter": "esbenp.prettier-vscode"
@@ -50,16 +50,6 @@
       "editor.defaultFormatter": "esbenp.prettier-vscode"
    },
    "files.associations": {
-      "*.css": "tailwindcss",
-      "*.vue": "vue"
-   },
-   "css.lint.unknownAtRules": "ignore",
-   "scss.lint.unknownAtRules": "ignore",
-   "js/ts.tsserver.experimental.enableProjectDiagnostics": true,
-   "tailwindCSS.includeLanguages": {
-      "vue": "html"
-   },
-   "editor.quickSuggestions": {
-      "strings": true
+      "*.css": "tailwindcss"
    }
 }

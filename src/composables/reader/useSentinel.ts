@@ -10,7 +10,7 @@ export function useBottomSentinel(
    callback: () => boolean | void | Promise<boolean | void>,
    options: SentinelOptions = {},
 ) {
-   const { buffer = 800, executeWhileVisible = false } = options;
+   const { buffer = 200, executeWhileVisible = false } = options;
 
    const isIntersecting = ref(false);
    let observer: IntersectionObserver | null = null;

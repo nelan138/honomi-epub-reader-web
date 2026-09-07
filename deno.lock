@@ -1,18 +1,19 @@
 {
   "version": "5",
   "specifiers": {
-    "npm:@deno/vite-plugin@^2.0.3": "2.0.3_vite@8.2.2",
+    "npm:@deno/vite-plugin@^2.0.3": "2.0.3_vite@8.2.2_@types+node@26.4.1",
     "npm:@fortawesome/fontawesome-free@^7.3.1": "7.3.1",
-    "npm:@tailwindcss/vite@^4.3.3": "4.3.3_vite@8.2.2",
-    "npm:@vitejs/plugin-vue@^6.0.8": "6.0.8_vite@8.2.2_vue@3.5.42",
+    "npm:@tailwindcss/typography@~0.5.20": "0.5.20_tailwindcss@4.3.3",
+    "npm:@tailwindcss/vite@^4.3.3": "4.3.3_vite@8.2.2_@types+node@26.4.1",
+    "npm:@vitejs/plugin-vue@^6.0.8": "6.0.8_vite@8.2.2_vue@3.5.42_@types+node@26.4.1",
     "npm:dexie@^4.4.5": "4.4.5",
     "npm:fflate@~0.8.3": "0.8.3",
     "npm:prettier-plugin-tailwindcss@~0.8.1": "0.8.1_prettier@3.9.6",
     "npm:prettier@^3.9.6": "3.9.6",
     "npm:tailwindcss@^4.3.3": "4.3.3",
     "npm:typescript@^6.0.3": "6.0.3",
-    "npm:vite@*": "8.2.2",
-    "npm:vite@^8.2.2": "8.2.2",
+    "npm:vite@*": "8.2.2_@types+node@26.4.1",
+    "npm:vite@^8.2.2": "8.2.2_@types+node@26.4.1",
     "npm:vue-router@^4.6.4": "4.6.4_vue@3.5.42",
     "npm:vue-tsc@*": "3.3.11_typescript@6.0.3",
     "npm:vue@^3.5.42": "3.5.42_typescript@6.0.3"
@@ -38,7 +39,7 @@
         "@babel/helper-validator-identifier"
       ]
     },
-    "@deno/vite-plugin@2.0.3_vite@8.2.2": {
+    "@deno/vite-plugin@2.0.3_vite@8.2.2_@types+node@26.4.1": {
       "integrity": "sha512-TbIawVRFqIfshSa4CYEPMgLbEIKHg+WXymWvvwlsyct1X8tG4O1OrQldvU/faw6bw7NBCyxVYdT4iIv93jQSig==",
       "dependencies": [
         "@deno/loader@npm:@jsr/deno__loader@0.5.0",
@@ -269,7 +270,14 @@
         "@tailwindcss/oxide-win32-x64-msvc"
       ]
     },
-    "@tailwindcss/vite@4.3.3_vite@8.2.2": {
+    "@tailwindcss/typography@0.5.20_tailwindcss@4.3.3": {
+      "integrity": "sha512-hwbzQuNUfcPvbegQFatVPl/MY/tcM9KLl963hQ5laJKPh81TEZ1+dNG9PirGvcaDBkp+BCshExAyKVPW91dozw==",
+      "dependencies": [
+        "postcss-selector-parser",
+        "tailwindcss"
+      ]
+    },
+    "@tailwindcss/vite@4.3.3_vite@8.2.2_@types+node@26.4.1": {
       "integrity": "sha512-yYU8cogLeSh/ms2jh8Fj7jaba/EWa7Ja6GoUqYZaraEuCI5YS6ms6ObZgjjedm+jm6XZjdNRWBpPP6Z86oOxcw==",
       "dependencies": [
         "@tailwindcss/node",
@@ -278,7 +286,13 @@
         "vite"
       ]
     },
-    "@vitejs/plugin-vue@6.0.8_vite@8.2.2_vue@3.5.42": {
+    "@types/node@26.4.1": {
+      "integrity": "sha512-k97ENvZWtvA6yqz5/FS6a7duDgOPEeOQOc2iKS/nY6mX6qJUKtLnWzQS+Xj6tXweyj6ZcTAK2Qecetnvi9nCLA==",
+      "dependencies": [
+        "undici-types"
+      ]
+    },
+    "@vitejs/plugin-vue@6.0.8_vite@8.2.2_vue@3.5.42_@types+node@26.4.1": {
       "integrity": "sha512-0ZjgOg7oO6farnNGup7yvoM/YXZV84OZxHAwtflItNa/6zzQyVb5LNxyea3FEKEX2XlagIKzrlH7wwxkKgtiew==",
       "dependencies": [
         "@rolldown/pluginutils",
@@ -391,6 +405,10 @@
     },
     "alien-signals@3.2.1": {
       "integrity": "sha512-I8FjmltrfnDFoZedi5CG8DghVYNhzb/Ijluz7tCSJH0xpd0484Kowhbb1XDYOxfJpU1p5wnM2X54dA+IfGyD1g=="
+    },
+    "cssesc@3.0.0": {
+      "integrity": "sha512-/Tb/JcjK111nNScGob5MNtsntNM1aCNUDipB/TkwZFhyDrrE47SOx/18wF2bbjgc3ZzCSKW1T5nt5EbFoAz/Vg==",
+      "bin": true
     },
     "csstype@3.2.3": {
       "integrity": "sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ=="
@@ -608,6 +626,13 @@
     "picomatch@4.0.5": {
       "integrity": "sha512-RvwwcruNjI1ncT5xRakeyS9Lf8lcItv34KD+aif+VH9kduAyfYBipGh12274xtenIPZ119/R9BdTBa8gAwSh0A=="
     },
+    "postcss-selector-parser@6.0.10": {
+      "integrity": "sha512-IQ7TZdoaqbT+LCpShg46jnZVlhWD2w6iQYAcYXfHARZ7X1t/UGhhceQDs5X0cGqKvYlHNOuv7Oa1xmb0oQuA3w==",
+      "dependencies": [
+        "cssesc",
+        "util-deprecate"
+      ]
+    },
     "postcss@8.5.26": {
       "integrity": "sha512-u82N74LFzG8ca+dD8puPnplTXoGH4fTPpVGuIbt36G3qvNlkvfD0lEAZSxaly3KX8TS/L1A1gsCEmvKmBcVbkQ==",
       "dependencies": [
@@ -670,9 +695,16 @@
       "integrity": "sha512-y2TvuxSZPDyQakkFRPZHKFm+KKVqIisdg9/CZwm9ftvKXLP8NRWj38/ODjNbr43SsoXqNuAisEf1GdCxqWcdBw==",
       "bin": true
     },
-    "vite@8.2.2": {
+    "undici-types@8.3.0": {
+      "integrity": "sha512-j375ScV60dom+YkPFIfTLcOiPxkN/buHz5GobjLhixFuANaNs3C9l4GmrWqejgXWJ7BbJcFYpTEUkS1Ge8bpZQ=="
+    },
+    "util-deprecate@1.0.2": {
+      "integrity": "sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw=="
+    },
+    "vite@8.2.2_@types+node@26.4.1": {
       "integrity": "sha512-cFKLV/PRgAUlIRm5WjMjJ86jrftzpqcgH+Us+DS8mI3CDNiH30Whrz8uHL3+MOLPAgqbMBAqWdAHAphOAM+z/Q==",
       "dependencies": [
+        "@types/node",
         "lightningcss@1.33.0",
         "picomatch",
         "postcss",
@@ -681,6 +713,9 @@
       ],
       "optionalDependencies": [
         "fsevents"
+      ],
+      "optionalPeers": [
+        "@types/node"
       ],
       "bin": true
     },
@@ -722,6 +757,7 @@
     "dependencies": [
       "npm:@deno/vite-plugin@^2.0.3",
       "npm:@fortawesome/fontawesome-free@^7.3.1",
+      "npm:@tailwindcss/typography@~0.5.20",
       "npm:@tailwindcss/vite@^4.3.3",
       "npm:@vitejs/plugin-vue@^6.0.8",
       "npm:dexie@^4.4.5",

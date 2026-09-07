@@ -9,7 +9,7 @@ const route = useRoute();
 const params = route.params.bookId as string | undefined;
 const bookId = params ? parseInt(params) : NaN;
 
-const { loadedChunks, loadNextContentToChunks, isReady: databaseLoaded } = useReader(bookId);
+const { loadedChunks, loadNextContentToChunks, isReady: databaseLoaded, publisherStyles } = useReader(bookId);
 
 const sentinel = ref<Element>();
 useBottomSentinel(sentinel, loadNextContentToChunks, { executeWhileVisible: true });
@@ -21,15 +21,15 @@ useBottomSentinel(sentinel, loadNextContentToChunks, { executeWhileVisible: true
    >
       <Header />
 
-      <div class="px-4 md:px-10">
-         <div
-            v-for="{ idref, content } in loadedChunks"
-            :key="idref"
-            class="content-chunk mb-10 min-h-[50vh] border-b border-gray-300 pb-10"
-         >
-            <div v-html="content"></div>
-         </div>
-      </div>
+      <main class="p-4 [&_img]:mx-auto [&_img]:block [&_img]:max-h-dvh [&_img]:w-auto">
+         <article v-for="{ idref, content } in loadedChunks" :key="idref" :id="idref">
+            <div
+               class="content-chunk prose mb-10 min-h-[50vh] max-w-none border-b border-gray-300 pb-10"
+               v-html="content"
+            ></div>
+         </article>
+      </main>
+
       <div v-if="databaseLoaded" ref="sentinel" class="flex h-16 w-full items-center justify-center"></div>
    </div>
 </template>

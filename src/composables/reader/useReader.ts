@@ -1,4 +1,5 @@
 import { onMounted, onUnmounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { getBookFromDB } from '@src/services/dexie/bookRepo';
 import { resolvePath } from '@src/utilities';
 import type {
@@ -7,9 +8,6 @@ import type {
    ResolvedPath,
    SpineItem,
 } from '@src/types/book';
-import { useRouter } from 'vue-router';
-
-const router = useRouter();
 
 type HTMLContentAsString = string;
 
@@ -20,17 +18,22 @@ type ContentChunk = {
 };
 
 export function useReader(bookId: number) {
+   const router = useRouter();
+
    const loadedChunks = ref<ContentChunk[]>([]);
    const isReady = ref(false);
+   const publisherStyles = ref('');
 
-   // Runtime caches
    let assets: Record<ResolvedPath, Uint8Array> = {};
    let spineItems: SpineItem[] = [];
    let contentMap = new Map<Idref, RawXTHMLContent>();
 
    let currentSpineItemIndex = 0;
 
-   const processRuntimeImages = (
+   const textDecoder = new TextDecoder();
+   const parser = new DOMParser();
+
+   const processChapter = (
       spineItem: SpineItem,
    ): { content: HTMLContentAsString; blobUrls: string[] } => {
       const rawHtml = contentMap.get(spineItem.idref);
@@ -41,18 +44,16 @@ export function useReader(bookId: number) {
          };
       }
 
-      const wrapper = document.createElement('div');
-      wrapper.innerHTML = rawHtml;
+      const doc = parser.parseFromString(rawHtml, 'text/html');
 
       const blobUrls: string[] = [];
-      const images = wrapper.querySelectorAll('img, image');
+      const images = doc.querySelectorAll('img, image');
 
       for (const img of images) {
          const src = img.getAttribute('src') || img.getAttribute('href')
             || img.getAttribute('xlink:href');
          if (!src) continue;
 
-         // Skip already-resolved sources
          if (src.startsWith('data:') || /^https?:\/\//.test(src)) continue;
 
          const imgZipPath = resolvePath(spineItem.resolvedHref, src);
@@ -73,7 +74,10 @@ export function useReader(bookId: number) {
          else img.setAttribute('src', blobUrl);
       }
 
-      return { content: wrapper.innerHTML, blobUrls };
+      return {
+         content: doc.body ? doc.body.innerHTML : doc.documentElement.innerHTML,
+         blobUrls,
+      };
    };
 
    const loadNextContentToChunks = (): boolean => {
@@ -82,11 +86,11 @@ export function useReader(bookId: number) {
       const spineItem = spineItems[currentSpineItemIndex++];
       if (!spineItem) return false;
 
-      // Process images on-the-fly right before pushing to Vue
-      const { content, blobUrls } = processRuntimeImages(spineItem);
+      const { content, blobUrls } = processChapter(spineItem);
+
       return loadedChunks.value.push({
          idref: spineItem.idref,
-         content: content,
+         content,
          blobUrls,
       }) > 0;
    };
@@ -98,6 +102,13 @@ export function useReader(bookId: number) {
          assets = bookRecord.assets;
          contentMap = bookRecord.spineItemContentMap;
 
+         const styles = [];
+         for (const [path, rawBytes] of Object.entries(assets)) {
+            if (path.endsWith('.css'))
+               styles.push(textDecoder.decode(rawBytes));
+         }
+         publisherStyles.value = styles.join('\n');
+
          isReady.value = true;
       }
       catch {
@@ -107,9 +118,8 @@ export function useReader(bookId: number) {
 
    onUnmounted(() => {
       loadedChunks.value.forEach((chunk) => {
-         const urls = chunk.blobUrls;
-         if (urls) {
-            for (const url of urls) URL.revokeObjectURL(url);
+         if (chunk.blobUrls) {
+            for (const url of chunk.blobUrls) URL.revokeObjectURL(url);
          }
       });
    });
@@ -119,5 +129,6 @@ export function useReader(bookId: number) {
       loadNextContentToChunks,
       spineItems,
       isReady,
+      publisherStyles,
    };
 }

@@ -10,6 +10,7 @@
       "@fortawesome/fontawesome-free": "npm:@fortawesome/fontawesome-free@^7.3.1",
       "@src/": "./src/",
       "@deno/vite-plugin": "npm:@deno/vite-plugin@^2.0.3",
+      "@tailwindcss/typography": "npm:@tailwindcss/typography@^0.5.20",
       "@tailwindcss/vite": "npm:@tailwindcss/vite@^4.3.3",
       "@vitejs/plugin-vue": "npm:@vitejs/plugin-vue@^6.0.8",
       "dexie": "npm:dexie@^4.4.5",
@@ -22,6 +23,7 @@
       "vue": "npm:vue@^3.5.42",
       "vue-router": "npm:vue-router@^4.6.4"
    },
+   
    "nodeModulesDir": "auto",
    "fmt": {
       "useTabs": false,

@@ -1,3 +1,9 @@
 {
-   "recommendations": ["esbenp.prettier-vscode", "dbaeumer.vscode-eslint", "denoland.vscode-deno"]
+   "recommendations": [
+      "esbenp.prettier-vscode",
+      "dbaeumer.vscode-eslint",
+      "denoland.vscode-deno",
+      "Vue.volar",
+      "bradlc.vscode-tailwindcss"
+   ]
 }
