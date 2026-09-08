@@ -11,7 +11,7 @@ import {
 } from '@src/services/dexie/shelfRepo';
 import { defaultShelf } from '@src/services/dexie/database';
 
-function useShelves() {
+export function useShelves() {
    const shelves = ref<UIShelf[]>([]);
    onMounted(async () => await syncWithDB());
 
@@ -32,7 +32,14 @@ function useShelves() {
       ! 3. If database update fails, rollback with syncWithDB() and alert the user
    */
 
-   const addShelf = async (shelf: Omit<ShelfRecord, 'id' | 'displayOrder'>) => {
+   const addShelf = async () => {
+      const name = prompt('Enter shelf name:', 'New Name')?.trim();
+      if (!name) return alert('Shelf name cannot be empty!');
+
+      const shelf: Omit<ShelfRecord, 'id' | 'displayOrder'> = {
+         name,
+         expanded: true,
+      };
       try {
          const { id, displayOrder } = await addShelfToDB(shelf);
 
@@ -61,7 +68,10 @@ function useShelves() {
       }
    };
 
-   const renameShelf = async (shelfId: number, newName: string) => {
+   const renameShelf = async (shelfId: number) => {
+      const newName = prompt('Enter new shelf name:', 'New Name')?.trim();
+      if (!newName) return alert('Shelf name cannot be empty!');
+
       const targetShelf = shelves.value.find((shelf) => shelf.id === shelfId);
       if (!targetShelf) return alert('Shelf does not exist!');
 
@@ -161,5 +171,3 @@ function useShelves() {
       moveShelfDown,
    };
 }
-
-export default useShelves;

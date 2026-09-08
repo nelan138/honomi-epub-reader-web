@@ -8,8 +8,10 @@ import {
    renameBookInDB,
 } from '@src/services/dexie/bookRepo';
 import { useRouter } from 'vue-router';
+import { useShelves } from '@src/composables/library/useShelves.ts';
+import { Epub } from '@src/services/epub/epub.ts';
 
-function useBooks() {
+export function useBooks() {
    const router = useRouter();
 
    const books = ref<UIBookCard[]>([]);
@@ -59,26 +61,35 @@ function useBooks() {
          alert('Failed to add book: ' + (error as Error).message);
       }
    };
+
    const deleteBook = async (id: number) => {
+      const userConfirmed = confirm(
+         'Are you sure you want to delete this book?',
+      );
+
+      if (!userConfirmed) return;
+
       books.value = books.value.filter((book) => book.id !== id);
       try {
          await deleteBookFromDB(id);
       }
       catch (error) {
-         // Rollback UI update if deletion fails
          await syncWithDB();
          alert('Failed to delete book: ' + (error as Error).message);
       }
    };
 
-   const renameBook = async (id: number, newTitle: string) => {
+   const renameBook = async (id: number) => {
+      const newBookName = prompt('Enter new book name:', 'New Title')?.trim();
+      if (!newBookName) return;
+
       const targetBook = books.value.find((book) => book.id === id);
       if (!targetBook) return alert('Book does not exist!');
 
-      targetBook.title = newTitle;
+      targetBook.title = newBookName;
 
       try {
-         await renameBookInDB(id, newTitle);
+         await renameBookInDB(id, newBookName);
       }
       catch (error) {
          await syncWithDB();
@@ -86,7 +97,15 @@ function useBooks() {
       }
    };
 
-   const changeBookShelf = async (bookId: number, shelfId: number) => {
+   const { shelves } = useShelves();
+   const changeBookShelf = async (bookId: number) => {
+      const shelfName = prompt('Enter shelf name:', 'Your Books')?.trim();
+      if (!shelfName) return;
+
+      const shelfId = shelves.value.find((shelf) => shelf.name === shelfName)
+         ?.id;
+      if (!shelfId) return alert('Shelf does not exist!');
+
       const targetBook = books.value.find((book) => book.id === bookId);
       if (!targetBook) return alert('Book does not exist!');
 
@@ -110,7 +129,23 @@ function useBooks() {
       }
    };
 
-   return { books, renameBook, changeBookShelf, deleteBook, addBook, openBook };
-}
+   const importBooks = async (files: FileList) => {
+      for (const file of files) {
+         if (!file) continue;
 
-export default useBooks;
+         const book = await Epub.parse(file);
+         await addBook(book);
+         // logEpubBook(book);
+      }
+   };
+
+   return {
+      books,
+      renameBook,
+      changeBookShelf,
+      deleteBook,
+      addBook,
+      openBook,
+      importBooks,
+   };
+}

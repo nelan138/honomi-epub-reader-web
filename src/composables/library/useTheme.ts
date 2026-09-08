@@ -2,7 +2,7 @@ import { ref, watch } from 'vue';
 
 type Theme = 'dark' | 'light';
 
-function useTheme() {
+export function useTheme() {
    const theme = ref<Theme>(
       (localStorage.getItem('theme') as Theme | null) || 'dark',
    );
@@ -54,5 +54,3 @@ function useTheme() {
 
    return { toggleTheme };
 }
-
-export default useTheme;

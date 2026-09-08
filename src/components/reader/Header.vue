@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
-import useTheme from '@src/composables/library/useTheme';
+import { useTheme } from '@src/composables/library/useTheme';
 
 const router = useRouter();
 const { toggleTheme } = useTheme();

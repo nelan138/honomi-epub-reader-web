@@ -1,42 +1,46 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import Header from '@src/components/reader/Header.vue';
 import { useReader } from '@src/composables/reader/useReader';
-import { useBottomSentinel } from '@src/composables/reader/useSentinel';
+import type { Chapter } from '@src/composables/reader/useReader';
+import { onMounted, shallowRef } from 'vue';
 
 const route = useRoute();
-const params = route.params.bookId as string | undefined;
-const bookId = params ? parseInt(params) : NaN;
+const router = useRouter();
 
-const { loadedChunks, loadNextContentToChunks, isReady: databaseLoaded, publisherStyles } = useReader(bookId);
+const chapters = shallowRef<Chapter[]>([]);
 
-const sentinel = ref<Element>();
-useBottomSentinel(sentinel, loadNextContentToChunks, { executeWhileVisible: true });
+onMounted(async () => {
+   const params = route.params.bookId as string | undefined;
+   const bookId = params ? parseInt(params) : NaN;
+
+   try {
+      const { getChapters } = await useReader(bookId);
+      chapters.value = getChapters();
+      console.log(`found ${chapters.value.length} chapters`);
+   } catch {
+      router.push('/error/book-not-found');
+   }
+});
 </script>
 
 <template>
-   <div
-      class="bg-bg text-ink min-h-dvh max-w-dvw font-serif text-base leading-normal font-normal transition-colors md:text-xl lg:text-base"
-   >
+   <div class="bg-bg">
       <Header />
 
-      <main class="p-4 [&_img]:mx-auto [&_img]:block [&_img]:max-h-dvh [&_img]:w-auto">
-         <article v-for="{ idref, content } in loadedChunks" :key="idref" :id="idref">
+      <main class="p-4">
+         <article v-for="chapter in chapters" :key="chapter.idref" class="w-full">
             <div
-               class="content-chunk prose mb-10 min-h-[50vh] max-w-none border-b border-gray-300 pb-10"
-               v-html="content"
+               class="chapter prose prose-headings:text-ink text-ink max-h-full max-w-full [&_img]:mx-auto [&_img]:block [&_img]:max-h-[80dvh] [&_img]:max-w-[80dvw]"
+               v-html="chapter.content"
             ></div>
          </article>
       </main>
-
-      <div v-if="databaseLoaded" ref="sentinel" class="flex h-16 w-full items-center justify-center"></div>
    </div>
 </template>
 
 <style scoped>
-.content-chunk {
+.chapter {
    content-visibility: auto;
-   contain-intrinsic-size: 0 800px;
 }
 </style>
