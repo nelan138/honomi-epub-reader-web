@@ -1,4 +1,4 @@
-import { ref, watch } from 'vue';
+import { nextTick, ref, watch } from 'vue';
 
 type Theme = 'dark' | 'light';
 
@@ -27,8 +27,9 @@ export function useTheme() {
          globalThis.innerHeight,
       ) * 1.5;
 
-      const transition = document.startViewTransition(() => {
+      const transition = document.startViewTransition(async () => {
          updateTheme(nextTheme);
+         await nextTick();
          document.documentElement.classList.toggle(
             'dark',
             nextTheme === 'dark',

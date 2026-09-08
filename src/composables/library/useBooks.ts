@@ -99,10 +99,10 @@ export function useBooks() {
 
    const { shelves } = useShelves();
    const changeBookShelf = async (bookId: number) => {
-      const shelfName = prompt('Enter shelf name:', 'Your Books')?.trim();
+      const shelfName = prompt('Enter shelf name:', 'Your Books')?.trim().toLowerCase();
       if (!shelfName) return;
 
-      const shelfId = shelves.value.find((shelf) => shelf.name === shelfName)
+      const shelfId = shelves.value.find((shelf) => shelf.name.toLowerCase() === shelfName)
          ?.id;
       if (!shelfId) return alert('Shelf does not exist!');
 

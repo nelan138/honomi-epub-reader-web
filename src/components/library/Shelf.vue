@@ -28,7 +28,7 @@ const emit = defineEmits<{
                <button
                   @click="emit('move-up', shelf.id)"
                   type="button"
-                  class="hover:text-highlight transition-colors hover:cursor-pointer"
+                  class="hover:text-highlight hover:cursor-pointer"
                >
                   <i class="fa-solid fa-circle-up"></i>
                </button>
@@ -37,7 +37,7 @@ const emit = defineEmits<{
                <button
                   @click="emit('move-down', shelf.id)"
                   type="button"
-                  class="hover:text-highlight transition-colors hover:cursor-pointer"
+                  class="hover:text-highlight hover:cursor-pointer"
                >
                   <i class="fa-solid fa-circle-down"></i>
                </button>
@@ -46,19 +46,16 @@ const emit = defineEmits<{
                <button
                   @click="emit('rename', shelf.id)"
                   type="button"
-                  class="hover:text-highlight transition-colors hover:cursor-pointer"
+                  class="hover:text-highlight hover:cursor-pointer"
                >
                   <i class="fa-solid fa-pencil"></i>
                </button>
             </li>
             <li>
                <button
-                  @click="
-                     if (shelf.expanded) emit('collapse', shelf.id);
-                     else emit('expand', shelf.id);
-                  "
+                  @click="shelf.expanded ? emit('collapse', shelf.id) : emit('expand', shelf.id)"
                   type="button"
-                  class="hover:text-highlight transition-colors hover:cursor-pointer"
+                  class="hover:text-highlight hover:cursor-pointer"
                >
                   <i v-if="shelf.expanded" class="fa-solid fa-caret-down"></i>
                   <i v-else class="fa-solid fa-caret-right"></i>
@@ -68,7 +65,7 @@ const emit = defineEmits<{
                <button
                   @click="emit('delete', shelf.id)"
                   type="button"
-                  class="hover:text-highlight transition-colors hover:cursor-pointer"
+                  class="hover:text-highlight hover:cursor-pointer"
                >
                   <i class="fa-solid fa-x"></i>
                </button>
@@ -76,8 +73,6 @@ const emit = defineEmits<{
          </ul>
       </header>
 
-      <slot>
-         <!-- ! Books go here -->
-      </slot>
+      <slot name="books"> </slot>
    </section>
 </template>

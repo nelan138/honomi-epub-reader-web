@@ -1,4 +1,5 @@
 import type { Book } from '@src/types/book.ts';
+import { router } from '@src/router.ts';
 
 export function normalizePath(path: string): string {
    const parts: string[] = [];
@@ -83,4 +84,13 @@ export function logBook(book: Book): void {
       );
       console.groupEnd();
    }
+}
+
+export function navigateToHomePage() {
+   router.push('/');
+   console.log('running');
+}
+
+export function navigateToNotFoundPage() {
+   router.push('error/not-found');
 }

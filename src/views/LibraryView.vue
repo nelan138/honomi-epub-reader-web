@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Shelf from '@src/components/library/Shelf.vue';
-import Header from '@src/components/library/Header.vue';
+import LibraryHeader from '@src/components/library/LibraryHeader.vue';
 import BookCard from '@src/components/library/BookCard.vue';
 
 import { useShelves } from '@src/composables/library/useShelves';
@@ -16,36 +16,37 @@ const getBooksInShelf = (shelfId: number) => books.value.filter((book) => book.s
 </script>
 
 <template>
-   <Header @toggle-theme="toggleTheme" @add-shelf="addShelf" @import-files="importBooks" />
+   <LibraryHeader @toggle-theme="toggleTheme" @add-shelf="addShelf" @import-files="importBooks" />
 
-   <Shelf
-      @rename="renameShelf($event)"
-      @move-up="moveShelfUp($event)"
-      @move-down="moveShelfDown($event)"
-      @expand="expandShelf($event)"
-      @collapse="collapseShelf($event)"
-      @delete="deleteShelf($event)"
-      v-for="shelf in shelves"
-      :shelf="shelf"
-      :key="shelf.id"
-   >
-      <TransitionGroup
-         v-if="shelf.expanded"
-         tag="div"
-         name="book-list"
-         class="grid w-full grid-cols-1 gap-4 lg:grid-cols-3 2xl:grid-cols-4"
+   <template v-for="shelf in shelves" :key="shelf.id">
+      <Shelf
+         @rename="renameShelf($event)"
+         @move-up="moveShelfUp($event)"
+         @move-down="moveShelfDown($event)"
+         @expand="expandShelf($event)"
+         @collapse="collapseShelf($event)"
+         @delete="deleteShelf($event)"
+         :shelf="shelf"
       >
-         <BookCard
-            @open="openBook($event)"
-            @rename="renameBook($event)"
-            @delete="deleteBook($event)"
-            @change-shelf="changeBookShelf($event)"
-            v-for="book in getBooksInShelf(shelf.id)"
-            :book="book"
-            :key="book.id"
-         />
-      </TransitionGroup>
-   </Shelf>
+         <template #books v-if="shelf.expanded">
+            <TransitionGroup
+               tag="div"
+               name="book-list"
+               class="grid w-full grid-cols-1 gap-4 lg:grid-cols-3 2xl:grid-cols-4"
+            >
+               <template v-for="book in getBooksInShelf(shelf.id)" :key="book.id">
+                  <BookCard
+                     @open="openBook($event)"
+                     @rename="renameBook($event)"
+                     @delete="deleteBook($event)"
+                     @change-shelf="changeBookShelf($event)"
+                     :book="book"
+                  />
+               </template>
+            </TransitionGroup>
+         </template>
+      </Shelf>
+   </template>
 </template>
 
 <style scoped>

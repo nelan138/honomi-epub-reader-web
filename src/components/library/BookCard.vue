@@ -24,7 +24,7 @@ onUnmounted(() => {
 <template>
    <article
       @click="emit('open', book.id)"
-      class="bg-card border-stroke/20 hover:border-highlight/50 grid min-w-0 grid-cols-[1fr_2fr] rounded-md border p-2 shadow-sm transition-colors md:p-4"
+      class="bg-card border-stroke/20 hover:border-highlight/50 grid min-w-0 grid-cols-[1fr_2fr] rounded-md border p-2 shadow-sm md:p-4"
    >
       <!-- Cover -->
       <div class="border-stroke/15 flex aspect-2/3 h-full items-center overflow-hidden rounded-sm border">
@@ -50,7 +50,7 @@ onUnmounted(() => {
                <button
                   @click="emit('rename', book.id)"
                   type="button"
-                  class="hover:text-highlight aspect-square transition-colors hover:cursor-pointer"
+                  class="hover:text-highlight aspect-square hover:cursor-pointer"
                >
                   <i class="fa-solid fa-pen-to-square"></i>
                </button>
@@ -60,7 +60,7 @@ onUnmounted(() => {
                <button
                   @click="emit('changeShelf', book.id)"
                   type="button"
-                  class="hover:text-highlight aspect-square transition-colors hover:cursor-pointer"
+                  class="hover:text-highlight aspect-square hover:cursor-pointer"
                >
                   <i class="fa-solid fa-right-left"></i>
                </button>
@@ -70,7 +70,7 @@ onUnmounted(() => {
                <button
                   @click="emit('delete', book.id)"
                   type="button"
-                  class="aspect-square transition-colors hover:cursor-pointer hover:text-red-400"
+                  class="aspect-square hover:cursor-pointer hover:text-red-400"
                >
                   <i class="fa-solid fa-trash"></i>
                </button>

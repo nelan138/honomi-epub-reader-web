@@ -53,6 +53,9 @@ export function useShelves() {
    };
 
    const deleteShelf = async (shelfId: number) => {
+      const userConfirmed = confirm('Are you sure you want to delete this shelf?');
+      if (!userConfirmed) return;
+
       const targetShelf = shelves.value.find((shelf) => shelf.id === shelfId);
       if (!targetShelf) return alert('Shelf does not exist!');
 

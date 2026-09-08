@@ -6,5 +6,5 @@ export type ShelfRecord = {
    name: string;
 
    displayOrder: number; // The lower the number, the higher the shelf is displayed in the UI
-   expanded: false | true;
+   expanded: boolean;
 };

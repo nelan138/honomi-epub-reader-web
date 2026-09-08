@@ -1,9 +1,8 @@
 import type { Idref } from '@src/types/book';
 import { getBookFromDB } from '@src/services/dexie/bookRepo.ts';
-import { useRouter } from 'vue-router';
 import { strFromU8 } from 'fflate';
-import { resolvePath } from '@src/utilities.ts';
-import { onUnmounted } from 'vue';
+import { navigateToNotFoundPage, resolvePath } from '@src/utilities.ts';
+import { onUnmounted, shallowRef } from 'vue';
 
 type HTMLAsString = string;
 
@@ -12,65 +11,74 @@ export type Chapter = {
    content: HTMLAsString;
 };
 
-export async function useReader(bookId: number) {
-   const router = useRouter();
+export function useReader(bookId: number) {
+   const chapters = shallowRef<Chapter[]>([]);
+   const isLoading = shallowRef(true);
    const blobUrls: string[] = [];
 
+   let isUnmounted = false;
+
    onUnmounted(() => {
-      blobUrls.forEach((url) => {
-         URL.revokeObjectURL(url);
-      });
+      isUnmounted = true;
+      blobUrls.forEach((url) => URL.revokeObjectURL(url));
    });
 
-   try {
-      const bookRecord = await getBookFromDB(bookId);
-      const spine = bookRecord.spine;
-      const assets = bookRecord.assets;
+   async function loadBook() {
+      try {
+         const bookRecord = await getBookFromDB(bookId);
 
-      const chapters: Chapter[] = [];
-      const parser = new DOMParser();
+         if (isUnmounted) return;
 
-      for (const item of spine) {
-         const data = assets[item.resolvedHref];
-         if (!data) continue;
+         const spine = bookRecord.spine;
+         const assets = bookRecord.assets;
+         const parser = new DOMParser();
+         const loadedChapters: Chapter[] = [];
 
-         const rawHtml = strFromU8(data);
-         const mediaType = item.mediaType as DOMParserSupportedType;
+         for (const item of spine) {
+            if (isUnmounted) break;
 
-         const idref = item.idref;
-         const doc = parser.parseFromString(rawHtml, mediaType);
+            const data = assets[item.resolvedHref];
+            if (!data) continue;
 
-         const images = doc.getElementsByTagName('img');
-         for (const image of images) {
-            const rawSrc = image.getAttribute('src');
-            if (!rawSrc) continue;
+            const rawHtml = strFromU8(data);
+            const doc = parser.parseFromString(
+               rawHtml,
+               item.mediaType as DOMParserSupportedType,
+            );
 
-            const imageSource = resolvePath(item.resolvedHref, rawSrc);
-            image.alt = `image of item: ${item.idref}`;
+            for (const image of doc.getElementsByTagName('img')) {
+               const rawSrc = image.getAttribute('src');
+               if (!rawSrc) continue;
 
-            const imageData = assets[imageSource];
-            if (!imageData) continue;
+               const imageData = assets[resolvePath(item.resolvedHref, rawSrc)];
+               if (!imageData) continue;
 
-            const blob = new Blob([imageData as BlobPart]);
+               const blob = new Blob([imageData as BlobPart]);
+               const blobUrl = URL.createObjectURL(blob);
 
-            const blobUrl = URL.createObjectURL(blob);
-            blobUrls.push(blobUrl);
-            image.src = blobUrl;
+               blobUrls.push(blobUrl);
+               image.src = blobUrl;
+               image.alt = `image of item: ${item.idref}`;
+            }
+
+            loadedChapters.push({
+               idref: item.idref,
+               content: doc.body?.innerHTML ?? '',
+            });
          }
 
-         const content = doc.body?.innerHTML ?? '';
-
-         const chapter: Chapter = {
-            idref,
-            content,
-         };
-         chapters.push(chapter);
+         chapters.value = loadedChapters;
       }
+      catch (error) {
+         if (!isUnmounted) navigateToNotFoundPage();
+      }
+      finally {
+         if (!isUnmounted) isLoading.value = false;
+      }
+   }
 
-      return { getChapters: () => chapters };
-   }
-   catch {
-      router.push('/error/book-not-found');
-      return { getChapters: () => [] };
-   }
+   // runs in the background
+   loadBook();
+
+   return { chapters, isLoading };
 }
