@@ -5,7 +5,7 @@ const defaultCoverBlob = await response.blob();
 
 import { unzipSync } from 'fflate';
 import type {
-   EpubBook,
+   Book,
    Idref,
    ManifestItem,
    NavigationItem,
@@ -396,7 +396,7 @@ function parseEpub2Navigation(
  * Represents an EPUB, only has data parsed from its content.
  */
 export class Epub {
-   static async parse(epubFile: Blob): Promise<EpubBook> {
+   static async parse(epubFile: Blob): Promise<Book> {
       const buffer = await epubFile.arrayBuffer();
       const fileArchive = unzipSync(new Uint8Array(buffer));
 
@@ -407,7 +407,7 @@ export class Epub {
       const navigation = getNavigation(epubContext);
       const spineItemContentMap = buildContentMap(epubContext, spine);
 
-      const epubBook: EpubBook = {
+      const book: Book = {
          ...metadata,
          spine,
          navigation,
@@ -415,6 +415,6 @@ export class Epub {
          spineItemContentMap,
       };
 
-      return epubBook;
+      return book;
    }
 }

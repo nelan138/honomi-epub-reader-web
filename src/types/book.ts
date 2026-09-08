@@ -29,7 +29,7 @@ export type NavigationItem = {
 };
 
 export type RawXTHMLContent = string;
-export type EpubBook = {
+export type Book = {
    // Metadata
    title: string;
    creator: string;
@@ -47,7 +47,7 @@ export type EpubBook = {
 /**
  * * Represents a record in the database.
  */
-export type BookRecord = EpubBook & {
+export type BookRecord = Book & {
    id: number;
    shelfId: number;
    progress: number;
@@ -56,7 +56,7 @@ export type BookRecord = EpubBook & {
 /**
  * Use for UI
  */
-export type UIBookCard = Pick<
+export type BookCard = Pick<
    BookRecord,
    | 'id'
    | 'shelfId'

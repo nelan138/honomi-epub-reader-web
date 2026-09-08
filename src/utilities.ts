@@ -1,4 +1,4 @@
-import type { EpubBook } from '@src/types/book.ts';
+import type { Book } from '@src/types/book.ts';
 
 export function normalizePath(path: string): string {
    const parts: string[] = [];
@@ -45,7 +45,7 @@ export function getXmlDocument(
    return document;
 }
 
-export function logEpubBook(book: EpubBook): void {
+export function logBook(book: Book): void {
    console.log(`%c📖 ${book.title}`, 'font-weight: bold; font-size: 14px;');
 
    console.table({

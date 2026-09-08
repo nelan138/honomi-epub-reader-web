@@ -1,5 +1,5 @@
 import { onMounted, ref } from 'vue';
-import type { ShelfRecord, UIShelf } from '@src/types/shelf';
+import type { ShelfRecord } from '@src/types/shelf';
 import {
    addShelfToDB,
    collapseShelfInDB,
@@ -12,7 +12,7 @@ import {
 import { defaultShelf } from '@src/services/dexie/database';
 
 export function useShelves() {
-   const shelves = ref<UIShelf[]>([]);
+   const shelves = ref<ShelfRecord[]>([]);
    onMounted(async () => await syncWithDB());
 
    async function syncWithDB() {
@@ -43,7 +43,7 @@ export function useShelves() {
       try {
          const { id, displayOrder } = await addShelfToDB(shelf);
 
-         const addedShelf: UIShelf = { id, displayOrder, ...shelf };
+         const addedShelf: ShelfRecord = { id, displayOrder, ...shelf };
          shelves.value.push(addedShelf);
       }
       catch (error) {

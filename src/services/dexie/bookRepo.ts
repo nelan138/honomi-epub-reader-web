@@ -1,10 +1,10 @@
 import { db } from '@src/services/dexie/database';
 import type { BookRecord } from '@src/types/book';
 import { defaultShelf } from '@src/services/dexie/database';
-import type { EpubBook } from '@src/types/book';
+import type { Book } from '@src/types/book';
 
 export async function addBookToDB(
-   book: EpubBook,
+   book: Book,
 ): Promise<{ bookId: number; shelfId: number }> {
    const store = db.books;
 

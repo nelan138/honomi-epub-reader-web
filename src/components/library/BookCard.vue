@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { UIBookCard } from '@src/types/book';
+import type { BookCard } from '@src/types/book';
 import { onUnmounted } from 'vue';
 
 const props = defineProps<{
-   book: UIBookCard;
+   book: BookCard;
 }>();
 
 const emit = defineEmits<{

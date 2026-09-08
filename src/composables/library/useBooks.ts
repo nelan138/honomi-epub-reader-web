@@ -1,5 +1,5 @@
 import { onMounted, ref } from 'vue';
-import type { EpubBook, UIBookCard } from '@src/types/book';
+import type { Book, BookCard } from '@src/types/book';
 import {
    addBookToDB,
    changeBookShelfInDB,
@@ -14,12 +14,12 @@ import { Epub } from '@src/services/epub/epub.ts';
 export function useBooks() {
    const router = useRouter();
 
-   const books = ref<UIBookCard[]>([]);
+   const books = ref<BookCard[]>([]);
 
    const syncWithDB = async () => {
       const bookRecords = await getBooksFromDB();
 
-      books.value = bookRecords.map((bookRecord): UIBookCard => ({
+      books.value = bookRecords.map((bookRecord): BookCard => ({
          id: bookRecord.id,
          shelfId: bookRecord.shelfId,
          progress: bookRecord.progress,
@@ -39,12 +39,12 @@ export function useBooks() {
       ! 3. If database update fails, rollback with syncWithDB() and alert the user
    */
 
-   const addBook = async (book: EpubBook) => {
+   const addBook = async (book: Book) => {
       try {
          const { bookId: id, shelfId } = await addBookToDB(book);
          const { title, creator, cover, publisher, language } = book;
 
-         const addedBook: UIBookCard = {
+         const addedBook: BookCard = {
             id,
             shelfId,
             title,
@@ -135,7 +135,7 @@ export function useBooks() {
 
          const book = await Epub.parse(file);
          await addBook(book);
-         // logEpubBook(book);
+         // logBook(book);
       }
    };
 
