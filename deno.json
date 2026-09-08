@@ -13,6 +13,7 @@
       "@tailwindcss/typography": "npm:@tailwindcss/typography@^0.5.20",
       "@tailwindcss/vite": "npm:@tailwindcss/vite@^4.3.3",
       "@vitejs/plugin-vue": "npm:@vitejs/plugin-vue@^6.0.8",
+      "@vueuse/core": "npm:@vueuse/core@^14.4.0",
       "dexie": "npm:dexie@^4.4.5",
       "fflate": "npm:fflate@^0.8.3",
       "prettier": "npm:prettier@^3.9.6",

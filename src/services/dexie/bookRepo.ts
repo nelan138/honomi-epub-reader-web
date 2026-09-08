@@ -10,7 +10,7 @@ export async function addBookToDB(
 
    const record: Omit<BookRecord, 'id'> = {
       ...book,
-      progress: 0,
+      progress: 0.0,
       shelfId: defaultShelf.id,
    };
 
@@ -73,4 +73,16 @@ export async function changeBookShelfInDB(
       bookRecord.shelfId = shelfId;
       await bookStore.put(bookRecord);
    });
+}
+
+export async function updateBookProgressInDB(
+   bookId: number,
+   progress: number,
+) {
+   const store = db.books;
+   const bookRecord = await store.get(bookId) as BookRecord | undefined;
+   if (!bookRecord) throw new Error('Book does not exist!');
+
+   bookRecord.progress = progress;
+   await store.put(bookRecord);
 }
