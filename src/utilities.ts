@@ -91,26 +91,32 @@ export function navigateTo(path: string) {
    return router.push(path);
 }
 
-export async function unwrapAsync<T, E = Error>(
+export async function unwrapAsync<T>(
    promise: Promise<T>,
-): Promise<[T, null] | [null, E]> {
+): Promise<[T, null] | [null, Error]> {
    try {
       const data = await promise;
       return [data, null];
    }
    catch (error) {
-      return [null, error as E];
+      const safeError = error instanceof Error
+         ? error
+         : new Error(String(error));
+      return [null, safeError];
    }
 }
 
-export function unwrapSync<T, E = Error>(
+export function unwrapSync<T>(
    fn: () => T,
-): [T, null] | [null, E] {
+): [T, null] | [null, Error] {
    try {
       return [fn(), null];
    }
    catch (error) {
-      return [null, error as E];
+      const safeError = error instanceof Error
+         ? error
+         : new Error(String(error));
+      return [null, safeError];
    }
 }
 

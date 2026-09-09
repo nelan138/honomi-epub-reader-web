@@ -8,7 +8,9 @@ import {
    renameBookInDB,
 } from '@src/services/dexie/bookRepo';
 import { useShelves } from '@src/composables/library/useShelves.ts';
-import { Epub } from '@src/services/epub/epub.ts';
+import { parseEpub } from '@src/services/epub/epub.ts';
+import { unwrapAsync } from '@src/utilities.ts';
+import { EpubParsingError, UnexpectedRuntimeError } from '@src/types/errors.ts';
 
 export function useBooks() {
    const books = ref<BookCard[]>([]);
@@ -131,11 +133,15 @@ export function useBooks() {
 
    const importBooks = async (files: FileList) => {
       for (const file of files) {
-         if (!file) continue;
-
-         const book = await Epub.parse(file);
+         const [book, error] = await unwrapAsync(parseEpub(file));
+         if (error) {
+            if (error instanceof EpubParsingError) {
+               console.warn('[Epub] Failed to import one file', error.message);
+               continue;
+            }
+            else { throw new UnexpectedRuntimeError(error.message); }
+         }
          await addBook(book);
-         // logBook(book);
       }
    };
 

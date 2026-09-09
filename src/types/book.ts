@@ -1,6 +1,22 @@
 export type Path = string;
 export type ResolvedPath = string;
 
+export type Metadata = {
+   title: string;
+   creator: string;
+   publisher: string;
+   language: string;
+   cover: Blob;
+};
+
+export type EpubContext = {
+   fileArchive: Record<string, Uint8Array>;
+   opfPath: ResolvedPath;
+   opfDocument: Document;
+   manifest: ManifestItem[];
+   version: 2 | 3;
+};
+
 export type ManifestItem = {
    href: Path;
    id: Idref;

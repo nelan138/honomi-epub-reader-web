@@ -1,13 +1,10 @@
-import defaultCoverUrl from '@src/assets/default-book-cover.jpeg';
-
-const response = await fetch(defaultCoverUrl);
-const defaultCoverBlob = await response.blob();
-
 import { strFromU8, unzipSync } from 'fflate';
 import type {
    Book,
+   EpubContext,
    Idref,
    ManifestItem,
+   Metadata,
    Path,
    RawXTHMLContent,
    ResolvedPath,
@@ -19,23 +16,24 @@ import {
    normalizePath,
    resolvePath,
    UNICODE_GLYPH_REGEX,
+   unwrapAsync,
 } from '@src/utilities';
 
-type Metadata = {
-   title: string;
-   creator: string;
-   publisher: string;
-   language: string;
-   cover: Blob;
-};
+import defaultCoverUrl from '@src/assets/default-book-cover.jpeg';
+import { EpubParsingError } from '@src/types/errors.ts';
+let defaultCoverBlobCache: Blob | null = null;
 
-type EpubContext = {
-   fileArchive: Record<string, Uint8Array>;
-   opfPath: ResolvedPath;
-   opfDocument: Document;
-   manifest: ManifestItem[];
-   version: 2 | 3;
-};
+async function getDefaultCoverBlob(): Promise<Blob> {
+   if (defaultCoverBlobCache) return defaultCoverBlobCache;
+
+   const [response, EpubParsingError] = await unwrapAsync(fetch(defaultCoverUrl));
+   if (response) defaultCoverBlobCache = await response.blob();
+   else {
+      console.warn('[Epub] Failed to load default book cover:', EpubParsingError.message);
+      defaultCoverBlobCache = new Blob([]);
+   }
+   return defaultCoverBlobCache;
+}
 
 function getOpfPath(fileArchive: Record<string, Uint8Array>): ResolvedPath {
    const containerDocument = getXmlDocument(
@@ -45,8 +43,11 @@ function getOpfPath(fileArchive: Record<string, Uint8Array>): ResolvedPath {
    const rootfile = containerDocument.getElementsByTagName('rootfile')[0];
    const opfPath = rootfile?.getAttribute('full-path') as ResolvedPath;
 
-   if (!opfPath)
-      throw new Error('EPUB container does not define an OPF package path');
+   if (!opfPath) {
+      throw new EpubParsingError(
+         'container.xml does not define OPF package path',
+      );
+   }
 
    return normalizePath(opfPath);
 }
@@ -57,42 +58,32 @@ function getManifest(
 ): ManifestItem[] {
    const manifestElement = opfDocument.getElementsByTagName('manifest')[0];
    if (!manifestElement)
-      throw new Error('EPUB package does not contain a manifest');
-
-   const manifest: ManifestItem[] = [];
+      throw new EpubParsingError('package does not contain a manifest');
 
    const manifestItemElements = [...manifestElement.children].filter(
       (element) => element.localName === 'item',
    );
 
-   for (const item of manifestItemElements) {
+   return manifestItemElements.map((item) => {
       const id: Idref | null = item.getAttribute('id');
-      if (!id) throw new Error('EPUB manifest item does not define id');
-
       const href: Path | null = item.getAttribute('href');
-      if (!href) throw new Error('EPUB manifest item does not define href');
-
       const mediaType = item.getAttribute('media-type');
-      if (!mediaType)
-         throw new Error('EPUB manifest item does not define media-type');
+
+      if (!id || !href || !mediaType)
+         throw new EpubParsingError('manifest item missing required attributes');
 
       const propertiesAttribute = item.getAttribute('properties')?.trim();
 
-      const properties = propertiesAttribute
-         ? propertiesAttribute.split(/\s+/)
-         : [];
-
-      const manifestItem: ManifestItem = {
+      return {
          id,
          href,
          resolvedHref: resolvePath(opfPath, href),
          mediaType,
-         properties,
+         properties: propertiesAttribute
+            ? propertiesAttribute.split(/\s+/)
+            : [],
       };
-
-      manifest.push(manifestItem);
-   }
-   return manifest;
+   });
 }
 
 function getVersion(opfDocument: Document): 2 | 3 {
@@ -100,11 +91,11 @@ function getVersion(opfDocument: Document): 2 | 3 {
    const versionString = packageElement?.getAttribute('version');
 
    if (!versionString)
-      throw new Error('EPUB package does not define a version');
+      throw new EpubParsingError('EPUB package does not define a version');
 
    const version = parseInt(versionString, 10);
    if (version !== 2 && version !== 3)
-      throw new Error(`Unsupported EPUB version: ${versionString}`);
+      throw new EpubParsingError(`Unsupported EPUB version: ${versionString}`);
 
    return version as 2 | 3;
 }
@@ -123,21 +114,21 @@ function createEpubContext(
 function getSpine(epubContext: EpubContext): SpineItem[] {
    const spineElement =
       epubContext.opfDocument.getElementsByTagName('spine')[0];
-   if (!spineElement) throw new Error('EPUB package does not contain a spine');
+   if (!spineElement) throw new EpubParsingError('EPUB package does not contain a spine');
 
    const spineItemElements = [...spineElement.children].filter(
       (element) => element.localName === 'itemref',
    );
 
-   const spine = Array.from(spineItemElements, (itemref): SpineItem => {
+   return spineItemElements.map((itemref): SpineItem => {
       const idref = itemref.getAttribute('idref');
-      if (!idref) throw new Error('EPUB spine item does not define an idref');
+      if (!idref) throw new EpubParsingError('EPUB spine item does not define an idref');
 
       const manifestItem = epubContext.manifest.find((item) =>
          item.id === idref
       );
       if (!manifestItem) {
-         throw new Error(
+         throw new EpubParsingError(
             `EPUB spine item references a manifest item that does not exist: ${idref}`,
          );
       }
@@ -149,20 +140,17 @@ function getSpine(epubContext: EpubContext): SpineItem[] {
          linear: itemref.getAttribute('linear') !== 'no',
       };
    });
-   return spine;
 }
 
-function getCover(epubContext: EpubContext): Blob {
+async function getCover(epubContext: EpubContext): Promise<Blob> {
    let coverItem: ManifestItem | undefined;
 
-   // * EPUB 3 check
    if (epubContext.version === 3) {
       coverItem = epubContext.manifest.find((item) =>
          item.properties?.includes('cover-image')
       );
    }
 
-   // * EPUB 2 check & EPUB 3 fallback
    if (!coverItem) {
       const coverId = [...epubContext.opfDocument.getElementsByTagName('meta')]
          .find((meta) => meta.getAttribute('name') === 'cover')
@@ -172,15 +160,15 @@ function getCover(epubContext: EpubContext): Blob {
          coverItem = epubContext.manifest.find((item) => item.id === coverId);
    }
 
-   if (!coverItem) return defaultCoverBlob;
+   if (!coverItem) return await getDefaultCoverBlob();
 
    const coverData = epubContext.fileArchive[coverItem.resolvedHref];
-   if (!coverData) return defaultCoverBlob;
+   if (!coverData) return await getDefaultCoverBlob();
 
    return new Blob([new Uint8Array(coverData)], { type: coverItem.mediaType });
 }
 
-function getMetadata(epubContext: EpubContext): Metadata {
+async function getMetadata(epubContext: EpubContext): Promise<Metadata> {
    const metadataElement = epubContext.opfDocument.getElementsByTagName(
       'metadata',
    )[0];
@@ -190,7 +178,7 @@ function getMetadata(epubContext: EpubContext): Metadata {
          creator: 'Unknown',
          publisher: 'Unknown',
          language: '',
-         cover: defaultCoverBlob,
+         cover: await getDefaultCoverBlob(),
       };
    }
 
@@ -199,7 +187,7 @@ function getMetadata(epubContext: EpubContext): Metadata {
       creator: getElementText(metadataElement, 'creator') || 'Unknown',
       publisher: getElementText(metadataElement, 'publisher') || 'Unknown',
       language: getElementText(metadataElement, 'language') || '',
-      cover: getCover(epubContext),
+      cover: await getCover(epubContext),
    };
 }
 
@@ -216,7 +204,6 @@ function buildContentMap(
       if (!fileData) continue;
 
       const rawXhtml = strFromU8(fileData);
-
       contentMap.set(spineItem.idref, rawXhtml as RawXTHMLContent);
    }
 
@@ -238,8 +225,7 @@ function getTotalCharacterCount(
          clone.querySelectorAll('rt, rp').forEach((el) => el.remove());
 
          const text = clone.textContent ?? '';
-         const count = text.match(UNICODE_GLYPH_REGEX)?.length ?? 0;
-         totalCount += count;
+         totalCount += text.match(UNICODE_GLYPH_REGEX)?.length ?? 0;
       }
    }
 
@@ -247,28 +233,26 @@ function getTotalCharacterCount(
 }
 
 /**
- * Represents an EPUB, only has data parsed from its content.
+ * Parses an EPUB Blob and extracts its content, metadata, and character count.
  */
-export class Epub {
-   static async parse(epubFile: Blob): Promise<Book> {
-      const buffer = await epubFile.arrayBuffer();
-      const fileArchive = unzipSync(new Uint8Array(buffer));
+export async function parseEpub(epubFile: Blob): Promise<Book> {
+   const buffer = await epubFile.arrayBuffer();
+   const fileArchive = unzipSync(new Uint8Array(buffer));
 
-      const epubContext = createEpubContext(fileArchive);
+   const epubContext = createEpubContext(fileArchive);
 
-      const metadata = getMetadata(epubContext);
-      const spine = getSpine(epubContext);
-      const spineItemContentMap = buildContentMap(epubContext, spine);
-      const totalCharacterCount = getTotalCharacterCount(spineItemContentMap);
+   const metadata = await getMetadata(epubContext);
+   const spine = getSpine(epubContext);
+   const spineItemContentMap = buildContentMap(epubContext, spine);
+   const totalCharacterCount = getTotalCharacterCount(spineItemContentMap);
 
-      const book: Book = {
-         ...metadata,
-         spine,
-         assets: fileArchive,
-         spineItemContentMap,
-         totalCharacterCount,
-      };
+   const book: Book = {
+      ...metadata,
+      spine,
+      assets: fileArchive,
+      spineItemContentMap,
+      totalCharacterCount,
+   };
 
-      return book;
-   }
+   return book;
 }

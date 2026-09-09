@@ -2,6 +2,7 @@ import { db } from '@src/services/dexie/database';
 import type { BookRecord } from '@src/types/book';
 import { defaultShelf } from '@src/services/dexie/database';
 import type { Book } from '@src/types/book';
+import { NotFoundError } from '@src/types/errors.ts';
 
 export async function addBookToDB(
    book: Book,
@@ -15,31 +16,30 @@ export async function addBookToDB(
    };
 
    const bookId = await store.add(record);
+
    const shelfId = defaultShelf.id;
    return { bookId, shelfId };
 }
 
 export async function getBooksFromDB(): Promise<BookRecord[]> {
    const store = db.books;
-   const books = await store.toArray() as BookRecord[];
+   const books = await store.toArray();
+
    return books;
 }
 
 export async function getBookFromDB(bookId: number): Promise<BookRecord> {
-   const store = db.books;
-   const book = await store.get(bookId);
-   if (book === undefined) throw new Error('Book does not exist!');
-
+   const book = await db.books.get(bookId);
+   if (!book) throw new NotFoundError('Book is not found');
    return book;
 }
 
-export async function deleteBookFromDB(id: number): Promise<void> {
-   await db.transaction('readwrite', db.books, async () => {
-      const store = db.books;
-      const existingBook = await store.get(id) as BookRecord | undefined;
-      if (existingBook) await store.delete(id);
-      else throw new Error('Book does not exist!');
-   });
+export async function deleteBookFromDB(bookId: number): Promise<void> {
+   const store = db.books;
+   const deletedCount = await store.where('id').equals(bookId).delete();
+
+   if (deletedCount === 0)
+      throw new NotFoundError(`Book with ID ${bookId} not found`);
 }
 
 export async function renameBookInDB(
@@ -47,12 +47,10 @@ export async function renameBookInDB(
    newTitle: string,
 ): Promise<void> {
    const store = db.books;
+   const updatedCount = await store.update(bookId, { title: newTitle });
 
-   const bookRecord = await store.get(bookId) as BookRecord | undefined;
-   if (!bookRecord) throw new Error('Book does not exist!');
-
-   bookRecord.title = newTitle;
-   await store.put(bookRecord);
+   if (updatedCount === 0)
+      throw new NotFoundError(`Book with ID ${bookId} not found`);
 }
 
 export async function changeBookShelfInDB(
@@ -63,12 +61,11 @@ export async function changeBookShelfInDB(
    const shelfStore = db.shelves;
 
    await db.transaction('readwrite', shelfStore, bookStore, async () => {
-      const bookRecord = await bookStore.get(bookId) as BookRecord | undefined;
-      if (bookRecord === undefined) throw new Error('Book does not exist!');
+      const bookRecord = await bookStore.get(bookId);
+      if (!bookRecord) throw new NotFoundError('Book does not exist');
 
-      const shelfExists = await shelfStore.where(':id').equals(shelfId)
-         .firstKey();
-      if (!shelfExists) throw new Error('Shelf does not exist');
+      const shelf = await shelfStore.get(shelfId);
+      if (!shelf) throw new NotFoundError('Shelf does not exist');
 
       bookRecord.shelfId = shelfId;
       await bookStore.put(bookRecord);
@@ -78,11 +75,11 @@ export async function changeBookShelfInDB(
 export async function updateBookProgressInDB(
    bookId: number,
    readCharCount: number,
-) {
+): Promise<void> {
    const store = db.books;
-   const bookRecord = await store.get(bookId) as BookRecord | undefined;
-   if (!bookRecord) throw new Error('Book does not exist!');
+   const updatedCount = await store.update(bookId, {
+      readCharacterCount: readCharCount,
+   });
 
-   bookRecord.readCharacterCount = readCharCount;
-   await store.put(bookRecord);
+   if (updatedCount === 0) throw new NotFoundError('Book does not exist!');
 }
