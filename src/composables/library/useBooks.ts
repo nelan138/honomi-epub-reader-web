@@ -7,13 +7,10 @@ import {
    getBooksFromDB,
    renameBookInDB,
 } from '@src/services/dexie/bookRepo';
-import { useRouter } from 'vue-router';
 import { useShelves } from '@src/composables/library/useShelves.ts';
 import { Epub } from '@src/services/epub/epub.ts';
 
 export function useBooks() {
-   const router = useRouter();
-
    const books = ref<BookCard[]>([]);
 
    const syncWithDB = async () => {
@@ -120,15 +117,6 @@ export function useBooks() {
       }
    };
 
-   const openBook = (bookId: number) => {
-      try {
-         router.push(`/read/${bookId}`);
-      }
-      catch (error) {
-         alert('Failed to open book: ' + (error as Error).message);
-      }
-   };
-
    const importBooks = async (files: FileList) => {
       for (const file of files) {
          if (!file) continue;
@@ -145,7 +133,6 @@ export function useBooks() {
       changeBookShelf,
       deleteBook,
       addBook,
-      openBook,
       importBooks,
    };
 }

@@ -56,17 +56,10 @@ export function logBook(book: Book): void {
       Language: book.language,
       'Cover Type': book.cover.type || '(unknown)',
       'Cover Size': `${(book.cover.size / 1024).toFixed(2)} KB`,
-      'Navigation Items': book.navigation.length,
       'Spine Items': book.spine.length,
       'Assets': Object.keys(book.assets).length,
       'Spine Content Cached': book.spineItemContentMap.size,
    });
-
-   if (book.navigation.length > 0) {
-      console.groupCollapsed('Navigation');
-      console.table(book.navigation);
-      console.groupEnd();
-   }
 
    if (book.spine.length > 0) {
       console.groupCollapsed('Spine');
@@ -87,10 +80,36 @@ export function logBook(book: Book): void {
 }
 
 export function navigateToHomePage() {
-   router.push('/');
-   console.log('running');
+   return router.push('/');
 }
 
 export function navigateToNotFoundPage() {
-   router.push('error/not-found');
+   return router.push('error/not-found');
+}
+
+export function navigateTo(path: string) {
+   return router.push(path);
+}
+
+export async function unwrapAsync<T, E = Error>(
+   promise: Promise<T>,
+): Promise<[T, null] | [null, E]> {
+   try {
+      const data = await promise;
+      return [data, null];
+   }
+   catch (error) {
+      return [null, error as E];
+   }
+}
+
+export function unwrapSync<T, E = Error>(
+   fn: () => T,
+): [T, null] | [null, E] {
+   try {
+      return [fn(), null];
+   }
+   catch (error) {
+      return [null, error as E];
+   }
 }

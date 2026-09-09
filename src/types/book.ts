@@ -19,15 +19,6 @@ export type SpineItem = {
    linear: boolean; // false <=> (footnotes, appendices, etc.)
 };
 
-export type NavigationItem = {
-   label: string;
-   href: Path;
-   resolvedHref: ResolvedPath;
-
-   children?: NavigationItem[];
-   fragment?: string; // Optional fragment identifier (e.g., #section1)
-};
-
 export type RawXTHMLContent = string;
 export type Book = {
    // Metadata
@@ -38,7 +29,6 @@ export type Book = {
    cover: Blob;
 
    // Book Content
-   navigation: NavigationItem[];
    spine: SpineItem[];
    assets: Record<ResolvedPath, Uint8Array>;
    spineItemContentMap: Map<Idref, RawXTHMLContent>;

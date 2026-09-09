@@ -8,7 +8,6 @@ import type {
    Book,
    Idref,
    ManifestItem,
-   NavigationItem,
    Path,
    RawXTHMLContent,
    ResolvedPath,
@@ -203,54 +202,6 @@ function getMetadata(epubContext: EpubContext): Metadata {
    };
 }
 
-function getNavigation(epubContext: EpubContext): NavigationItem[] {
-   if (epubContext.version === 3) {
-      let navItem = epubContext.manifest.find((item) =>
-         item.properties?.includes('nav')
-      );
-
-      if (!navItem) {
-         navItem = epubContext.manifest.find((item) =>
-            item.href.includes('toc')
-            && (item.href.endsWith('.xhtml') || item.href.endsWith('.html'))
-         );
-      }
-      if (!navItem) return [];
-
-      const navDocument = getXmlDocument(
-         navItem.resolvedHref,
-         epubContext.fileArchive,
-      );
-      return parseEpub3Navigation(navDocument, navItem.resolvedHref);
-   }
-
-   // version === 2
-   const spineItemElement =
-      epubContext.opfDocument.getElementsByTagName('spine')[0];
-   const tocId = spineItemElement?.getAttribute('toc');
-
-   let tocItem = tocId
-      ? epubContext.manifest.find((item) => item.id === tocId)
-      : undefined;
-
-   if (!tocItem) {
-      tocItem = epubContext.manifest.find((item) =>
-         item.mediaType === 'application/x-dtbncx+xml'
-      )
-         ?? epubContext.manifest.find((item) =>
-            item.href.endsWith('.ncx')
-         );
-   }
-
-   if (!tocItem) return [];
-
-   const navDocument = getXmlDocument(
-      tocItem.resolvedHref,
-      epubContext.fileArchive,
-   );
-   return parseEpub2Navigation(navDocument, tocItem.resolvedHref);
-}
-
 function buildContentMap(
    epubContext: EpubContext,
    spine: SpineItem[],
@@ -296,102 +247,6 @@ function buildContentMap(
    return contentMap;
 }
 
-function parseEpub3Navigation(
-   navDocument: Document,
-   navPath: string,
-): NavigationItem[] {
-   const navElements = navDocument.getElementsByTagName('nav');
-   let tocNav: Element | null = null;
-
-   for (const nav of navElements) {
-      const epubType = nav.getAttributeNS(
-         'http://www.idpf.org/2007/ops',
-         'type',
-      );
-      if (epubType?.split(/\s+/).includes('toc')) {
-         tocNav = nav;
-         break;
-      }
-   }
-
-   if (!tocNav) return [];
-
-   const parseOl = (ol: Element): NavigationItem[] => {
-      const items: NavigationItem[] = [];
-      for (const li of ol.children) {
-         if (li.localName !== 'li') continue;
-
-         const anchor = li.querySelector('a');
-         if (!anchor) continue;
-
-         const label = anchor.textContent?.trim() ?? '';
-         const href = anchor.getAttribute('href') ?? '';
-         const [hrefPath, fragment] = href.split('#');
-         const resolvedHref = resolvePath(navPath, hrefPath!);
-
-         const item: NavigationItem = {
-            label,
-            href,
-            resolvedHref,
-            fragment: fragment,
-            children: [],
-         };
-
-         const childOl = li.querySelector('ol');
-         if (childOl) item.children = parseOl(childOl);
-
-         items.push(item);
-      }
-      return items;
-   };
-
-   const rootOl = tocNav.querySelector('ol');
-   return rootOl ? parseOl(rootOl) : [];
-}
-
-function parseEpub2Navigation(
-   tocDocument: Document,
-   tocPath: string,
-): NavigationItem[] {
-   const navMap = tocDocument.getElementsByTagName('navMap')[0];
-   if (!navMap) return [];
-
-   const parseNavPoints = (parent: Element): NavigationItem[] => {
-      const items: NavigationItem[] = [];
-      for (const navPoint of parent.children) {
-         if (navPoint.localName !== 'navPoint') continue;
-
-         const label = navPoint.getElementsByTagName('navLabel')[0]
-            ?.getElementsByTagName('text')[0]
-            ?.textContent?.trim() ?? '';
-
-         const contentSrc =
-            navPoint.getElementsByTagName('content')[0]?.getAttribute('src')
-               ?? '';
-
-         const [hrefPath, fragment] = contentSrc.split('#');
-         const resolvedHref = resolvePath(tocPath, hrefPath!);
-
-         const item: NavigationItem = {
-            label,
-            href: contentSrc,
-            resolvedHref,
-            fragment: fragment,
-            children: [],
-         };
-
-         if (
-            [...navPoint.children].some((el) => el.localName === 'navPoint')
-         ) { item.children = parseNavPoints(navPoint); }
-
-         items.push(item);
-      }
-      return items;
-   };
-
-   return parseNavPoints(navMap);
-}
-
 /**
  * Represents an EPUB, only has data parsed from its content.
  */
@@ -404,13 +259,11 @@ export class Epub {
 
       const metadata = getMetadata(epubContext);
       const spine = getSpine(epubContext);
-      const navigation = getNavigation(epubContext);
       const spineItemContentMap = buildContentMap(epubContext, spine);
 
       const book: Book = {
          ...metadata,
          spine,
-         navigation,
          assets: fileArchive,
          spineItemContentMap,
       };

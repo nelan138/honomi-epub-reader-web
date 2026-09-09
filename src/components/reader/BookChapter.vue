@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 const props = defineProps<{
-   // HTML string
+   /**
+    * HTML string
+    */
    content: string;
 }>();
 </script>

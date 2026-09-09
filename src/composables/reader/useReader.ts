@@ -1,63 +1,61 @@
-import type { Idref } from '@src/types/book';
+import {
+   navigateTo,
+   navigateToNotFoundPage,
+   resolvePath,
+   unwrapAsync,
+   unwrapSync,
+} from '@src/utilities';
 import { getBookFromDB } from '@src/services/dexie/bookRepo.ts';
 import { strFromU8 } from 'fflate';
-import { navigateToNotFoundPage, resolvePath } from '@src/utilities.ts';
-import { onUnmounted, shallowRef, ref } from 'vue';
-
-type HTMLAsString = string;
 
 export type Chapter = {
-   idref: Idref; // use for :key
-   content: HTMLAsString;
+   /** ! HTML string */
+   idref: string;
+   content: string;
+   /** ! Remember to provoke these after use */
+   blobUrls: string[] | undefined;
 };
 
-export function useReader(bookId: number) {
-   const chapters = shallowRef<Chapter[]>([]);
-   const blobUrls: string[] = [];
+export function useReader() {
+   const openBook = async (bookId: number) => {
+      const [error] = await unwrapAsync(navigateTo(`/read/${bookId}`));
+      if (error) await navigateToNotFoundPage();
+   };
 
-   let isUnmounted = false;
+   const getChapters = async (bookId: number): Promise<Chapter[]> => {
+      const [bookRecord, error] = await unwrapAsync(getBookFromDB(bookId));
+      if (error || !bookRecord) throw new Error('Book not found!');
 
-   onUnmounted(() => {
-      isUnmounted = true;
-      blobUrls.forEach((url) => URL.revokeObjectURL(url));
-   });
-
-   const cumulativeCharacterCountMap = new Map<number, number>();
-
-   const cumulativeChars = ref(0);
-   async function loadBook() {
-      const bookRecord = await getBookFromDB(bookId).catch(
-         navigateToNotFoundPage,
-      );
-
-      if (!bookRecord) return navigateToNotFoundPage();
-      if (isUnmounted) return;
-
-      cumulativeCharacterCountMap.clear();
-      let globalIndex = 0;
-
-      const spine = bookRecord.spine;
       const assets = bookRecord.assets;
-      const parser = new DOMParser();
-      const loadedChapters: Chapter[] = [];
+      const spine = bookRecord.spine;
+      const domParser = new DOMParser();
 
+      const chapters: Chapter[] = [];
       for (const item of spine) {
-         if (isUnmounted) break;
+         if (!item.linear) continue;
 
+         // Get raw content
          const data = assets[item.resolvedHref];
          if (!data) continue;
 
          const rawHtml = strFromU8(data);
-         const doc = parser.parseFromString(
-            rawHtml,
-            item.mediaType as DOMParserSupportedType,
+         const [document] = unwrapSync(() =>
+            domParser.parseFromString(
+               rawHtml,
+               item.mediaType as DOMParserSupportedType,
+            )
          );
+         if (!document) throw new Error('DOM Parser not working');
 
-         for (const image of doc.getElementsByTagName('img')) {
-            const rawSrc = image.getAttribute('src');
-            if (!rawSrc) continue;
+         const blobUrls: string[] = [];
+         // Process imgs
+         for (const image of document.getElementsByTagName('img')) {
+            const src = image.getAttribute('src');
+            if (!src) continue;
 
-            const imageData = assets[resolvePath(item.resolvedHref, rawSrc)];
+            const resolvedSrc = resolvePath(item.resolvedHref, src);
+
+            const imageData = assets[resolvedSrc];
             if (!imageData) continue;
 
             const blob = new Blob([imageData as BlobPart]);
@@ -68,41 +66,19 @@ export function useReader(bookId: number) {
             image.alt = `image of item: ${item.idref}`;
          }
 
-         const paragraphs = doc.getElementsByTagName('p');
-         for (let i = 0; i < paragraphs.length; i++) {
-            const p = paragraphs[i];
-            if (!p) continue;
-
-            p.setAttribute('data-index', globalIndex.toString());
-
-            const clone = p.cloneNode(true) as HTMLElement;
-
-            const rubyAnnotations = clone.querySelectorAll('rt, rp');
-            for (let j = 0; j < rubyAnnotations.length; j++)
-               rubyAnnotations[j]?.remove();
-
-            cumulativeChars.value += clone.textContent?.length ?? 0;
-            cumulativeCharacterCountMap.set(globalIndex, cumulativeChars.value);
-
-            globalIndex++;
-         }
-         const content = doc.body?.innerHTML ?? '';
-
-         loadedChapters.push({
+         const chapter: Chapter = {
             idref: item.idref,
-            content,
-         });
+            content: document.body.innerHTML,
+            blobUrls,
+         };
+         chapters.push(chapter);
       }
 
-      chapters.value = loadedChapters;
-   }
+      return chapters;
+   };
 
-   const totalCharacterCount = cumulativeChars;
-   // runs in the background
-   loadBook();
    return {
-      chapters,
-      cumulativeCharacterCountMap,
-      totalCharacterCount,
+      getChapters,
+      openBook,
    };
 }

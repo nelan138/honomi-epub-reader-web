@@ -39,9 +39,8 @@ onUnmounted(() => {
             <p class="text-muted line-clamp-1 text-[80%] uppercase">{{ book.language }}</p>
          </div>
 
-         <!-- Todo: Progress bar -->
          <div class="bg-stroke/10 h-1 overflow-hidden rounded-full">
-            <div class="bg-tertiary h-full w-[67%] rounded-full"></div>
+            <div class="bg-tertiary h-full rounded-full" :style="{ width: `${book.progress}%` }"></div>
          </div>
 
          <!-- Buttons -->

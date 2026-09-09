@@ -6,11 +6,15 @@ import BookCard from '@src/components/library/BookCard.vue';
 import { useShelves } from '@src/composables/library/useShelves';
 import { useTheme } from '@src/composables/library/useTheme';
 import { useBooks } from '@src/composables/library/useBooks';
+import { useReader } from '@src/composables/reader/useReader';
 
 const { toggleTheme } = useTheme();
 const { shelves, addShelf, deleteShelf, renameShelf, collapseShelf, expandShelf, moveShelfUp, moveShelfDown } =
    useShelves();
-const { books, openBook, renameBook, changeBookShelf, deleteBook, importBooks } = useBooks();
+const { books, renameBook, changeBookShelf, deleteBook, importBooks } = useBooks();
+
+const { openBook } = useReader()
+
 
 const getBooksInShelf = (shelfId: number) => books.value.filter((book) => book.shelfId === shelfId);
 </script>
