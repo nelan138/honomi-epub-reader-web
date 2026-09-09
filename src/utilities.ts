@@ -113,3 +113,13 @@ export function unwrapSync<T, E = Error>(
       return [null, error as E];
    }
 }
+
+export const UNICODE_GLYPH_REGEX = /[\p{L}\p{N}]/gu; // only letters and numbers
+
+export function cleanUpBlobUrls(blobUrls: string[] | undefined) {
+   if (blobUrls) {
+      blobUrls.forEach((url) => {
+         if (url) URL.revokeObjectURL(url);
+      });
+   }
+}

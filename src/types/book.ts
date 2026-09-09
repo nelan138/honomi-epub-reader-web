@@ -31,7 +31,9 @@ export type Book = {
    // Book Content
    spine: SpineItem[];
    assets: Record<ResolvedPath, Uint8Array>;
+   /** Map<Idref, RawXTHMLContent> */
    spineItemContentMap: Map<Idref, RawXTHMLContent>;
+   totalCharacterCount: number;
 };
 
 /**
@@ -40,7 +42,8 @@ export type Book = {
 export type BookRecord = Book & {
    id: number;
    shelfId: number;
-   progress: number;
+   /** count of how many chars user has read of this book */
+   readCharacterCount: number;
 };
 
 /**
@@ -50,7 +53,8 @@ export type BookCard = Pick<
    BookRecord,
    | 'id'
    | 'shelfId'
-   | 'progress'
+   | 'readCharacterCount'
+   | 'totalCharacterCount'
    | 'cover'
    | 'title'
    | 'creator'

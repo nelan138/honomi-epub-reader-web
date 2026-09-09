@@ -3,7 +3,7 @@ import defaultCoverUrl from '@src/assets/default-book-cover.jpeg';
 const response = await fetch(defaultCoverUrl);
 const defaultCoverBlob = await response.blob();
 
-import { unzipSync } from 'fflate';
+import { strFromU8, unzipSync } from 'fflate';
 import type {
    Book,
    Idref,
@@ -18,6 +18,7 @@ import {
    getXmlDocument,
    normalizePath,
    resolvePath,
+   UNICODE_GLYPH_REGEX,
 } from '@src/utilities';
 
 type Metadata = {
@@ -209,42 +210,40 @@ function buildContentMap(
    const contentMap = new Map<Idref, RawXTHMLContent>();
 
    for (const spineItem of spine) {
-      const idref = spineItem.idref;
+      if (!spineItem.linear) continue;
 
-      const manifestItem = epubContext.manifest.find((item) =>
-         item.id === idref
-      );
-      if (!manifestItem) {
-         contentMap.set(idref, `<p>Error: ${idref} not found</p>`);
-         continue;
-      }
+      const fileData = epubContext.fileArchive[spineItem.resolvedHref];
+      if (!fileData) continue;
 
-      const chapterPath = manifestItem.resolvedHref;
-      const fileData = epubContext.fileArchive[chapterPath];
+      const rawXhtml = strFromU8(fileData);
 
-      if (!fileData) {
-         contentMap.set(idref, `<p>Error: File missing</p>`);
-         continue;
-      }
-
-      const rawXhtml = new TextDecoder('utf-8').decode(fileData);
-      const doc = new DOMParser().parseFromString(
-         rawXhtml,
-         'application/xhtml+xml',
-      );
-
-      if (doc.getElementsByTagName('parsererror').length > 0) {
-         console.error(`Invalid XML in EPUB entry: ${chapterPath}`);
-         contentMap.set(idref, `<p>Error parsing chapter.</p>`);
-         continue;
-      }
-
-      const body = doc.querySelector('body');
-
-      contentMap.set(idref, body ? body.innerHTML : '');
+      contentMap.set(spineItem.idref, rawXhtml as RawXTHMLContent);
    }
 
    return contentMap;
+}
+
+function getTotalCharacterCount(
+   spineItemContentMap: Map<Idref, RawXTHMLContent>,
+): number {
+   let totalCount = 0;
+   const parser = new DOMParser();
+
+   for (const rawContent of spineItemContentMap.values()) {
+      const doc = parser.parseFromString(rawContent, 'application/xhtml+xml');
+      const paragraphs = doc.querySelectorAll('p');
+
+      for (const p of paragraphs) {
+         const clone = p.cloneNode(true) as HTMLElement;
+         clone.querySelectorAll('rt, rp').forEach((el) => el.remove());
+
+         const text = clone.textContent ?? '';
+         const count = text.match(UNICODE_GLYPH_REGEX)?.length ?? 0;
+         totalCount += count;
+      }
+   }
+
+   return totalCount;
 }
 
 /**
@@ -260,12 +259,14 @@ export class Epub {
       const metadata = getMetadata(epubContext);
       const spine = getSpine(epubContext);
       const spineItemContentMap = buildContentMap(epubContext, spine);
+      const totalCharacterCount = getTotalCharacterCount(spineItemContentMap);
 
       const book: Book = {
          ...metadata,
          spine,
          assets: fileArchive,
          spineItemContentMap,
+         totalCharacterCount,
       };
 
       return book;

@@ -19,7 +19,8 @@ export function useBooks() {
       books.value = bookRecords.map((bookRecord): BookCard => ({
          id: bookRecord.id,
          shelfId: bookRecord.shelfId,
-         progress: bookRecord.progress,
+         readCharacterCount: bookRecord.readCharacterCount,
+         totalCharacterCount: bookRecord.totalCharacterCount,
          title: bookRecord.title,
          creator: bookRecord.creator,
          publisher: bookRecord.publisher,
@@ -39,7 +40,14 @@ export function useBooks() {
    const addBook = async (book: Book) => {
       try {
          const { bookId: id, shelfId } = await addBookToDB(book);
-         const { title, creator, cover, publisher, language } = book;
+         const {
+            title,
+            creator,
+            cover,
+            publisher,
+            language,
+            totalCharacterCount,
+         } = book;
 
          const addedBook: BookCard = {
             id,
@@ -49,7 +57,8 @@ export function useBooks() {
             cover,
             publisher,
             language,
-            progress: 0,
+            totalCharacterCount,
+            readCharacterCount: 0,
          };
          books.value.push(addedBook);
       }
@@ -96,10 +105,13 @@ export function useBooks() {
 
    const { shelves } = useShelves();
    const changeBookShelf = async (bookId: number) => {
-      const shelfName = prompt('Enter shelf name:', 'Your Books')?.trim().toLowerCase();
+      const shelfName = prompt('Enter shelf name:', 'Your Books')?.trim()
+         .toLowerCase();
       if (!shelfName) return;
 
-      const shelfId = shelves.value.find((shelf) => shelf.name.toLowerCase() === shelfName)
+      const shelfId = shelves.value.find((shelf) =>
+         shelf.name.toLowerCase() === shelfName
+      )
          ?.id;
       if (!shelfId) return alert('Shelf does not exist!');
 

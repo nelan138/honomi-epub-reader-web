@@ -2,40 +2,88 @@
 import BookChapter from '@src/components/reader/BookChapter.vue';
 import ReaderHeader from '@src/components/reader/ReaderHeader.vue';
 import { type Chapter, useReader } from '@src/composables/reader/useReader';
-import { navigateToNotFoundPage, unwrapAsync } from '@src/utilities';
-import { onMounted, onUnmounted, shallowRef } from 'vue';
+import { cleanUpBlobUrls, navigateToNotFoundPage, unwrapAsync } from '@src/utilities';
+import { computed, onMounted, onUnmounted, shallowRef } from 'vue';
 import { useRoute } from 'vue-router';
 
+import { getBookFromDB, updateBookProgressInDB } from '@src/services/dexie/bookRepo';
+import { useBookScroller } from '@src/composables/reader/useBookScroller';
+import { useDebounceFn } from '@vueuse/core';
+
 const route = useRoute();
+const params = route.params.bookId as string | undefined;
+const bookId = params ? parseInt(params) : NaN;
+
+const { getChapters } = useReader();
+const { restoreScrollPosition, getCurrentPIndex } = useBookScroller();
+
 const chapters = shallowRef<Chapter[]>([]);
-const progress = '67.67';
+
+const totalCharacterCount = shallowRef<number>(0);
+const scrolledPastCharacterCount = shallowRef<number>(0);
+
+// Uniform all maps into one map
+const cumulativeCharacterCount = computed(() => {
+   const map = new Map<number, number>();
+   let runningTotal = 0;
+
+   for (const chapter of chapters.value) {
+      for (const [pIndex, charCount] of chapter.characterCount.entries()) {
+         runningTotal += charCount;
+         map.set(pIndex, runningTotal);
+      }
+   }
+
+   return map;
+});
+
+const delay = 1000; // delay on scroll stop (ms)
+const updateBookProgressOnScrollStop = useDebounceFn(async () => {
+   const pIndex = getCurrentPIndex();
+   if (!pIndex) return;
+
+   const readCharCount = cumulativeCharacterCount.value.get(pIndex);
+   if (!readCharCount) return;
+
+   const [error] = await unwrapAsync(updateBookProgressInDB(bookId, readCharCount));
+   if (error) return; // ! fails to save progress
+
+   scrolledPastCharacterCount.value = readCharCount;
+}, delay);
 
 onMounted(async () => {
-   const params = route.params.bookId as string | undefined;
-   const bookId = params ? parseInt(params) : NaN;
+   const [data] = await unwrapAsync(getChapters(bookId));
+   if (!data) {
+      navigateToNotFoundPage();
+      return;
+   }
+   chapters.value = data;
 
-   const { getChapters } = useReader();
-
-   const [data, error] = await unwrapAsync(getChapters(bookId));
-   if (error || !data) {
+   const [book] = await unwrapAsync(getBookFromDB(bookId));
+   if (!book) {
       navigateToNotFoundPage();
       return;
    }
 
-   chapters.value = data;
+   totalCharacterCount.value = book.totalCharacterCount;
+   scrolledPastCharacterCount.value = book.readCharacterCount;
+
+   // Attach func: Runs after `delay` every time user stops scrolling.
+   window.addEventListener('scroll', updateBookProgressOnScrollStop, { passive: true });
+
+   restoreScrollPosition(scrolledPastCharacterCount.value, cumulativeCharacterCount.value);
 });
 
 onUnmounted(() => {
-   for (const chapter of chapters.value) {
-      if (chapter.blobUrls) chapter.blobUrls.forEach((url) => URL.revokeObjectURL(url));
-   }
+   window.removeEventListener('scroll', updateBookProgressOnScrollStop);
+   chapters.value.forEach((chapter) => cleanUpBlobUrls(chapter.blobUrls));
 });
 </script>
 
 <template>
    <ReaderHeader />
    <template v-if="chapters.length === 0">
-      <main class="h-screen w-full p-8 text-center">Loading...</main>
+      <main class="my-auto h-screen w-full p-8 text-center">Loading...</main>
    </template>
 
    <template v-else>
@@ -44,7 +92,11 @@ onUnmounted(() => {
             <BookChapter :content="chapter.content" />
          </template>
 
-         <footer class="sticky bottom-0 z-50 py-2 text-right text-xs">{{ progress }} %</footer>
+         <footer class="sticky bottom-0 z-50 py-2 text-right text-xs">
+            {{
+               `${scrolledPastCharacterCount}/${totalCharacterCount} - ${((scrolledPastCharacterCount * 100) / totalCharacterCount).toFixed(2)}%`
+            }}
+         </footer>
       </main>
    </template>
 </template>

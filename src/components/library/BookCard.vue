@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { BookCard } from '@src/types/book';
+import { cleanUpBlobUrls } from '@src/utilities';
 import { onUnmounted } from 'vue';
 
 const props = defineProps<{
@@ -16,9 +17,7 @@ const emit = defineEmits<{
 const defaultCover = '../assets/default-book-cover.jpeg';
 const coverUrl = props.book.cover ? URL.createObjectURL(props.book.cover) : new URL(defaultCover, import.meta.url).href;
 
-onUnmounted(() => {
-   URL.revokeObjectURL(coverUrl);
-});
+onUnmounted(() => cleanUpBlobUrls([coverUrl]));
 </script>
 
 <template>
@@ -40,7 +39,10 @@ onUnmounted(() => {
          </div>
 
          <div class="bg-stroke/10 h-1 overflow-hidden rounded-full">
-            <div class="bg-tertiary h-full rounded-full" :style="{ width: `${book.progress}%` }"></div>
+            <div
+               class="bg-tertiary h-full rounded-full"
+               :style="{ width: `${((book.readCharacterCount * 100) / book.totalCharacterCount).toFixed(0)}%` }"
+            ></div>
          </div>
 
          <!-- Buttons -->
