@@ -1,5 +1,6 @@
 export type Path = string;
 export type ResolvedPath = string;
+export const XLINK_NS = 'http://www.w3.org/1999/xlink';
 
 export type Metadata = {
    title: string;

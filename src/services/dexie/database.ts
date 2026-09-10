@@ -1,7 +1,8 @@
 import { Dexie, type EntityTable } from 'dexie';
 import type { BookRecord } from '@src/types/book';
 import type { ShelfRecord } from '@src/types/shelf';
-import { addShelfToDB } from '@src/services/dexie/shelfRepo';
+import { NotFoundError, UnexpectedRuntimeError } from '@src/types/errors.ts';
+import { unwrapAsync } from '@src/utilities.ts';
 
 const DB_NAME = 'Honomi';
 const DB_VERSION = 1;
@@ -16,29 +17,33 @@ db.version(DB_VERSION).stores({
    shelves: '++id, &name, &displayOrder',
 });
 
-export const defaultShelf: ShelfRecord = {
-   id: 1, // ? maybe not but will be updated
-   displayOrder: 1, // ? maybe not but will be updated
+export const DEFAULT_SHELF_ID = 1;
+export const defaultShelf: Readonly<ShelfRecord> = {
+   id: DEFAULT_SHELF_ID,
+   displayOrder: 1,
    name: 'Your Books',
    expanded: true,
 };
 
-db.on('ready', async () => {
-   const shelf = await db.shelves.where('name').equals(defaultShelf.name)
-      .first();
-   if (!shelf) throw new Error('Default shelf not found in database!');
-   defaultShelf.id = shelf.id;
-   defaultShelf.displayOrder = shelf.displayOrder;
+// first created
+db.on('populate', () => {
+   const clone = { ...defaultShelf };
+   db.shelves.add(clone);
 });
 
-db.on('populate', async () => {
-   try {
-      const { name, expanded } = defaultShelf;
-      const { id, displayOrder } = await addShelfToDB({ name, expanded });
-      defaultShelf.id = id;
-      defaultShelf.displayOrder = displayOrder;
+// every time the database opens
+db.on('ready', async () => {
+   const [shelf, error] = await unwrapAsync(db.shelves.get(DEFAULT_SHELF_ID));
+
+   if (error) {
+      throw new UnexpectedRuntimeError(
+         `Failed to read default shelf: ${error.message}`,
+      );
    }
-   catch {
-      console.log('Default shelf already initialized');
+
+   if (!shelf) {
+      throw new NotFoundError(
+         `Default shelf (ID: ${DEFAULT_SHELF_ID}) not found in DB`,
+      );
    }
 });

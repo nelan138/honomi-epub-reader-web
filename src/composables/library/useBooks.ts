@@ -10,13 +10,23 @@ import {
 import { useShelves } from '@src/composables/library/useShelves.ts';
 import { parseEpub } from '@src/services/epub/epub.ts';
 import { unwrapAsync } from '@src/utilities.ts';
-import { EpubParsingError, UnexpectedRuntimeError } from '@src/types/errors.ts';
+import {
+   EpubParsingError,
+   NotFoundError,
+   UnexpectedRuntimeError,
+} from '@src/types/errors.ts';
+import Dexie from 'dexie';
 
 export function useBooks() {
    const books = ref<BookCard[]>([]);
 
    const syncWithDB = async () => {
-      const bookRecords = await getBooksFromDB();
+      const [bookRecords, error] = await unwrapAsync(getBooksFromDB());
+      if (error) {
+         alert('Failed to sync with database: ' + error.message);
+         books.value = [];
+         return;
+      }
 
       books.value = bookRecords.map((bookRecord): BookCard => ({
          id: bookRecord.id,
@@ -31,7 +41,7 @@ export function useBooks() {
       }));
    };
 
-   onMounted(async () => await syncWithDB());
+   onMounted(syncWithDB); // runs in the background 
 
    /* All operations follow Optimistic UI Update pattern:
       * 1. Update the UI first
@@ -40,50 +50,50 @@ export function useBooks() {
    */
 
    const addBook = async (book: Book) => {
-      try {
-         const { bookId: id, shelfId } = await addBookToDB(book);
-         const {
-            title,
-            creator,
-            cover,
-            publisher,
-            language,
-            totalCharacterCount,
-         } = book;
+      const [result, error] = await unwrapAsync(
+         addBookToDB(book),
+      );
 
-         const addedBook: BookCard = {
-            id,
-            shelfId,
-            title,
-            creator,
-            cover,
-            publisher,
-            language,
-            totalCharacterCount,
-            readCharacterCount: 0,
-         };
-         books.value.push(addedBook);
-      }
-      catch (error) {
+      if (error) {
          await syncWithDB();
-         alert('Failed to add book: ' + (error as Error).message);
+         alert('Failed to add book: ' + error.message);
+         return;
       }
+
+      const { bookId: id, shelfId } = result;
+
+      const addedBook: BookCard = {
+         id,
+         shelfId,
+         title: book.title,
+         creator: book.creator,
+         cover: book.cover,
+         publisher: book.publisher,
+         language: book.language,
+         totalCharacterCount: book.totalCharacterCount,
+         readCharacterCount: 0, // init
+      };
+
+      books.value.push(addedBook);
    };
 
    const deleteBook = async (id: number) => {
       const userConfirmed = confirm(
          'Are you sure you want to delete this book?',
       );
-
       if (!userConfirmed) return;
 
       books.value = books.value.filter((book) => book.id !== id);
-      try {
-         await deleteBookFromDB(id);
-      }
-      catch (error) {
-         await syncWithDB();
-         alert('Failed to delete book: ' + (error as Error).message);
+
+      const [_, error] = await unwrapAsync(deleteBookFromDB(id));
+
+      if (error) {
+         if (error instanceof NotFoundError) throw error; // ! only happens if i made a mistake somewhere, otherwise should never happen
+         else if (error instanceof Dexie.DexieError) {
+            await syncWithDB();
+            alert('Failed to delete book: ' + error.message);
+         }
+         else { throw new UnexpectedRuntimeError(error.message); }
       }
    };
 
@@ -92,42 +102,60 @@ export function useBooks() {
       if (!newBookName) return;
 
       const targetBook = books.value.find((book) => book.id === id);
-      if (!targetBook) return alert('Book does not exist!');
+      if (!targetBook) {
+         alert('Book does not exist!');
+         return;
+      }
 
       targetBook.title = newBookName;
 
-      try {
-         await renameBookInDB(id, newBookName);
-      }
-      catch (error) {
-         await syncWithDB();
-         alert('Failed to rename book: ' + (error as Error).message);
+      const [_, error] = await unwrapAsync(renameBookInDB(id, newBookName));
+      if (error) {
+         if (error instanceof NotFoundError) throw error; // ! only happens if i made a mistake somewhere, otherwise should never happen
+         else if (error instanceof Dexie.DexieError) {
+            await syncWithDB();
+            alert('Failed to rename book: ' + error.message);
+         }
+         else { throw new UnexpectedRuntimeError(error.message); }
       }
    };
 
    const { shelves } = useShelves();
    const changeBookShelf = async (bookId: number) => {
+      // todo: implement a proper UI for selecting
       const shelfName = prompt('Enter shelf name:', 'Your Books')?.trim()
          .toLowerCase();
       if (!shelfName) return;
 
+      // todo-------------------------------------
+
       const shelfId = shelves.value.find((shelf) =>
          shelf.name.toLowerCase() === shelfName
-      )
-         ?.id;
-      if (!shelfId) return alert('Shelf does not exist!');
+      )?.id;
+      if (!shelfId) {
+         alert('Shelf does not exist!');
+         return;
+      }
 
       const targetBook = books.value.find((book) => book.id === bookId);
-      if (!targetBook) return alert('Book does not exist!');
+      if (!targetBook) {
+         alert('Book does not exist!');
+         return;
+      }
 
       targetBook.shelfId = shelfId;
 
-      try {
-         await changeBookShelfInDB(bookId, shelfId);
-      }
-      catch (error) {
-         await syncWithDB();
-         alert('Failed to change book shelf: ' + (error as Error).message);
+      const [_, error] = await unwrapAsync(
+         changeBookShelfInDB(bookId, shelfId),
+      );
+
+      if (error) {
+         if (error instanceof NotFoundError) throw error; // ! only happens if i made a mistake somewhere, otherwise should never happen
+         else if (error instanceof Dexie.DexieError) {
+            await syncWithDB();
+            alert('Failed to change book shelf: ' + error.message);
+         }
+         else { throw new UnexpectedRuntimeError(error.message); }
       }
    };
 

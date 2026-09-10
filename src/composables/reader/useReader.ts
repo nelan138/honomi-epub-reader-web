@@ -1,4 +1,5 @@
 import {
+getMimeType,
    navigateTo,
    navigateToNotFoundPage,
    resolvePath,
@@ -7,8 +8,7 @@ import {
    unwrapSync,
 } from '@src/utilities';
 import { getBookFromDB } from '@src/services/dexie/bookRepo.ts';
-
-
+import { XLINK_NS } from '@src/types/book.ts';
 
 export type Chapter = {
    /** ! HTML string */
@@ -76,21 +76,40 @@ export function useReader() {
          // ! Process imgs
          const blobUrls: string[] = [];
 
-         for (const image of document.getElementsByTagName('img')) {
-            const src = image.getAttribute('src');
-            if (!src) continue;
+         for (const image of document.querySelectorAll('img, image')) {
+            const isSvg = image.tagName.toLowerCase() === 'image';
+            const src = image.getAttribute('src')
+               ?? image.getAttributeNS(XLINK_NS, 'href')
+               ?? image.getAttribute('xlink:href')
+               ?? image.getAttribute('href');
+
+            if (!src) {
+               console.warn(`Image src not found for item: ${item.idref}`);
+               continue;
+            }
 
             const resolvedSrc = resolvePath(item.resolvedHref, src);
-
             const imageData = assets[resolvedSrc];
-            if (!imageData) continue;
 
-            const blob = new Blob([imageData as BlobPart]);
+            if (!imageData) {
+               console.warn(`Image data not found for src: ${resolvedSrc}`);
+               continue;
+            }
+
+            const blob = new Blob([imageData as BlobPart], {
+               type: getMimeType(resolvedSrc),
+            });
             const blobUrl = URL.createObjectURL(blob);
-
             blobUrls.push(blobUrl);
-            image.src = blobUrl;
-            image.alt = `image of item: ${item.idref}`;
+
+            if (isSvg) {
+               image.setAttributeNS(XLINK_NS, 'xlink:href', blobUrl);
+               image.setAttribute('href', blobUrl);
+            }
+            else {
+               image.setAttribute('src', blobUrl);
+               image.setAttribute('alt', `image of item: ${item.idref}`);
+            }
          }
 
          const chapter: Chapter = {

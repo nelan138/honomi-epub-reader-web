@@ -9,12 +9,13 @@ import { useBooks } from '@src/composables/library/useBooks';
 import { useReader } from '@src/composables/reader/useReader';
 
 const { toggleTheme } = useTheme();
+
 const { shelves, addShelf, deleteShelf, renameShelf, collapseShelf, expandShelf, moveShelfUp, moveShelfDown } =
    useShelves();
+
 const { books, renameBook, changeBookShelf, deleteBook, importBooks } = useBooks();
 
-const { openBook } = useReader()
-
+const { openBook } = useReader();
 
 const getBooksInShelf = (shelfId: number) => books.value.filter((book) => book.shelfId === shelfId);
 </script>

@@ -129,3 +129,18 @@ export function cleanUpBlobUrls(blobUrls: string[] | undefined) {
       });
    }
 }
+
+const MIME_MAP: Record<string, string> = {
+   jpg: 'image/jpeg',
+   jpeg: 'image/jpeg',
+   png: 'image/png',
+   svg: 'image/svg+xml',
+   gif: 'image/gif',
+   webp: 'image/webp',
+   avif: 'image/avif',
+};
+
+export function getMimeType(path: string): string {
+   const ext = path.split('.').pop()?.toLowerCase() ?? '';
+   return MIME_MAP[ext] ?? 'application/octet-stream';
+}

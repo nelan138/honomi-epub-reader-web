@@ -1,10 +1,9 @@
 import { nextTick, ref, watch } from 'vue';
-
-type Theme = 'dark' | 'light';
+import type { Theme } from '@src/types/theme.ts';
 
 export function useTheme() {
    const theme = ref<Theme>(
-      (localStorage.getItem('theme') as Theme | null) || 'dark',
+      (localStorage.getItem('theme') as Theme) || 'dark',
    );
 
    watch(theme, (newValue) => {
@@ -18,7 +17,6 @@ export function useTheme() {
 
    const toggleTheme = () => {
       const nextTheme = theme.value === 'dark' ? 'light' : 'dark';
-
       if (!document.startViewTransition) return updateTheme(nextTheme);
 
       // top-right to bottom-left
@@ -30,10 +28,6 @@ export function useTheme() {
       const transition = document.startViewTransition(async () => {
          updateTheme(nextTheme);
          await nextTick();
-         document.documentElement.classList.toggle(
-            'dark',
-            nextTheme === 'dark',
-         );
       });
 
       transition.ready.then(() => {
