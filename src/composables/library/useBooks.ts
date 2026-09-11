@@ -7,7 +7,6 @@ import {
    getBooksFromDB,
    renameBookInDB,
 } from '@src/services/dexie/bookRepo';
-import { useShelves } from '@src/composables/library/useShelves.ts';
 import { parseEpub } from '@src/services/epub/epub.ts';
 import { unwrapAsync } from '@src/utilities.ts';
 import {
@@ -16,6 +15,7 @@ import {
    UnexpectedRuntimeError,
 } from '@src/types/errors.ts';
 import Dexie from 'dexie';
+import { getShelvesFromDB } from '@src/services/dexie/shelfRepo.ts';
 
 export function useBooks() {
    const books = ref<BookCard[]>([]);
@@ -41,7 +41,7 @@ export function useBooks() {
       }));
    };
 
-   onMounted(syncWithDB); // runs in the background 
+   onMounted(syncWithDB); // runs in the background
 
    /* All operations follow Optimistic UI Update pattern:
       * 1. Update the UI first
@@ -97,19 +97,16 @@ export function useBooks() {
       }
    };
 
-   const renameBook = async (id: number) => {
-      const newBookName = prompt('Enter new book name:', 'New Title')?.trim();
-      if (!newBookName) return;
-
+   const renameBook = async (id: number, name: string) => {
       const targetBook = books.value.find((book) => book.id === id);
       if (!targetBook) {
          alert('Book does not exist!');
          return;
       }
 
-      targetBook.title = newBookName;
+      targetBook.title = name;
 
-      const [_, error] = await unwrapAsync(renameBookInDB(id, newBookName));
+      const [_, error] = await unwrapAsync(renameBookInDB(id, name));
       if (error) {
          if (error instanceof NotFoundError) throw error; // ! only happens if i made a mistake somewhere, otherwise should never happen
          else if (error instanceof Dexie.DexieError) {
@@ -120,17 +117,19 @@ export function useBooks() {
       }
    };
 
-   const { shelves } = useShelves();
    const changeBookShelf = async (bookId: number) => {
-      // todo: implement a proper UI for selecting
-      const shelfName = prompt('Enter shelf name:', 'Your Books')?.trim()
-         .toLowerCase();
+      const shelfName = prompt('Enter shelf name')?.trim();
       if (!shelfName) return;
 
-      // todo-------------------------------------
+      const [shelves] = await unwrapAsync(getShelvesFromDB());
+      if (!shelves) {
+         throw new UnexpectedRuntimeError(
+            'Failed to get shelves from database',
+         );
+      }
 
-      const shelfId = shelves.value.find((shelf) =>
-         shelf.name.toLowerCase() === shelfName
+      const shelfId = shelves.find((shelf) =>
+         shelf.name.toLowerCase() === shelfName.toLowerCase()
       )?.id;
       if (!shelfId) {
          alert('Shelf does not exist!');
@@ -138,10 +137,7 @@ export function useBooks() {
       }
 
       const targetBook = books.value.find((book) => book.id === bookId);
-      if (!targetBook) {
-         alert('Book does not exist!');
-         return;
-      }
+      if (!targetBook) throw new NotFoundError('Book does not exist!');
 
       targetBook.shelfId = shelfId;
 

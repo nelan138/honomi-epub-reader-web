@@ -73,6 +73,8 @@ const emit = defineEmits<{
          </ul>
       </header>
 
-      <slot name="books"> </slot>
+      <slot>
+         <!-- ! Books -->
+      </slot>
    </section>
 </template>

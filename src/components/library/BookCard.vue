@@ -32,12 +32,11 @@ onUnmounted(() => cleanUpBlobUrls([coverUrl]));
 
       <div class="bg-card flex flex-col gap-4 pl-4">
          <!-- Metadata -->
-         <div class="flex flex-1 flex-col md:gap-2 md:text-[100%]">
-            <h3 class="font-label line-clamp-2 font-medium">{{ book.title }}</h3>
-            <p class="text-muted line-clamp-1 text-[80%]">{{ book.creator }}</p>
-            <p class="text-muted line-clamp-1 text-[80%] uppercase">{{ book.language }}</p>
+         <div class="flex min-w-0 flex-1 flex-col md:gap-2 md:text-[100%]">
+            <h3 class="font-label line-clamp-2 font-medium break-all">{{ book.title }}</h3>
+            <p class="text-muted truncate text-[80%]">{{ book.creator }}</p>
+            <p class="text-muted truncate text-[80%] uppercase">{{ book.language }}</p>
          </div>
-
          <div class="bg-stroke/10 h-1 overflow-hidden rounded-full">
             <div
                class="bg-tertiary h-full rounded-full"

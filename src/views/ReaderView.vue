@@ -78,27 +78,30 @@ onUnmounted(() => {
    window.removeEventListener('scroll', updateBookProgressOnScrollStop);
    chapters.value.forEach((chapter) => cleanUpBlobUrls(chapter.blobUrls));
 });
+
+const progressPercentage = computed(() => {
+   if (totalCharacterCount.value === 0) return '0.00';
+   return ((scrolledPastCharacterCount.value * 100) / totalCharacterCount.value).toFixed(2);
+});
 </script>
 
 <template>
-   <ReaderHeader />
-   <template v-if="chapters.length === 0">
-      <main class="my-auto h-screen w-full p-8 text-center">Loading...</main>
-   </template>
-
-   <template v-else>
-      <main class="scrollbar-thin p-4">
-         <template v-for="chapter in chapters" :key="chapter.idref">
-            <BookChapter :content="chapter.content" />
-         </template>
+   <main>
+      <ReaderHeader />
+      <div v-if="chapters.length === 0" class="my-auto w-full p-8 text-center">Loading...</div>
+      <div v-else class="scrollbar-thin p-4 font-sans">
+         <ul>
+            <li v-for="chapter in chapters" :key="chapter.idref">
+               <BookChapter :content="chapter.content" />
+            </li>
+         </ul>
 
          <footer class="sticky bottom-0 z-50 py-2 text-right text-xs">
-            {{
-               `${scrolledPastCharacterCount}/${totalCharacterCount} - ${((scrolledPastCharacterCount * 100) / totalCharacterCount).toFixed(2)}%`
-            }}
+            <span>{{ scrolledPastCharacterCount }}/{{ totalCharacterCount }} - </span>
+            <span>{{ progressPercentage }}%</span>
          </footer>
-      </main>
-   </template>
+      </div>
+   </main>
 </template>
 
 <style scoped></style>

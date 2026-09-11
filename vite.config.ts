@@ -1,7 +1,6 @@
 import { defineConfig } from 'vite';
 import { fileURLToPath, URL } from 'node:url';
 import tailwindcss from '@tailwindcss/vite';
-import deno from '@deno/vite-plugin';
 import vue from '@vitejs/plugin-vue';
 
 export default defineConfig({
@@ -11,7 +10,7 @@ export default defineConfig({
    //       interval: 15000, // Only scans for file changes every 15 seconds
    //    },
    // },
-   plugins: [tailwindcss(), vue(), deno()],
+   plugins: [tailwindcss(), vue()],
    resolve: {
       tsconfigPaths: true,
       alias: {

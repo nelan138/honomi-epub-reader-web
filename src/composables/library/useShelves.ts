@@ -43,13 +43,7 @@ export function useShelves() {
       ! 3. If database update fails, rollback with syncWithDB() and alert the user
    */
 
-   const addShelf = async () => {
-      const name = prompt('Enter shelf name:', 'New Name')?.trim();
-      if (!name) {
-         alert('Shelf name cannot be empty!');
-         return;
-      }
-
+   const addShelf = async (name: string) => {
       const shelf: Omit<ShelfRecord, 'id' | 'displayOrder'> = {
          name,
          expanded: true,
@@ -93,13 +87,7 @@ export function useShelves() {
       }
    };
 
-   const renameShelf = async (shelfId: number) => {
-      const newName = prompt('Enter new shelf name:', 'New Name')?.trim();
-      if (!newName) {
-         alert('Shelf name cannot be empty!');
-         return;
-      }
-
+   const renameShelf = async (shelfId: number, newName: string) => {
       const targetShelf = shelves.value.find((shelf) => shelf.id === shelfId);
       if (!targetShelf) throw new NotFoundError('Shelf does not exist!'); // ! only happens if i made a mistake somewhere, otherwise should never happen
 
