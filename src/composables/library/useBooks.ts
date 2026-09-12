@@ -104,14 +104,15 @@ export function useBooks() {
    };
 
    const importBooks = async (files: FileList) => {
-      const addedBooks: BookCard[] = [];
-      const totalBooks = files.length;
+      let failedBookCount = 0;
+      const totalBookCount = files.length;
 
       for (const file of files) {
          const [book, error1] = await unwrapAsync(parseEpub(file));
          if (error1) {
             if (error1 instanceof EpubParsingError) {
                console.warn('[Epub] Failed to import one file', error1.message);
+               failedBookCount++;
                continue;
             }
             else { throw new UnexpectedRuntimeError(error1.message); }
@@ -121,7 +122,10 @@ export function useBooks() {
             addBookToDB(book),
          );
 
-         if (error2) continue;
+         if (error2) {
+            failedBookCount++;
+            continue;
+         }
 
          const { bookId: id, shelfId } = result;
 
@@ -137,16 +141,15 @@ export function useBooks() {
             readCharacterCount: 0, // init
          };
 
-         addedBooks.push(addedBook);
+         books.value.push(addedBook); // update UI
       }
 
-      if (totalBooks !== addedBooks.length) {
+      if (failedBookCount > 0) {
          await syncWithDB();
          alert(
-            `Failed to load ${totalBooks - addedBooks.length} / ${totalBooks}`,
+            `Failed to import ${failedBookCount} out of ${totalBookCount} books. Check console for details.`,
          );
       }
-      else { books.value.push(...addedBooks); }
    };
 
    return {
