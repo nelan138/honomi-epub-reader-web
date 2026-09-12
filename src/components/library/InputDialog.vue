@@ -11,12 +11,12 @@ const { title } = defineProps<{
 
 const emit = defineEmits<{
    submit: [input: string];
-   cancel: [input: string];
+   cancel: [];
 }>();
 
 const onCancel = () => {
    input.value = '';
-   emit('cancel', '');
+   emit('cancel');
 };
 
 const onSubmit = () => {
@@ -32,7 +32,6 @@ const onSubmit = () => {
 
          <DialogContent
             @escape-key-down="onCancel"
-            @open-auto-focus=""
             class="border-stroke bg-card font-label text-ink fixed top-1/2 left-1/2 z-50 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-xl border p-5 shadow-xl focus:outline-none"
          >
             <DialogTitle class="text-ink text-sm font-semibold"> {{ title || 'Popup' }} </DialogTitle>
@@ -40,11 +39,18 @@ const onSubmit = () => {
             <form @submit.prevent="onSubmit" class="mt-4 space-y-4">
                <div class="relative w-full">
                   <input
-                     v-model.lazy.trim="input"
+                     v-model.trim="input"
                      type="text"
                      placeholder="Type a name..."
-                     class="border-stroke bg-bg text-ink placeholder:text-muted/60 focus:border-highlight focus:ring-tertiary w-full rounded-md border px-3 py-2 text-sm transition-colors outline-none focus:ring-1"
+                     maxlength="40"
+                     class="border-stroke bg-bg text-ink placeholder:text-muted/60 focus:border-highlight focus:ring-tertiary w-full rounded-md border px-3 py-2 pr-14 text-sm transition-colors outline-none focus:ring-1"
                   />
+
+                  <span
+                     class="text-muted pointer-events-none absolute inset-y-0 right-3 flex items-center font-mono text-xs"
+                  >
+                     {{ input?.length || 0 }}/40
+                  </span>
                </div>
 
                <div class="flex justify-end gap-2">

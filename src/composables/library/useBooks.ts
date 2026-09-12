@@ -1,5 +1,5 @@
 import { onMounted, ref } from 'vue';
-import type { Book, BookCard } from '@src/types/book';
+import type { BookCard } from '@src/types/book';
 import {
    addBookToDB,
    changeBookShelfInDB,
@@ -15,7 +15,6 @@ import {
    UnexpectedRuntimeError,
 } from '@src/types/errors.ts';
 import Dexie from 'dexie';
-import { getShelvesFromDB } from '@src/services/dexie/shelfRepo.ts';
 
 export function useBooks() {
    const books = ref<BookCard[]>([]);
@@ -49,40 +48,7 @@ export function useBooks() {
       ! 3. If database update fails, rollback with syncWithDB() and alert the user
    */
 
-   const addBook = async (book: Book) => {
-      const [result, error] = await unwrapAsync(
-         addBookToDB(book),
-      );
-
-      if (error) {
-         await syncWithDB();
-         alert('Failed to add book: ' + error.message);
-         return;
-      }
-
-      const { bookId: id, shelfId } = result;
-
-      const addedBook: BookCard = {
-         id,
-         shelfId,
-         title: book.title,
-         creator: book.creator,
-         cover: book.cover,
-         publisher: book.publisher,
-         language: book.language,
-         totalCharacterCount: book.totalCharacterCount,
-         readCharacterCount: 0, // init
-      };
-
-      books.value.push(addedBook);
-   };
-
    const deleteBook = async (id: number) => {
-      const userConfirmed = confirm(
-         'Are you sure you want to delete this book?',
-      );
-      if (!userConfirmed) return;
-
       books.value = books.value.filter((book) => book.id !== id);
 
       const [_, error] = await unwrapAsync(deleteBookFromDB(id));
@@ -117,25 +83,7 @@ export function useBooks() {
       }
    };
 
-   const changeBookShelf = async (bookId: number) => {
-      const shelfName = prompt('Enter shelf name')?.trim();
-      if (!shelfName) return;
-
-      const [shelves] = await unwrapAsync(getShelvesFromDB());
-      if (!shelves) {
-         throw new UnexpectedRuntimeError(
-            'Failed to get shelves from database',
-         );
-      }
-
-      const shelfId = shelves.find((shelf) =>
-         shelf.name.toLowerCase() === shelfName.toLowerCase()
-      )?.id;
-      if (!shelfId) {
-         alert('Shelf does not exist!');
-         return;
-      }
-
+   const changeBookShelf = async (bookId: number, shelfId: number) => {
       const targetBook = books.value.find((book) => book.id === bookId);
       if (!targetBook) throw new NotFoundError('Book does not exist!');
 
@@ -156,17 +104,49 @@ export function useBooks() {
    };
 
    const importBooks = async (files: FileList) => {
+      const addedBooks: BookCard[] = [];
+      const totalBooks = files.length;
+
       for (const file of files) {
-         const [book, error] = await unwrapAsync(parseEpub(file));
-         if (error) {
-            if (error instanceof EpubParsingError) {
-               console.warn('[Epub] Failed to import one file', error.message);
+         const [book, error1] = await unwrapAsync(parseEpub(file));
+         if (error1) {
+            if (error1 instanceof EpubParsingError) {
+               console.warn('[Epub] Failed to import one file', error1.message);
                continue;
             }
-            else { throw new UnexpectedRuntimeError(error.message); }
+            else { throw new UnexpectedRuntimeError(error1.message); }
          }
-         await addBook(book);
+
+         const [result, error2] = await unwrapAsync(
+            addBookToDB(book),
+         );
+
+         if (error2) continue;
+
+         const { bookId: id, shelfId } = result;
+
+         const addedBook: BookCard = {
+            id,
+            shelfId,
+            title: book.title,
+            creator: book.creator,
+            cover: book.cover,
+            publisher: book.publisher,
+            language: book.language,
+            totalCharacterCount: book.totalCharacterCount,
+            readCharacterCount: 0, // init
+         };
+
+         addedBooks.push(addedBook);
       }
+
+      if (totalBooks !== addedBooks.length) {
+         await syncWithDB();
+         alert(
+            `Failed to load ${totalBooks - addedBooks.length} / ${totalBooks}`,
+         );
+      }
+      else { books.value.push(...addedBooks); }
    };
 
    return {
@@ -174,7 +154,6 @@ export function useBooks() {
       renameBook,
       changeBookShelf,
       deleteBook,
-      addBook,
       importBooks,
    };
 }
