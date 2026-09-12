@@ -8,9 +8,8 @@ import { useTheme } from '@src/composables/library/useTheme';
 import { useBooks } from '@src/composables/library/useBooks';
 import { useReader } from '@src/composables/reader/useReader';
 import { computed } from 'vue';
-import type { BookCard as BookCardType } from '@src/types/book';
+import { type BookCard as BookCardType, UnexpectedRuntimeError } from '@src/types';
 import { unwrapAsync } from '@src/utilities';
-import { UnexpectedRuntimeError } from '@src/types/errors';
 
 import SelectDialog from '@src/components/library/SelectDialog.vue';
 import InputDialog from '@src/components/library/InputDialog.vue';
@@ -136,36 +135,53 @@ const handleDeletingShelf = async (shelfId: number) => {
    />
 
    <InputDialog @submit="resolveInputDialogSubmit" @cancel="resolveInputDialogCancel" v-model:open="textDialogIsOpen" />
+   
+   <LibraryHeader @toggle-theme="toggleTheme" @add-shelf="handleAddingShelf" @import-files="importBooks" />
 
-   <main>
-      <LibraryHeader @toggle-theme="toggleTheme" @add-shelf="handleAddingShelf" @import-files="importBooks" />
-
-      <ul>
-         <li v-for="shelf in shelves" :key="shelf.id">
-            <Shelf
-               @rename="handleRenamingShelf"
-               @move-up="moveShelfUp"
-               @move-down="moveShelfDown"
-               @expand="expandShelf"
-               @collapse="collapseShelf"
-               @delete="handleDeletingShelf"
-               :shelf="shelf"
+   <ul>
+      <li v-for="shelf in shelves" :key="shelf.id">
+         <Shelf
+            @rename="handleRenamingShelf"
+            @move-up="moveShelfUp"
+            @move-down="moveShelfDown"
+            @expand="expandShelf"
+            @collapse="collapseShelf"
+            @delete="handleDeletingShelf"
+            :shelf="shelf"
+         >
+            <TransitionGroup
+               tag="ul"
+               name="book-list"
+               class="grid w-full grid-cols-1 gap-4 lg:grid-cols-3 2xl:grid-cols-4"
             >
-               <ul class="grid w-full grid-cols-1 gap-4 lg:grid-cols-3 2xl:grid-cols-4">
-                  <li v-for="book in (shelf.expanded ? bookShelfMap.get(shelf.id) : []) ?? []" :key="book.id">
-                     <BookCard
-                        @open="openBook"
-                        @rename="handleRenamingBook"
-                        @delete="handleDeletingBook"
-                        @change-shelf="handleChangingBookShelf"
-                        :book="book"
-                     />
-                  </li>
-               </ul>
-            </Shelf>
-         </li>
-      </ul>
-   </main>
+               <li v-if="shelf.expanded" v-for="book in bookShelfMap.get(shelf.id) ?? []" :key="book.id">
+                  <BookCard
+                     @open="openBook"
+                     @rename="handleRenamingBook"
+                     @delete="handleDeletingBook"
+                     @change-shelf="handleChangingBookShelf"
+                     :book="book"
+                  />
+               </li>
+            </TransitionGroup>
+         </Shelf>
+      </li>
+   </ul>
 </template>
 
-<style scoped></style>
+<style scoped>
+.book-list-enter-active,
+.book-list-leave-active {
+   transition: all 0.25s ease;
+}
+
+.book-list-enter-from,
+.book-list-leave-to {
+   opacity: 0;
+   transform: translateY(8px) scale(0.96);
+}
+
+.book-list-move {
+   transition: transform 0.25s ease;
+}
+</style>

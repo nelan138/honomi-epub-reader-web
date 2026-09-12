@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { UnexpectedRuntimeError } from '@src/types/errors';
+import { UnexpectedRuntimeError } from '@src/types';
 import { DialogClose, DialogContent, DialogOverlay, DialogPortal, DialogRoot, DialogTitle } from 'reka-ui';
 import { ListboxContent, ListboxItem, ListboxItemIndicator, ListboxRoot } from 'reka-ui';
 import { ref } from 'vue';

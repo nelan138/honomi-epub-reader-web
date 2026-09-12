@@ -1,7 +1,10 @@
 import { Dexie, type EntityTable } from 'dexie';
-import type { BookRecord } from '@src/types/book';
-import type { ShelfRecord } from '@src/types/shelf';
-import { NotFoundError, UnexpectedRuntimeError } from '@src/types/errors.ts';
+import {
+   type BookRecord,
+   NotFoundError,
+   type ShelfRecord,
+   UnexpectedRuntimeError,
+} from '@src/types';
 import { unwrapAsync } from '@src/utilities.ts';
 
 const DB_NAME = 'Honomi';

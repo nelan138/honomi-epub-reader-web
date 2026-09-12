@@ -1,5 +1,5 @@
 import {
-getMimeType,
+   getMimeType,
    navigateTo,
    navigateToNotFoundPage,
    resolvePath,
@@ -8,28 +8,24 @@ getMimeType,
    unwrapSync,
 } from '@src/utilities';
 import { getBookFromDB } from '@src/services/dexie/bookRepo.ts';
-import { XLINK_NS } from '@src/types/book.ts';
-
-export type Chapter = {
-   /** ! HTML string */
-   idref: string;
-   content: string;
-   /** ! Remember to provoke these after use */
-   blobUrls: string[] | undefined;
-   /** Accessing character count of each <p> via p-index: Map<p-index, char count> */
-   characterCount: Map<number, number>;
-};
+import {
+   type Chapter,
+   NotFoundError,
+   UnexpectedRuntimeError,
+   XLINK_NS,
+} from '@src/types';
 
 export function useReader() {
-   console.log('Running Reader');
    const openBook = async (bookId: number) => {
+      console.log('Running Reader');
+      console.log('BookId: ', bookId);
       const [error] = await unwrapAsync(navigateTo(`/read/${bookId}`));
       if (error) await navigateToNotFoundPage();
    };
 
    const getChapters = async (bookId: number): Promise<Chapter[]> => {
       const [bookRecord] = await unwrapAsync(getBookFromDB(bookId));
-      if (!bookRecord) throw new Error('Book not found!');
+      if (!bookRecord) throw new NotFoundError('Book not found!');
 
       const assets = bookRecord.assets;
       const spine = bookRecord.spine;
@@ -51,7 +47,8 @@ export function useReader() {
                item.mediaType as DOMParserSupportedType,
             )
          );
-         if (!document) throw new Error('DOM Parser not working');
+         if (!document)
+            throw new UnexpectedRuntimeError('DOM Parser not working');
 
          // * Progress tracking
          const paragraphs = document.querySelectorAll('p');

@@ -1,15 +1,12 @@
 import { strFromU8, unzipSync } from 'fflate';
-import type {
-   Book,
-   EpubContext,
-   Idref,
-   ManifestItem,
-   Metadata,
-   Path,
-   RawXTHMLContent,
-   ResolvedPath,
-   SpineItem,
-} from '@src/types/book';
+import {
+   type Book,
+   EpubParsingError,
+   type Idref,
+   type RawXTHMLContent,
+   type ResolvedPath,
+   type SpineItem,
+} from '@src/types';
 import {
    getElementText,
    getXmlDocument,
@@ -20,16 +17,46 @@ import {
 } from '@src/utilities';
 
 import defaultCoverUrl from '@src/assets/default-book-cover.jpeg';
-import { EpubParsingError } from '@src/types/errors.ts';
+
+type Path = string;
+
+type Metadata = {
+   title: string;
+   creator: string;
+   publisher: string;
+   language: string;
+   cover: Blob;
+};
+
+type ManifestItem = {
+   href: Path;
+   id: Idref;
+   resolvedHref: ResolvedPath;
+   mediaType: string;
+   properties?: string[];
+};
+
+type EpubContext = {
+   fileArchive: Record<string, Uint8Array>;
+   opfPath: ResolvedPath;
+   opfDocument: Document;
+   manifest: ManifestItem[];
+   version: 2 | 3;
+};
 let defaultCoverBlobCache: Blob | null = null;
 
 async function getDefaultCoverBlob(): Promise<Blob> {
    if (defaultCoverBlobCache) return defaultCoverBlobCache;
 
-   const [response, EpubParsingError] = await unwrapAsync(fetch(defaultCoverUrl));
+   const [response, EpubParsingError] = await unwrapAsync(
+      fetch(defaultCoverUrl),
+   );
    if (response) defaultCoverBlobCache = await response.blob();
    else {
-      console.warn('[Epub] Failed to load default book cover:', EpubParsingError.message);
+      console.warn(
+         '[Epub] Failed to load default book cover:',
+         EpubParsingError.message,
+      );
       defaultCoverBlobCache = new Blob([]);
    }
    return defaultCoverBlobCache;
@@ -69,8 +96,11 @@ function getManifest(
       const href: Path | null = item.getAttribute('href');
       const mediaType = item.getAttribute('media-type');
 
-      if (!id || !href || !mediaType)
-         throw new EpubParsingError('manifest item missing required attributes');
+      if (!id || !href || !mediaType) {
+         throw new EpubParsingError(
+            'manifest item missing required attributes',
+         );
+      }
 
       const propertiesAttribute = item.getAttribute('properties')?.trim();
 
@@ -114,7 +144,8 @@ function createEpubContext(
 function getSpine(epubContext: EpubContext): SpineItem[] {
    const spineElement =
       epubContext.opfDocument.getElementsByTagName('spine')[0];
-   if (!spineElement) throw new EpubParsingError('EPUB package does not contain a spine');
+   if (!spineElement)
+      throw new EpubParsingError('EPUB package does not contain a spine');
 
    const spineItemElements = [...spineElement.children].filter(
       (element) => element.localName === 'itemref',
@@ -122,7 +153,8 @@ function getSpine(epubContext: EpubContext): SpineItem[] {
 
    return spineItemElements.map((itemref): SpineItem => {
       const idref = itemref.getAttribute('idref');
-      if (!idref) throw new EpubParsingError('EPUB spine item does not define an idref');
+      if (!idref)
+         throw new EpubParsingError('EPUB spine item does not define an idref');
 
       const manifestItem = epubContext.manifest.find((item) =>
          item.id === idref

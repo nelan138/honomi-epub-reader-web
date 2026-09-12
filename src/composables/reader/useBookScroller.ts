@@ -1,4 +1,5 @@
 import { nextTick } from 'vue';
+import { UnexpectedRuntimeError } from '@src/types.ts';
 
 export function useBookScroller() {
    function getCurrentPIndex(): number | null {
@@ -13,18 +14,26 @@ export function useBookScroller() {
       const direct = target?.closest('[data-p-index]');
       if (direct) {
          const index = direct.getAttribute('data-p-index');
-         return index != null ? Number(index) : null;
+         if (!index) throw new UnexpectedRuntimeError('No pIndex was set');
+
+         return Number(index);
       }
 
-      // Runs backward - fallback using ... binary search (?)
       const paragraphs = document.querySelectorAll<HTMLElement>(
          '[data-p-index]',
       );
-      if (!paragraphs.length) return null;
+      if (!paragraphs.length) {
+         console.warn(
+            'Either this book has no <p> or your there is no pIndex',
+         );
+         return null;
+      }
 
+      // Runs backward - fallback using ... binary search (?)
       let left = 0;
       let right = paragraphs.length - 1;
-      let matchIndex: number | null = null;
+
+      let matchingIndex: number = 0;
 
       while (left <= right) {
          const mid = (left + right) >> 1;
@@ -34,22 +43,21 @@ export function useBookScroller() {
          const rect = p.getBoundingClientRect();
 
          if (rect.top <= y && rect.bottom >= y) {
-            matchIndex = mid;
+            matchingIndex = mid;
             break;
          }
 
-         // >= reading line
          if (rect.top <= y) {
-            matchIndex = mid;
+            matchingIndex = mid;
             left = mid + 1;
          }
-         else { right = mid - 1; // < reading line
-          }
+         else { right = mid - 1; }
       }
 
-      const resolvedIndex = matchIndex ?? 0;
-      const indexStr = paragraphs[resolvedIndex]?.getAttribute('data-p-index');
-      return indexStr != null ? Number(indexStr) : null;
+      const index = paragraphs[matchingIndex]!.getAttribute('data-p-index');
+      if (!index) throw new UnexpectedRuntimeError('No pIndex was set');
+
+      return Number(index);
    }
 
    const restoreScrollPosition = async (
@@ -73,11 +81,13 @@ export function useBookScroller() {
       if (!targetElement) return;
 
       const header = document.querySelector('header');
-      const headerHeight = header ? header.offsetHeight : 0;
+      const headerOffset = header
+         ? Math.ceil(header.getBoundingClientRect().bottom) + 10
+         : 0;
 
-      targetElement.style.scrollMarginTop = `${headerHeight + 10}px`;
+      targetElement.style.scrollMarginTop = `${headerOffset}px`;
 
-      targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      targetElement.scrollIntoView({ behavior: 'instant', block: 'start' });
    };
 
    return { restoreScrollPosition, getCurrentPIndex };

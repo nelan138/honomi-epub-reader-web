@@ -1,5 +1,6 @@
 import { nextTick, ref, watch } from 'vue';
-import type { Theme } from '@src/types/theme.ts';
+
+export type Theme = 'dark' | 'light';
 
 export function useTheme() {
    const theme = ref<Theme>(

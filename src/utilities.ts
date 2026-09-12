@@ -1,4 +1,4 @@
-import type { Book } from '@src/types/book.ts';
+import type { Book, DeferredPromise } from '@src/types';
 import { router } from '@src/router.ts';
 
 export function normalizePath(path: string): string {
@@ -144,12 +144,6 @@ export function getMimeType(path: string): string {
    const ext = path.split('.').pop()?.toLowerCase() ?? '';
    return MIME_MAP[ext] ?? 'application/octet-stream';
 }
-
-export type DeferredPromise<T> = {
-   promise: Promise<T>;
-   resolve: (value: T | PromiseLike<T>) => void;
-   reject: (reason?: unknown) => void;
-};
 
 export function createDeferredPromise<T>(): DeferredPromise<T> {
    let resolve!: (value: T | PromiseLike<T>) => void;

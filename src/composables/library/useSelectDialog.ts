@@ -1,6 +1,6 @@
 import { ref } from 'vue';
-import { createDeferredPromise, type DeferredPromise } from '@src/utilities.ts';
-import { UnexpectedRuntimeError } from '@src/types/errors.ts';
+import { createDeferredPromise } from '@src/utilities.ts';
+import { type DeferredPromise, UnexpectedRuntimeError } from '@src/types';
 
 export function useSelectDialog() {
    const isOpen = ref<boolean>(false);

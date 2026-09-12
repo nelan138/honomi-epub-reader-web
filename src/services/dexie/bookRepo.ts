@@ -1,8 +1,5 @@
-import { db } from '@src/services/dexie/database';
-import type { BookRecord } from '@src/types/book';
-import { defaultShelf } from '@src/services/dexie/database';
-import type { Book } from '@src/types/book';
-import { NotFoundError } from '@src/types/errors.ts';
+import { db, defaultShelf } from '@src/services/dexie/database';
+import { type Book, type BookRecord, NotFoundError } from '@src/types';
 
 export async function addBookToDB(
    book: Book,

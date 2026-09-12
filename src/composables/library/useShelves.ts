@@ -1,5 +1,9 @@
 import { onMounted, ref } from 'vue';
-import type { ShelfRecord } from '@src/types/shelf';
+import {
+   NotFoundError,
+   type ShelfRecord,
+   UnexpectedRuntimeError,
+} from '@src/types';
 import {
    addShelfToDB,
    collapseShelfInDB,
@@ -12,7 +16,6 @@ import {
 import { defaultShelf } from '@src/services/dexie/database';
 import { unwrapAsync } from '@src/utilities.ts';
 import Dexie from 'dexie';
-import { NotFoundError, UnexpectedRuntimeError } from '@src/types/errors.ts';
 
 export function useShelves() {
    const shelves = ref<ShelfRecord[]>([]);

@@ -1,5 +1,10 @@
 import { onMounted, ref } from 'vue';
-import type { BookCard } from '@src/types/book';
+import {
+   type BookCard,
+   EpubParsingError,
+   NotFoundError,
+   UnexpectedRuntimeError,
+} from '@src/types';
 import {
    addBookToDB,
    changeBookShelfInDB,
@@ -9,11 +14,6 @@ import {
 } from '@src/services/dexie/bookRepo';
 import { parseEpub } from '@src/services/epub/epub.ts';
 import { unwrapAsync } from '@src/utilities.ts';
-import {
-   EpubParsingError,
-   NotFoundError,
-   UnexpectedRuntimeError,
-} from '@src/types/errors.ts';
 import Dexie from 'dexie';
 
 export function useBooks() {

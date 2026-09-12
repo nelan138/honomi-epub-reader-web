@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { navigateToHomePage } from '@src/utilities';
-
 </script>
 <template>
    <div class="bg-bg text-ink flex min-h-dvh flex-col font-serif">
@@ -16,10 +15,10 @@ import { navigateToHomePage } from '@src/utilities';
          </button>
       </header>
 
-      <main class="flex flex-1 items-center justify-center p-4">
+      <div class="flex flex-1 items-center justify-center p-4">
          <h1 class="text-ink/60 text-sm tracking-[0.3em] uppercase md:text-base">
             404 <span class="border-stroke/50 mx-3 h-full border-l"></span> Not Found
          </h1>
-      </main>
+      </div>
    </div>
 </template>

@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import BookChapter from '@src/components/reader/BookChapter.vue';
 import ReaderHeader from '@src/components/reader/ReaderHeader.vue';
-import { type Chapter, useReader } from '@src/composables/reader/useReader';
+import type { Chapter } from '@src/types';
+import { useReader } from '@src/composables/reader/useReader';
 import { cleanUpBlobUrls, navigateToNotFoundPage, unwrapAsync } from '@src/utilities';
 import { computed, onMounted, onUnmounted, shallowRef } from 'vue';
 import { useRoute } from 'vue-router';
@@ -86,22 +87,20 @@ const progressPercentage = computed(() => {
 </script>
 
 <template>
-   <main>
-      <ReaderHeader />
-      <div v-if="chapters.length === 0" class="my-auto w-full p-8 text-center">Loading...</div>
-      <div v-else class="scrollbar-thin p-4 font-sans">
-         <ul>
-            <li v-for="chapter in chapters" :key="chapter.idref">
-               <BookChapter :content="chapter.content" />
-            </li>
-         </ul>
+   <ReaderHeader />
+   <div v-if="chapters.length === 0" class="my-auto w-full p-8 text-center">Loading...</div>
+   <div v-else class="scrollbar-thin p-4 font-sans">
+      <ul>
+         <li v-for="chapter in chapters" :key="chapter.idref">
+            <BookChapter :content="chapter.content" />
+         </li>
+      </ul>
 
-         <footer class="sticky bottom-0 z-50 py-2 text-right text-xs">
-            <span>{{ scrolledPastCharacterCount }}/{{ totalCharacterCount }} - </span>
-            <span>{{ progressPercentage }}%</span>
-         </footer>
-      </div>
-   </main>
+      <footer class="sticky bottom-0 z-50 py-2 text-right text-xs">
+         <span>{{ scrolledPastCharacterCount }} / {{ totalCharacterCount }} - </span>
+         <span>{{ progressPercentage }}%</span>
+      </footer>
+   </div>
 </template>
 
 <style scoped></style>
