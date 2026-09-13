@@ -12,9 +12,9 @@ import {
    getBooksFromDB,
    renameBookInDB,
 } from '@src/services/dexie/bookRepo';
-import { parseEpub } from '@src/services/epub/epub.ts';
-import { unwrapAsync } from '@src/utilities.ts';
+import { unwrapAsync } from '@src/utilities';
 import Dexie from 'dexie';
+import { EpubParser } from '@src/services/epub/epubParser';
 
 export function useBooks() {
    const books = ref<BookCard[]>([]);
@@ -108,7 +108,7 @@ export function useBooks() {
       const totalBookCount = files.length;
 
       for (const file of files) {
-         const [book, error1] = await unwrapAsync(parseEpub(file));
+         const [book, error1] = await unwrapAsync(EpubParser.parse(file));
          if (error1) {
             if (error1 instanceof EpubParsingError) {
                console.warn('[Epub] Failed to import one file', error1.message);
@@ -123,6 +123,7 @@ export function useBooks() {
          );
 
          if (error2) {
+            console.warn('[Epub] Failed to import one file', error2.message);
             failedBookCount++;
             continue;
          }

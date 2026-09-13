@@ -1,5 +1,5 @@
 import { nextTick } from 'vue';
-import { UnexpectedRuntimeError } from '@src/types.ts';
+import { UnexpectedRuntimeError } from '@src/types';
 
 export function useBookScroller() {
    function getCurrentPIndex(): number | null {

@@ -7,7 +7,7 @@ import {
    unwrapAsync,
    unwrapSync,
 } from '@src/utilities';
-import { getBookFromDB } from '@src/services/dexie/bookRepo.ts';
+import { getBookFromDB } from '@src/services/dexie/bookRepo';
 import {
    type Chapter,
    NotFoundError,

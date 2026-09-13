@@ -1,5 +1,5 @@
 import type { Book, DeferredPromise } from '@src/types';
-import { router } from '@src/router.ts';
+import { router } from '@src/router';
 
 export function normalizePath(path: string): string {
    const parts: string[] = [];

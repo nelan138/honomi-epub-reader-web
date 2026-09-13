@@ -5,7 +5,7 @@ import {
    type ShelfRecord,
    UnexpectedRuntimeError,
 } from '@src/types';
-import { unwrapAsync } from '@src/utilities.ts';
+import { unwrapAsync } from '@src/utilities';
 
 const DB_NAME = 'Honomi';
 const DB_VERSION = 1;

@@ -14,7 +14,7 @@ import {
    swapShelfDisplayOrdersInDB,
 } from '@src/services/dexie/shelfRepo';
 import { defaultShelf } from '@src/services/dexie/database';
-import { unwrapAsync } from '@src/utilities.ts';
+import { unwrapAsync } from '@src/utilities';
 import Dexie from 'dexie';
 
 export function useShelves() {
