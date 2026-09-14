@@ -1,22 +1,13 @@
 <script setup lang="ts">
-import Shelf from '@src/components/library/Shelf.vue';
-import LibraryHeader from '@src/components/library/LibraryHeader.vue';
-import BookCard from '@src/components/library/BookCard.vue';
-
 import { useShelves } from '@src/composables/library/useShelves';
 import { useTheme } from '@src/composables/library/useTheme';
 import { useBooks } from '@src/composables/library/useBooks';
 import { useReader } from '@src/composables/reader/useReader';
-import { computed } from 'vue';
 import { type BookCard as BookCardType, UnexpectedRuntimeError } from '@src/types';
 import { unwrapAsync } from '@src/utilities';
-
-import SelectDialog from '@src/components/library/SelectDialog.vue';
-import InputDialog from '@src/components/library/InputDialog.vue';
 import { useSelectDialog } from '@src/composables/library/useSelectDialog';
 import { useInputDialog } from '@src/composables/library/useInputDialog';
 import { useConfirmDialog } from '@src/composables/library/useConfirmDialog';
-import ConfirmDialog from '@src/components/library/ConfirmDialog.vue';
 
 /* *** */
 
@@ -135,7 +126,7 @@ const handleDeletingShelf = async (shelfId: number) => {
    />
 
    <InputDialog @submit="resolveInputDialogSubmit" @cancel="resolveInputDialogCancel" v-model:open="textDialogIsOpen" />
-   
+
    <LibraryHeader @toggle-theme="toggleTheme" @add-shelf="handleAddingShelf" @import-files="importBooks" />
 
    <ul>

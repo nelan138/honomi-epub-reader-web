@@ -1,4 +1,3 @@
-import { nextTick } from 'vue';
 import { UnexpectedRuntimeError } from '@src/types';
 
 export function useBookScroller() {

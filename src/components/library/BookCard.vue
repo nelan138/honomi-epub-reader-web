@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { BookCard } from '@src/types';
 import { cleanUpBlobUrls } from '@src/utilities';
-import { onUnmounted } from 'vue';
 
 const props = defineProps<{
    book: BookCard;

@@ -1,5 +1,3 @@
-import { nextTick, ref, watch } from 'vue';
-
 export type Theme = 'dark' | 'light';
 
 export function useTheme() {

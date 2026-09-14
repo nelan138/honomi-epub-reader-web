@@ -1,4 +1,3 @@
-import { ref } from 'vue';
 import { createDeferredPromise } from '@src/utilities';
 import { type DeferredPromise, UnexpectedRuntimeError } from '@src/types';
 

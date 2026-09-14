@@ -1,4 +1,3 @@
-import { onMounted, ref } from 'vue';
 import {
    type BookCard,
    EpubParsingError,

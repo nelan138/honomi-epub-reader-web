@@ -1,4 +1,3 @@
-import { onMounted, ref } from 'vue';
 import {
    NotFoundError,
    type ShelfRecord,

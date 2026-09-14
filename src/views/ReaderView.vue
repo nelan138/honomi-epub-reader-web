@@ -1,15 +1,10 @@
 <script setup lang="ts">
-import BookChapter from '@src/components/reader/BookChapter.vue';
-import ReaderHeader from '@src/components/reader/ReaderHeader.vue';
 import type { Chapter } from '@src/types';
 import { useReader } from '@src/composables/reader/useReader';
 import { cleanUpBlobUrls, navigateToNotFoundPage, unwrapAsync } from '@src/utilities';
-import { computed, onMounted, onUnmounted, shallowRef } from 'vue';
-import { useRoute } from 'vue-router';
 
 import { getBookFromDB, updateBookProgressInDB } from '@src/services/dexie/bookRepo';
 import { useBookScroller } from '@src/composables/reader/useBookScroller';
-import { useDebounceFn } from '@vueuse/core';
 
 const route = useRoute();
 const params = route.params.bookId as string | undefined;
