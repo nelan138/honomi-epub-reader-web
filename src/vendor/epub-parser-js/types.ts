@@ -14,6 +14,7 @@ export type SpineItem = {
 };
 
 export type ManifestItem = {
+   /* Resolved Path */
    href: string;
    mediaType: string;
    properties?: string[];
@@ -28,6 +29,8 @@ export type NavigationItem = {
 export type Epub = {
    metadata: Metadata;
    cover?: Blob;
+   /** Full path of the OPF file within the archive, e.g. `"OEBPS/content.opf"`. Use as the base for resolving relative paths. */
+   opfPath: string;
    archive: Record<string, Uint8Array>;
    manifest: Map<string, ManifestItem>;
    spine: SpineItem[];

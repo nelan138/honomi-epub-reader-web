@@ -1,18 +1,17 @@
 import { db, defaultShelf } from '@src/services/dexie/database';
-import { type Book, type BookRecord, NotFoundError } from '@src/types';
+import { type BookRecord, NotFoundError } from '@src/types';
+import type { Book } from '@src/services/epub/epubParser.ts';
 
 export async function addBookToDB(
    book: Book,
 ): Promise<{ bookId: number; shelfId: number }> {
    const store = db.books;
 
-   const record: Omit<BookRecord, 'id'> = {
+   const bookId = await store.add({
       ...book,
-      readCharacterCount: 0,
+      readCharCount: 0,
       shelfId: defaultShelf.id,
-   };
-
-   const bookId = await store.add(record);
+   });
 
    const shelfId = defaultShelf.id;
    return { bookId, shelfId };
@@ -44,7 +43,9 @@ export async function renameBookInDB(
    newTitle: string,
 ): Promise<void> {
    const store = db.books;
-   const updatedCount = await store.update(bookId, { title: newTitle });
+   const updatedCount = await store.update(bookId, {
+      'metadata.title': newTitle,
+   });
 
    if (updatedCount === 0)
       throw new NotFoundError(`Book with ID ${bookId} not found`);
@@ -75,7 +76,7 @@ export async function updateBookProgressInDB(
 ): Promise<void> {
    const store = db.books;
    const updatedCount = await store.update(bookId, {
-      readCharacterCount: readCharCount,
+      readCharCount: readCharCount,
    });
 
    if (updatedCount === 0) throw new NotFoundError('Book does not exist!');

@@ -1,3 +1,5 @@
+import type { Book } from '@src/services/epub/epubParser.ts';
+
 export type Idref = string;
 export type ResolvedPath = string;
 export type RawXTHMLContent = string;
@@ -13,22 +15,6 @@ export type SpineItem = {
    linear: boolean; // false <=> (footnotes, appendices, etc.)
 };
 
-export type Book = {
-   // Metadata
-   title: string;
-   creator: string;
-   publisher: string;
-   language: string;
-   cover: Blob;
-
-   // Book Content
-   spine: SpineItem[];
-   assets: Record<ResolvedPath, Uint8Array>;
-   /** Map<Idref, RawXTHMLContent> */
-   spineItemContentMap: Map<Idref, RawXTHMLContent>;
-   totalCharacterCount: number;
-};
-
 /**
  * * Represents a record in the database.
  */
@@ -36,7 +22,7 @@ export type BookRecord = Book & {
    id: number;
    shelfId: number;
    /** count of how many chars user has read of this book */
-   readCharacterCount: number;
+   readCharCount: number;
 };
 
 /**
@@ -46,13 +32,10 @@ export type BookCard = Pick<
    BookRecord,
    | 'id'
    | 'shelfId'
-   | 'readCharacterCount'
-   | 'totalCharacterCount'
+   | 'readCharCount'
+   | 'metadata'
    | 'cover'
-   | 'title'
-   | 'creator'
-   | 'publisher'
-   | 'language'
+   | 'charCount'
 >;
 
 /**
@@ -67,16 +50,6 @@ export type ShelfRecord = {
 };
 
 export type ShelfOption = { id: number; name: string };
-
-export type Chapter = {
-   /** ! HTML string */
-   idref: string;
-   content: string;
-   /** ! Remember to provoke these after use */
-   blobUrls: string[] | undefined;
-   /** Accessing character count of each <p> via p-index: Map<p-index, char count> */
-   characterCount: Map<number, number>;
-};
 
 export type DeferredPromise<T> = {
    promise: Promise<T>;

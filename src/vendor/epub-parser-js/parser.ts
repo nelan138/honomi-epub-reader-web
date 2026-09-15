@@ -479,7 +479,7 @@ export function parseEpub(
    const navigation = parseEpub3Nav(manifest, archive)
       ?? parseNcx(manifest, archive, tocId);
 
-   const epub: Epub = { metadata, archive, manifest, spine };
+   const epub: Epub = { metadata, opfPath, archive, manifest, spine };
    if (cover) epub.cover = cover;
    if (navigation) epub.navigation = navigation;
 

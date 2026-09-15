@@ -1,19 +1,11 @@
 import {
-   getMimeType,
    navigateTo,
    navigateToNotFoundPage,
-   resolvePath,
-   UNICODE_GLYPH_REGEX,
    unwrapAsync,
-   unwrapSync,
 } from '@src/utilities';
 import { getBookFromDB } from '@src/services/dexie/bookRepo';
-import {
-   type Chapter,
-   NotFoundError,
-   UnexpectedRuntimeError,
-   XLINK_NS,
-} from '@src/types';
+import { NotFoundError, UnexpectedRuntimeError } from '@src/types';
+import type { Section } from '@src/services/epub/epubParser.ts';
 
 export function useReader() {
    const openBook = async (bookId: number) => {
@@ -23,103 +15,55 @@ export function useReader() {
       if (error) await navigateToNotFoundPage();
    };
 
-   const getChapters = async (bookId: number): Promise<Chapter[]> => {
+   const blobUrls: string[] = [];
+
+   const getChapters = async (
+      bookId: number,
+   ): Promise<Section[]> => {
       const [bookRecord] = await unwrapAsync(getBookFromDB(bookId));
       if (!bookRecord) throw new NotFoundError('Book not found!');
 
-      const assets = bookRecord.assets;
-      const spine = bookRecord.spine;
+      const images = bookRecord.images;
+      const sections = bookRecord.sections;
+
       const domParser = new DOMParser();
 
-      const chapters: Chapter[] = [];
-      let globalParagraphIndex: number = 0; // ! p-index
-
-      for (const item of spine) {
-         if (!item.linear) continue;
-
-         // * Get raw content
-         const rawHtml = bookRecord.spineItemContentMap.get(item.idref);
-         if (!rawHtml) continue;
-
-         const [document] = unwrapSync(() =>
-            domParser.parseFromString(
-               rawHtml,
-               item.mediaType as DOMParserSupportedType,
-            )
+      for (const section of sections) {
+         const doc = domParser.parseFromString(
+            section.content,
+            'application/xhtml+xml',
          );
-         if (!document)
-            throw new UnexpectedRuntimeError('DOM Parser not working');
 
-         // * Progress tracking
-         const paragraphs = document.querySelectorAll('p');
-         const characterCount = new Map<number, number>(); // p-index -> count
-
-         for (const paragraph of paragraphs) {
-            paragraph.setAttribute(
-               'data-p-index',
-               globalParagraphIndex.toString(),
-            );
-
-            const clone = paragraph.cloneNode(true) as HTMLElement;
-            clone.querySelectorAll('rt, rp').forEach((element) =>
-               element.remove()
-            );
-
-            const text = clone.textContent ?? '';
-            const count = text.match(UNICODE_GLYPH_REGEX)?.length ?? 0;
-            characterCount.set(globalParagraphIndex++, count);
-         }
-
-         // ! Process imgs
-         const blobUrls: string[] = [];
-
-         for (const image of document.querySelectorAll('img, image')) {
-            const isSvg = image.tagName.toLowerCase() === 'image';
-            const src = image.getAttribute('src')
-               ?? image.getAttributeNS(XLINK_NS, 'href')
-               ?? image.getAttribute('xlink:href')
-               ?? image.getAttribute('href');
-
+         const imgTags = doc.getElementsByTagName('img');
+         for (const imgTag of imgTags) {
+            const src = imgTag.getAttribute('src');
             if (!src) {
-               console.warn(`Image src not found for item: ${item.idref}`);
-               continue;
+               throw new UnexpectedRuntimeError(
+                  'Image tag without src attribute!',
+               );
             }
 
-            const resolvedSrc = resolvePath(item.resolvedHref, src);
-            const imageData = assets[resolvedSrc];
-
-            if (!imageData) {
-               console.warn(`Image data not found for src: ${resolvedSrc}`);
-               continue;
+            const blob = images.get(src);
+            if (!blob) {
+               throw new UnexpectedRuntimeError(
+                  `Image not found in book record: ${src}`,
+               );
             }
 
-            const blob = new Blob([imageData as BlobPart], {
-               type: getMimeType(resolvedSrc),
-            });
             const blobUrl = URL.createObjectURL(blob);
             blobUrls.push(blobUrl);
-
-            if (isSvg) {
-               image.setAttributeNS(XLINK_NS, 'xlink:href', blobUrl);
-               image.setAttribute('href', blobUrl);
-            }
-            else {
-               image.setAttribute('src', blobUrl);
-               image.setAttribute('alt', `image of item: ${item.idref}`);
-            }
+            imgTag.setAttribute('src', blobUrl);
          }
 
-         const chapter: Chapter = {
-            idref: item.idref,
-            content: document.body.innerHTML,
-            blobUrls,
-            characterCount,
-         };
-         chapters.push(chapter);
+         section.content = doc.getElementsByTagName('body')[0]!.innerHTML;
       }
 
-      return chapters;
+      return sections;
    };
+
+   onUnmounted(() => {
+      blobUrls.forEach((url) => URL.revokeObjectURL(url));
+   });
 
    return {
       getChapters,

@@ -26,17 +26,16 @@ export function useBooks() {
          return;
       }
 
-      books.value = bookRecords.map((bookRecord): BookCard => ({
-         id: bookRecord.id,
-         shelfId: bookRecord.shelfId,
-         readCharacterCount: bookRecord.readCharacterCount,
-         totalCharacterCount: bookRecord.totalCharacterCount,
-         title: bookRecord.title,
-         creator: bookRecord.creator,
-         publisher: bookRecord.publisher,
-         language: bookRecord.language,
-         cover: bookRecord.cover,
-      }));
+      books.value = bookRecords.map((record) => {
+         return {
+            id: record.id,
+            shelfId: record.shelfId,
+            readCharCount: record.readCharCount,
+            metadata: record.metadata,
+            cover: record.cover,
+            charCount: record.charCount,
+         };
+      });
    };
 
    onMounted(syncWithDB); // runs in the background
@@ -69,7 +68,7 @@ export function useBooks() {
          return;
       }
 
-      targetBook.title = name;
+      targetBook.metadata.title = name;
 
       const [_, error] = await unwrapAsync(renameBookInDB(id, name));
       if (error) {
@@ -132,13 +131,10 @@ export function useBooks() {
          const addedBook: BookCard = {
             id,
             shelfId,
-            title: book.title,
-            creator: book.creator,
+            readCharCount: 0,
+            metadata: book.metadata,
             cover: book.cover,
-            publisher: book.publisher,
-            language: book.language,
-            totalCharacterCount: book.totalCharacterCount,
-            readCharacterCount: 0, // init
+            charCount: book.charCount,
          };
 
          books.value.push(addedBook); // update UI

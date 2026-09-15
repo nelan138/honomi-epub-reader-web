@@ -1,295 +1,289 @@
-import { strFromU8, unzipSync } from 'fflate';
-import {
-   type Book,
-   EpubParsingError,
-   type Idref,
-   type RawXTHMLContent,
-   type ResolvedPath,
-   type SpineItem,
-} from '@src/types';
-import {
-   getElementText,
-   getXmlDocument,
-   normalizePath,
-   resolvePath,
-   UNICODE_GLYPH_REGEX,
-   unwrapAsync,
-} from '@src/utilities';
+import { makeBook } from '@src/vendor/epub-parser-js/index.ts';
+import { EpubParsingError } from '@src/types.ts';
+import { strFromU8 } from 'fflate';
+import { UNICODE_GLYPH_REGEX } from '@src/utilities.ts';
 
-import defaultCoverUrl from '@src/assets/default-book-cover.jpeg';
-
-type Path = string;
-
-type Metadata = {
-   title: string;
-   creator: string;
-   publisher: string;
-   language: string;
-   cover: Blob;
+export type Section = {
+   content: string;
+   idref: string;
 };
 
-type ManifestItem = {
-   href: Path;
-   id: Idref;
-   resolvedHref: ResolvedPath;
-   mediaType: string;
-   properties?: string[];
+export type Book = {
+   cover: Blob | null;
+   metadata: {
+      title: string;
+      creator: string;
+      publisher: string;
+      language: string;
+   };
+   sections: Section[];
+
+   charCount: number;
+   images: Map<string, Blob>;
 };
-
-let defaultCoverBlobCache: Blob | null = null;
-
-async function getDefaultCoverBlob(): Promise<Blob> {
-   if (defaultCoverBlobCache) return defaultCoverBlobCache;
-
-   const [response, error] = await unwrapAsync(
-      fetch(defaultCoverUrl),
-   );
-   if (response) defaultCoverBlobCache = await response.blob();
-   else {
-      console.warn(
-         '[Epub] Failed to load default book cover:',
-         error.message,
-      );
-      defaultCoverBlobCache = new Blob([]);
-   }
-   return defaultCoverBlobCache;
-}
 
 export class EpubParser {
-   private archive!: Record<string, Uint8Array>;
-   private opfPath!: ResolvedPath;
-   private opfDocument!: Document;
-   private manifest!: ManifestItem[];
-   private version!: 2 | 3;
+   constructor(private file: File) {}
 
-   constructor(private file: Blob) {}
-
-   static parse(file: Blob): Promise<Book> {
+   static parse(file: File): Promise<Book> {
       return new EpubParser(file).parse();
    }
 
    async parse(): Promise<Book> {
-      const buffer = await this.file.arrayBuffer();
-      this.archive = unzipSync(new Uint8Array(buffer));
+      const book = await makeBook(this.file);
 
-      this.opfPath = this.getOpfPath();
-      this.opfDocument = getXmlDocument(this.opfPath, this.archive);
-      this.version = this.getVersion();
-      this.manifest = this.getManifest();
+      const archive = book.archive;
+      const manifest = book.manifest;
+      const spine = book.spine;
 
-      const metadata = await this.getMetadata();
-      const spine = this.getSpine();
-      const spineItemContentMap = this.buildContentMap(spine);
-      const totalCharacterCount = this.getTotalCharacterCount(
-         spineItemContentMap,
-      );
+      const domParser = new DOMParser();
 
-      const book: Book = {
-         ...metadata,
-         spine,
-         assets: this.archive,
-         spineItemContentMap,
-         totalCharacterCount,
+      const images = new Map<string, Blob>();
+
+      const processImageTags = (
+         body: Element,
+         chapterPath: string,
+      ): Element => {
+         const processImage = (
+            element: Element,
+            rawSrc: string,
+         ) => {
+            // resolvePath returns null for external/data/blob URIs,
+            // malformed percent sequences, or root-escaping paths — skip.
+            const resolvedSrc = resolvePath(chapterPath, rawSrc);
+            if (!resolvedSrc) return;
+
+            const buffer = archive[resolvedSrc];
+            if (!buffer) {
+               console.warn(`Image not found in archive: ${resolvedSrc}`);
+               return;
+            }
+
+            if (!images.has(resolvedSrc)) {
+               const mimeType = getMimeType(resolvedSrc);
+               const buf = buffer.buffer.slice(
+                  buffer.byteOffset,
+                  buffer.byteOffset + buffer.byteLength,
+               );
+               const blob = new Blob([buf as BlobPart], { type: mimeType });
+               images.set(resolvedSrc, blob);
+            }
+
+            element.setAttribute('src', resolvedSrc);
+         };
+
+         for (const img of body.getElementsByTagName('img')) {
+            const src = img.getAttribute('src');
+            if (!src) continue;
+            try {
+               processImage(img, src);
+            }
+            catch (e) {
+               console.warn(`Failed to process <img> src="${src}":`, e);
+            }
+         }
+
+         // SVG <image> — resolve src, then replace the <svg> wrapper with a plain <img>.
+         // Collect into a static array first because the live NodeList would shift
+         // during DOM mutations.
+         const svgImages = Array.from(
+            body.getElementsByTagNameNS('http://www.w3.org/2000/svg', 'image'),
+         );
+         for (const svgImg of svgImages) {
+            const src = svgImg.getAttribute('href')
+               ?? svgImg.getAttributeNS('http://www.w3.org/1999/xlink', 'href')
+               ?? svgImg.getAttribute('xlink:href');
+            if (!src) continue;
+
+            const resolvedSrc = resolvePath(chapterPath, src);
+            if (!resolvedSrc) continue;
+
+            const buffer = archive[resolvedSrc];
+            if (!buffer) {
+               console.warn(`Image not found in archive: ${resolvedSrc}`);
+               continue;
+            }
+
+            if (!images.has(resolvedSrc)) {
+               const mimeType = getMimeType(resolvedSrc);
+               const buf = buffer.buffer.slice(
+                  buffer.byteOffset,
+                  buffer.byteOffset + buffer.byteLength,
+               );
+               const blob = new Blob([buf as BlobPart], { type: mimeType });
+               images.set(resolvedSrc, blob);
+            }
+
+            // Replace the closest <svg> ancestor (or the <image> itself) with <img>
+            const svgWrapper = svgImg.closest('svg') ?? svgImg;
+            const img = body.ownerDocument.createElement('img');
+            img.setAttribute('src', resolvedSrc);
+            svgWrapper.parentNode?.replaceChild(img, svgWrapper);
+         }
+
+         return body;
       };
 
-      return book;
-   }
+      const processBookSections = (): Section[] => {
+         const sections: Section[] = [];
+         for (const spineItem of spine) {
+            if (!spineItem.linear) { // Skip non-linear sections
+               console.warn(`Skipping non-linear section: ${spineItem.id}`);
+               continue;
+            }
+            const manifestItem = manifest.get(spineItem.id);
+            if (!manifestItem) {
+               throw new EpubParsingError(
+                  `Manifest item not found for spine item: ${spineItem.id}`,
+               );
+            }
 
-   private getOpfPath(): ResolvedPath {
-      const containerDocument = getXmlDocument(
-         'META-INF/container.xml',
-         this.archive,
-      );
-      const rootfile = containerDocument.getElementsByTagName('rootfile')[0];
-      const opfPath = rootfile?.getAttribute('full-path') as ResolvedPath;
+            if (!(manifestItem.mediaType in SupportedMimeTypes)) {
+               throw new EpubParsingError(
+                  `Unsupported media type: ${manifestItem.mediaType}`,
+               );
+            }
 
-      if (!opfPath) {
-         throw new EpubParsingError(
-            'container.xml does not define OPF package path',
-         );
-      }
+            const buffer = archive[manifestItem.href];
+            if (!buffer) {
+               throw new EpubParsingError(
+                  `Buffer not found for manifest item: ${manifestItem.href}`,
+               );
+            }
 
-      return normalizePath(opfPath);
-   }
+            const raw = strFromU8(buffer);
 
-   private getManifest(): ManifestItem[] {
-      const manifestElement = this.opfDocument.getElementsByTagName(
-         'manifest',
-      )[0];
-      if (!manifestElement)
-         throw new EpubParsingError('package does not contain a manifest');
-
-      const manifestItemElements = [...manifestElement.children].filter(
-         (element) => element.localName === 'item',
-      );
-
-      return manifestItemElements.map((item) => {
-         const id: Idref | null = item.getAttribute('id');
-         const href: Path | null = item.getAttribute('href');
-         const mediaType = item.getAttribute('media-type');
-
-         if (!id || !href || !mediaType) {
-            throw new EpubParsingError(
-               'manifest item missing required attributes',
+            const doc = domParser.parseFromString(
+               raw,
+               'application/xhtml+xml',
             );
+
+            const body = doc.body
+               ?? doc.getElementsByTagName('body')[0]
+               ?? doc.getElementsByTagNameNS(
+                  'http://www.w3.org/1999/xhtml',
+                  'body',
+               )[0];
+            if (!body) {
+               throw new EpubParsingError(
+                  `Body element not found for spine item: ${spineItem.id}`,
+               );
+            }
+
+            const processedBody = processImageTags(body, manifestItem.href);
+            const serialize = new XMLSerializer();
+            const content = serialize.serializeToString(processedBody);
+            sections.push({
+               content,
+               idref: spineItem.id,
+            });
          }
+         return sections;
+      };
 
-         const propertiesAttribute = item.getAttribute('properties')?.trim();
+      const sections = processBookSections();
 
-         return {
-            id,
-            href,
-            resolvedHref: resolvePath(this.opfPath, href),
-            mediaType,
-            properties: propertiesAttribute
-               ? propertiesAttribute.split(/\s+/)
-               : [],
-         };
-      });
-   }
-
-   private getVersion(): 2 | 3 {
-      const packageElement =
-         this.opfDocument.getElementsByTagName('package')[0];
-      const versionString = packageElement?.getAttribute('version');
-
-      if (!versionString)
-         throw new EpubParsingError('EPUB package does not define a version');
-
-      const version = parseInt(versionString, 10);
-      if (version !== 2 && version !== 3) {
-         throw new EpubParsingError(
-            `Unsupported EPUB version: ${versionString}`,
+      const charCount = sections.reduce((acc, section) => {
+         const doc = domParser.parseFromString(
+            section.content,
+            'text/html',
          );
-      }
 
-      return version as 2 | 3;
-   }
+         // Drop ruby annotations and noise tags before counting
+         const dropElements = doc.querySelectorAll('rt, rp, style, script');
+         for (const el of dropElements) el.remove();
 
-   private getSpine(): SpineItem[] {
-      const spineElement = this.opfDocument.getElementsByTagName('spine')[0];
-      if (!spineElement)
-         throw new EpubParsingError('EPUB package does not contain a spine');
-
-      const spineItemElements = [...spineElement.children].filter(
-         (element) => element.localName === 'itemref',
-      );
-
-      return spineItemElements.map((itemref): SpineItem => {
-         const idref = itemref.getAttribute('idref');
-         if (!idref) {
-            throw new EpubParsingError(
-               'EPUB spine item does not define an idref',
-            );
-         }
-
-         const manifestItem = this.manifest.find((item) => item.id === idref);
-         if (!manifestItem) {
-            throw new EpubParsingError(
-               `EPUB spine item references a manifest item that does not exist: ${idref}`,
-            );
-         }
-
-         return {
-            idref,
-            mediaType: manifestItem.mediaType,
-            resolvedHref: manifestItem.resolvedHref,
-            linear: itemref.getAttribute('linear') !== 'no',
-         };
-      });
-   }
-
-   private async getCover(): Promise<Blob> {
-      let coverItem: ManifestItem | undefined;
-
-      if (this.version === 3) {
-         coverItem = this.manifest.find((item) =>
-            item.properties?.includes('cover-image')
-         );
-      }
-
-      if (!coverItem) {
-         const coverId = [...this.opfDocument.getElementsByTagName('meta')]
-            .find((meta) => meta.getAttribute('name') === 'cover')
-            ?.getAttribute('content');
-
-         if (coverId)
-            coverItem = this.manifest.find((item) => item.id === coverId);
-      }
-
-      if (!coverItem) return await getDefaultCoverBlob();
-
-      const coverData = this.archive[coverItem.resolvedHref];
-      if (!coverData) return await getDefaultCoverBlob();
-
-      return new Blob([new Uint8Array(coverData)], {
-         type: coverItem.mediaType,
-      });
-   }
-
-   private async getMetadata(): Promise<Metadata> {
-      const metadataElement = this.opfDocument.getElementsByTagName(
-         'metadata',
-      )[0];
-      if (!metadataElement) {
-         return {
-            title: 'No title',
-            creator: 'Unknown',
-            publisher: 'Unknown',
-            language: '',
-            cover: await getDefaultCoverBlob(),
-         };
-      }
+         const rawText = doc.body?.textContent ?? '';
+         return acc + (rawText.match(UNICODE_GLYPH_REGEX)?.length ?? 0);
+      }, 0);
 
       return {
-         title: getElementText(metadataElement, 'title') || 'No title',
-         creator: getElementText(metadataElement, 'creator') || 'Unknown',
-         publisher: getElementText(metadataElement, 'publisher') || 'Unknown',
-         language: getElementText(metadataElement, 'language') || '',
-         cover: await this.getCover(),
+         cover: book.cover ?? null,
+         metadata: {
+            title: book.metadata.title,
+            creator: book.metadata.creator ?? 'Unknown',
+            publisher: book.metadata.publisher ?? 'Unknown',
+            language: book.metadata.language,
+         },
+         sections,
+         charCount,
+         images,
       };
    }
+}
 
-   private buildContentMap(
-      spine: SpineItem[],
-   ): Map<Idref, RawXTHMLContent> {
-      const contentMap = new Map<Idref, RawXTHMLContent>();
+const SupportedMimeTypes = {
+   'application/xhtml+xml': true,
+   'application/xml': true,
+   'text/html': true,
+   'text/xml': true,
+} as const;
 
-      for (const spineItem of spine) {
-         if (!spineItem.linear) continue;
+const MIME_MAP: Record<string, string> = {
+   jpg: 'image/jpeg',
+   jpeg: 'image/jpeg',
+   png: 'image/png',
+   svg: 'image/svg+xml',
+   gif: 'image/gif',
+   webp: 'image/webp',
+   avif: 'image/avif',
+};
 
-         const fileData = this.archive[spineItem.resolvedHref];
-         if (!fileData) continue;
+function getMimeType(path: string): string {
+   const ext = path.split('.').pop()?.toLowerCase() ?? '';
+   return MIME_MAP[ext] ?? 'application/octet-stream';
+}
 
-         const rawXhtml = strFromU8(fileData);
-         contentMap.set(spineItem.idref, rawXhtml as RawXTHMLContent);
+/**
+ * Collapse `.` and `..` segments in an already-joined path string.
+ * Returns `null` if `..` would escape the archive root (instead of throwing).
+ */
+export function normalizePath(path: string): string | null {
+   const stack: string[] = [];
+   for (const seg of path.replace(/\\/g, '/').split('/')) {
+      if (seg === '' || seg === '.') continue;
+      if (seg === '..') {
+         if (stack.length === 0) return null;
+         stack.pop();
       }
+      else {
+         stack.push(seg);
+      }
+   }
+   return stack.join('/');
+}
 
-      return contentMap;
+const EXTERNAL_URI_RE = /^(?:https?:|data:|blob:)/i;
+
+export function resolvePath(
+   basePath: string,
+   relativeSrc: string,
+): string | null {
+   // 1. External / data / blob URIs — nothing to resolve
+   if (EXTERNAL_URI_RE.test(relativeSrc)) return null;
+
+   // 2. Strip fragment and query string
+   let cleaned = relativeSrc;
+   const hashIdx = cleaned.indexOf('#');
+   if (hashIdx !== -1) cleaned = cleaned.slice(0, hashIdx);
+   const queryIdx = cleaned.indexOf('?');
+   if (queryIdx !== -1) cleaned = cleaned.slice(0, queryIdx);
+
+   // 3. Percent-decode (safe — catch URIError on malformed sequences)
+   let raw: string;
+   try {
+      raw = decodeURIComponent(cleaned);
+   }
+   catch {
+      return null;
    }
 
-   private getTotalCharacterCount(
-      spineItemContentMap: Map<Idref, RawXTHMLContent>,
-   ): number {
-      let totalCount = 0;
-      const parser = new DOMParser();
+   // 4. Already root-relative (absolute path)
+   if (raw.startsWith('/')) return normalizePath(raw.slice(1));
 
-      for (const rawContent of spineItemContentMap.values()) {
-         const doc = parser.parseFromString(
-            rawContent,
-            'application/xhtml+xml',
-         );
-         const paragraphs = doc.querySelectorAll('p');
+   // 5. Derive chapter directory (everything up to and including the last '/')
+   const slashIdx = basePath.lastIndexOf('/');
+   const chapterDir = slashIdx !== -1 ? basePath.slice(0, slashIdx + 1) : '';
 
-         for (const p of paragraphs) {
-            const clone = p.cloneNode(true) as HTMLElement;
-            clone.querySelectorAll('rt, rp').forEach((el) => el.remove());
-
-            const text = clone.textContent ?? '';
-            totalCount += text.match(UNICODE_GLYPH_REGEX)?.length ?? 0;
-         }
-      }
-
-      return totalCount;
-   }
+   return normalizePath(chapterDir + raw);
 }
