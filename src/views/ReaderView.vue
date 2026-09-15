@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { useReader } from '@src/composables/reader/useReader';
+import type { Section } from '@src/types';
 import { navigateToNotFoundPage, unwrapAsync } from '@src/utilities';
-
-import type { Section } from '@src/services/epub/epubParser';
 
 /* *** */
 

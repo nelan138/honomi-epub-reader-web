@@ -11,16 +11,19 @@ export class EpubParser {
    }
 
    async parse(): Promise<Book> {
+      const domParser = new DOMParser();
+      const xmlSerializer = new XMLSerializer();
+
       const book = await makeBook(this.file);
 
       const archive = book.archive;
       const manifest = book.manifest;
       const spine = book.spine;
 
-      const domParser = new DOMParser();
+      // ! <image src, Blob>
+      const images: Record<string, Blob> = {};
 
-      const images = new Map<string, Blob>();
-
+      // todo: might refactor if feel like it, too lazy rn >.<
       const processImageTags = (body: Element, chapterPath: string): Element => {
          // * <img> tags
          for (const img of body.getElementsByTagName('img')) {
@@ -39,18 +42,22 @@ export class EpubParser {
                continue;
             }
 
-            if (!images.has(resolvedSrc)) {
-               const mimeType = getMimeType(resolvedSrc);
-               const blob = new Blob([buffer as Uint8Array<ArrayBuffer>], { type: mimeType });
-               images.set(resolvedSrc, blob);
+            const mimeType = getMimeType(resolvedSrc);
+            const blob = new Blob([buffer as Uint8Array<ArrayBuffer>], { type: mimeType });
+
+            if (resolvedSrc in images) {
+               console.warn(
+                  `Duplicate image src found: ${resolvedSrc}, overwriting previous Blob.`,
+               );
             }
 
+            images[resolvedSrc] = blob;
             img.setAttribute('src', resolvedSrc);
          }
 
          // * <svg:image> tags
          const svgImages = body.getElementsByTagNameNS('http://www.w3.org/2000/svg', 'image');
-         
+
          for (const svgImg of svgImages) {
             const src = svgImg.getAttribute('href')
                ?? svgImg.getAttributeNS('http://www.w3.org/1999/xlink', 'href')
@@ -70,11 +77,15 @@ export class EpubParser {
                continue;
             }
 
-            if (!images.has(resolvedSrc)) {
-               const mimeType = getMimeType(resolvedSrc);
-               const blob = new Blob([buffer as Uint8Array<ArrayBuffer>], { type: mimeType });
-               images.set(resolvedSrc, blob);
+            const mimeType = getMimeType(resolvedSrc);
+            const blob = new Blob([buffer as Uint8Array<ArrayBuffer>], { type: mimeType });
+            if (resolvedSrc in images) {
+               console.warn(
+                  `Duplicate image src found: ${resolvedSrc}, overwriting previous Blob.`,
+               );
             }
+
+            images[resolvedSrc] = blob;
 
             // ! Replace the svg wrapper
             const svgWrapper = svgImg.closest('svg');
@@ -92,10 +103,11 @@ export class EpubParser {
       const processBookSections = (): Section[] => {
          const sections: Section[] = [];
          for (const spineItem of spine) {
-            if (!spineItem.linear) { // Skip non-linear sections
+            if (!spineItem.linear) { // Skip non-linear cuz im lazy >.<
                console.warn(`Skipping non-linear section: ${spineItem.id}`);
                continue;
             }
+
             const manifestItem = manifest.get(spineItem.id);
             if (!manifestItem) {
                throw new EpubParsingError(
@@ -117,7 +129,7 @@ export class EpubParser {
             }
 
             const raw = strFromU8(buffer);
-
+            // 'application/xhtml+xml' cuz don't wanna think too much
             const doc = domParser.parseFromString(
                raw,
                'application/xhtml+xml',
@@ -129,6 +141,7 @@ export class EpubParser {
                   'http://www.w3.org/1999/xhtml',
                   'body',
                )[0];
+
             if (!body) {
                throw new EpubParsingError(
                   `Body element not found for spine item: ${spineItem.id}`,
@@ -136,8 +149,8 @@ export class EpubParser {
             }
 
             const processedBody = processImageTags(body, manifestItem.href);
-            const serialize = new XMLSerializer();
-            const content = serialize.serializeToString(processedBody);
+            const content = xmlSerializer.serializeToString(processedBody);
+
             sections.push({
                content,
                idref: spineItem.id,
@@ -149,14 +162,14 @@ export class EpubParser {
       const sections = processBookSections();
 
       const charCount = sections.reduce((acc, section) => {
+         // 'text/html' cuz don't wanna think too much
          const doc = domParser.parseFromString(
             section.content,
             'text/html',
          );
 
-         // Drop ruby annotations and noise tags before counting
-         const dropElements = doc.querySelectorAll('rt, rp, style, script');
-         for (const el of dropElements) el.remove();
+         // Drop noise tags
+         for (const element of doc.querySelectorAll('rt, rp, style, script')) element.remove();
 
          const rawText = doc.body?.textContent ?? '';
          return acc + (rawText.match(UNICODE_GLYPH_REGEX)?.length ?? 0);
@@ -177,6 +190,7 @@ export class EpubParser {
    }
 }
 
+// i don't wanna deal with img so i excluded it
 const SupportedMimeTypes = {
    'application/xhtml+xml': true,
    'application/xml': true,
@@ -193,6 +207,9 @@ const MIME_MAP: Record<string, string> = {
    webp: 'image/webp',
    avif: 'image/avif',
 };
+
+// ! AI SLOP ALERT BELOW !
+// ? Too lazy to fix, plus it's working >.< ?
 
 function getMimeType(path: string): string {
    const ext = path.split('.').pop()?.toLowerCase() ?? '';

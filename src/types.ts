@@ -17,7 +17,7 @@ export type Book = {
    sections: Section[];
 
    charCount: number;
-   images: Map<string, Blob>;
+   images: Record<string, Blob>;
 };
 
 /**

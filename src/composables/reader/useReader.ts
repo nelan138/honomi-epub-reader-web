@@ -1,26 +1,18 @@
-import {
-   navigateTo,
-   navigateToNotFoundPage,
-   unwrapAsync,
-} from '@src/utilities';
+import { navigateTo, navigateToNotFoundPage, unwrapAsync } from '@src/utilities';
 import { getBookFromDB } from '@src/services/dexie/bookRepo';
-import { NotFoundError, UnexpectedRuntimeError, type Section } from '@src/types';
+import { NotFoundError, type Section, UnexpectedRuntimeError } from '@src/types';
 
 /* *** */
 
 export function useReader() {
    const openBook = async (bookId: number) => {
-      console.log('Running Reader');
-      console.log('BookId: ', bookId);
       const [error] = await unwrapAsync(navigateTo(`/read/${bookId}`));
       if (error) await navigateToNotFoundPage();
    };
 
    const blobUrls: string[] = [];
 
-   const getChapters = async (
-      bookId: number,
-   ): Promise<Section[]> => {
+   const getChapters = async (bookId: number): Promise<Section[]> => {
       const [bookRecord] = await unwrapAsync(getBookFromDB(bookId));
       if (!bookRecord) throw new NotFoundError('Book not found!');
 
@@ -30,10 +22,7 @@ export function useReader() {
       const domParser = new DOMParser();
 
       for (const section of sections) {
-         const doc = domParser.parseFromString(
-            section.content,
-            'application/xhtml+xml',
-         );
+         const doc = domParser.parseFromString(section.content, 'application/xhtml+xml');
 
          const imgTags = doc.getElementsByTagName('img');
          for (const imgTag of imgTags) {
@@ -44,7 +33,7 @@ export function useReader() {
                );
             }
 
-            const blob = images.get(src);
+            const blob = images[src];
             if (!blob) {
                throw new UnexpectedRuntimeError(
                   `Image not found in book record: ${src}`,
@@ -53,12 +42,19 @@ export function useReader() {
 
             const blobUrl = URL.createObjectURL(blob);
             blobUrls.push(blobUrl);
+
             imgTag.setAttribute('src', blobUrl);
          }
 
-         section.content = doc.getElementsByTagName('body')[0]!.innerHTML;
-      }
+         const body = doc.body ?? doc.getElementsByTagName('body')[0];
+         if (!body) {
+            throw new UnexpectedRuntimeError(
+               'No <body> tag found in section content!',
+            );
+         }
 
+         section.content = body.innerHTML;
+      }
       return sections;
    };
 

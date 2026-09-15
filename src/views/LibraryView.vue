@@ -27,18 +27,18 @@ const {
    resolveSubmit: resolveInputDialogSubmit,
 } = useInputDialog();
 
-/* BOOK SECTION */
-
-const { openBook } = useReader();
-
-const { books, renameBook, changeBookShelf, deleteBook, importBooks } = useBooks();
-
 const {
    isOpen: confirmDialogIsOpen,
    dialogPrompt: confirmDialogPrompt,
    resolveConfirm: resolveConfirmDialogConfirm,
    resolveCancel: resolveConfirmDialogCancel,
 } = useConfirmDialog();
+
+/* BOOK SECTION */
+
+const { openBook } = useReader();
+
+const { books, renameBook, changeBookShelf, deleteBook, importBooks } = useBooks();
 
 const handleChangingBookShelf = async (bookId: number) => {
    const [selectShelfId, error] = await unwrapAsync(selectDialogPrompt());
