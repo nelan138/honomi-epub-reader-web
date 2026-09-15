@@ -21,60 +21,14 @@ export class EpubParser {
 
       const images = new Map<string, Blob>();
 
-      const processImageTags = (
-         body: Element,
-         chapterPath: string,
-      ): Element => {
-         const processImage = (
-            element: Element,
-            rawSrc: string,
-         ) => {
-            // resolvePath returns null for external/data/blob URIs,
-            // malformed percent sequences, or root-escaping paths — skip.
-            const resolvedSrc = resolvePath(chapterPath, rawSrc);
-            if (!resolvedSrc) return;
-
-            const buffer = archive[resolvedSrc];
-            if (!buffer) {
-               console.warn(`Image not found in archive: ${resolvedSrc}`);
-               return;
-            }
-
-            if (!images.has(resolvedSrc)) {
-               const mimeType = getMimeType(resolvedSrc);
-               const buf = buffer.buffer.slice(
-                  buffer.byteOffset,
-                  buffer.byteOffset + buffer.byteLength,
-               );
-               const blob = new Blob([buf as BlobPart], { type: mimeType });
-               images.set(resolvedSrc, blob);
-            }
-
-            element.setAttribute('src', resolvedSrc);
-         };
-
+      const processImageTags = (body: Element, chapterPath: string): Element => {
+         // * <img> tags
          for (const img of body.getElementsByTagName('img')) {
             const src = img.getAttribute('src');
-            if (!src) continue;
-            try {
-               processImage(img, src);
+            if (!src) {
+               console.warn('<img> tag missing src attribute, skipping:', img);
+               continue;
             }
-            catch (e) {
-               console.warn(`Failed to process <img> src="${src}":`, e);
-            }
-         }
-
-         // SVG <image> — resolve src, then replace the <svg> wrapper with a plain <img>.
-         // Collect into a static array first because the live NodeList would shift
-         // during DOM mutations.
-         const svgImages = Array.from(
-            body.getElementsByTagNameNS('http://www.w3.org/2000/svg', 'image'),
-         );
-         for (const svgImg of svgImages) {
-            const src = svgImg.getAttribute('href')
-               ?? svgImg.getAttributeNS('http://www.w3.org/1999/xlink', 'href')
-               ?? svgImg.getAttribute('xlink:href');
-            if (!src) continue;
 
             const resolvedSrc = resolvePath(chapterPath, src);
             if (!resolvedSrc) continue;
@@ -87,19 +41,49 @@ export class EpubParser {
 
             if (!images.has(resolvedSrc)) {
                const mimeType = getMimeType(resolvedSrc);
-               const buf = buffer.buffer.slice(
-                  buffer.byteOffset,
-                  buffer.byteOffset + buffer.byteLength,
-               );
-               const blob = new Blob([buf as BlobPart], { type: mimeType });
+               const blob = new Blob([buffer as Uint8Array<ArrayBuffer>], { type: mimeType });
                images.set(resolvedSrc, blob);
             }
 
-            // Replace the closest <svg> ancestor (or the <image> itself) with <img>
-            const svgWrapper = svgImg.closest('svg') ?? svgImg;
+            img.setAttribute('src', resolvedSrc);
+         }
+
+         // * <svg:image> tags
+         const svgImages = body.getElementsByTagNameNS('http://www.w3.org/2000/svg', 'image');
+         
+         for (const svgImg of svgImages) {
+            const src = svgImg.getAttribute('href')
+               ?? svgImg.getAttributeNS('http://www.w3.org/1999/xlink', 'href')
+               ?? svgImg.getAttribute('xlink:href');
+
+            if (!src) {
+               console.warn('<svg:image> tag missing href attribute, skipping:', svgImg);
+               continue;
+            }
+
+            const resolvedSrc = resolvePath(chapterPath, src);
+            if (!resolvedSrc) continue;
+
+            const buffer = archive[resolvedSrc];
+            if (!buffer) {
+               console.warn(`Image not found in archive: ${resolvedSrc}`);
+               continue;
+            }
+
+            if (!images.has(resolvedSrc)) {
+               const mimeType = getMimeType(resolvedSrc);
+               const blob = new Blob([buffer as Uint8Array<ArrayBuffer>], { type: mimeType });
+               images.set(resolvedSrc, blob);
+            }
+
+            // ! Replace the svg wrapper
+            const svgWrapper = svgImg.closest('svg');
+            if (!svgWrapper) break;
+
             const img = body.ownerDocument.createElement('img');
             img.setAttribute('src', resolvedSrc);
-            svgWrapper.parentNode?.replaceChild(img, svgWrapper);
+
+            svgWrapper.replaceWith(img);
          }
 
          return body;
