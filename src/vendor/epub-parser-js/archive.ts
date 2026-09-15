@@ -1,5 +1,7 @@
 import { unzipSync } from 'fflate';
 
+/* *** */
+
 const MAX_COMPRESSED_SIZE = 100 * 1024 * 1024; // 100 MB
 const MAX_DECOMPRESSED_SIZE = 200 * 1024 * 1024; // 200 MB
 const MAX_ENTRY_SIZE = 30 * 1024 * 1024; // 30 MB

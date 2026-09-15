@@ -2,6 +2,8 @@ import { db, defaultShelf } from '@src/services/dexie/database';
 import { type BookRecord, NotFoundError } from '@src/types';
 import type { Book } from '@src/services/epub/epubParser.ts';
 
+/* *** */
+
 export async function addBookToDB(
    book: Book,
 ): Promise<{ bookId: number; shelfId: number }> {

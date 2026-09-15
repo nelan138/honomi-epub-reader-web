@@ -2,6 +2,8 @@
 import { useTheme } from '@src/composables/library/useTheme';
 import { navigateToHomePage } from '@src/utilities';
 
+/* *** */
+
 const { toggleTheme } = useTheme();
 </script>
 

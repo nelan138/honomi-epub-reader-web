@@ -1,26 +1,7 @@
 import { makeBook } from '@src/vendor/epub-parser-js/index.ts';
-import { EpubParsingError } from '@src/types.ts';
+import { type Book, EpubParsingError, type Section } from '@src/types.ts';
 import { strFromU8 } from 'fflate';
 import { UNICODE_GLYPH_REGEX } from '@src/utilities.ts';
-
-export type Section = {
-   content: string;
-   idref: string;
-};
-
-export type Book = {
-   cover: Blob | null;
-   metadata: {
-      title: string;
-      creator: string;
-      publisher: string;
-      language: string;
-   };
-   sections: Section[];
-
-   charCount: number;
-   images: Map<string, Blob>;
-};
 
 export class EpubParser {
    constructor(private file: File) {}

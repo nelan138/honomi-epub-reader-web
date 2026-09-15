@@ -1,6 +1,8 @@
 import type { DeferredPromise } from '@src/types';
 import { router } from '@src/router';
 
+/* *** */
+
 export function navigateToHomePage() {
    return router.push('/');
 }

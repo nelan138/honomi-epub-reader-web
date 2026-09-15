@@ -30,7 +30,7 @@
    "nodeModulesDir": "auto",
    "fmt": {
       "useTabs": false,
-      "lineWidth": 80,
+      "lineWidth": 100,
       "indentWidth": 3,
       "semiColons": true,
       "operatorPosition": "nextLine",

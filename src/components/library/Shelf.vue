@@ -2,6 +2,8 @@
 import { defaultShelf } from '@src/services/dexie/database';
 import type { ShelfRecord } from '@src/types';
 
+/* *** */
+
 const props = defineProps<{
    shelf: ShelfRecord;
 }>();

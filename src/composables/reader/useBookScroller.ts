@@ -1,5 +1,7 @@
 import { UnexpectedRuntimeError } from '@src/types';
 
+/* *** */
+
 export function useBookScroller() {
    function getCurrentPIndex(): number | null {
       const header = document.querySelector('header');

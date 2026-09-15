@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import { DialogClose, DialogContent, DialogOverlay, DialogPortal, DialogRoot, DialogTitle } from 'reka-ui';
 
+/* *** */
+
 const open = defineModel<boolean>('open', { required: true });
 const input = ref<string>('');
 

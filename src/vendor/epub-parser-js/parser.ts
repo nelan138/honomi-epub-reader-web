@@ -6,6 +6,8 @@ import type {
    SpineItem,
 } from './types.ts';
 
+/* *** */
+
 // ─── Namespace URIs ──────────────────────────────────────────
 const NS_CONTAINER = 'urn:oasis:names:tc:opendocument:xmlns:container';
 const NS_OPF = 'http://www.idpf.org/2007/opf';

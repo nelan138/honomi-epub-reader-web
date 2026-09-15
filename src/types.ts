@@ -1,18 +1,23 @@
-import type { Book } from '@src/services/epub/epubParser.ts';
+export type Section = {
+   content: string;
+   idref: string;
+};
 
-export type Idref = string;
-export type ResolvedPath = string;
-export type RawXTHMLContent = string;
+/**
+ * * What parsed from parser
+ */
+export type Book = {
+   cover: Blob | null;
+   metadata: {
+      title: string;
+      creator: string;
+      publisher: string;
+      language: string;
+   };
+   sections: Section[];
 
-export const XLINK_NS = 'http://www.w3.org/1999/xlink';
-
-export type SpineItem = {
-   idref: Idref;
-   // Can treat this as resource path to use in assets map
-   resolvedHref: ResolvedPath;
-   mediaType: string;
-
-   linear: boolean; // false <=> (footnotes, appendices, etc.)
+   charCount: number;
+   images: Map<string, Blob>;
 };
 
 /**
@@ -26,7 +31,7 @@ export type BookRecord = Book & {
 };
 
 /**
- * Use for UI
+ * * Use for UI
  */
 export type BookCard = Pick<
    BookRecord,
@@ -49,13 +54,13 @@ export type ShelfRecord = {
    expanded: boolean;
 };
 
-export type ShelfOption = { id: number; name: string };
-
 export type DeferredPromise<T> = {
    promise: Promise<T>;
    resolve: (value: T | PromiseLike<T>) => void;
    reject: (reason?: unknown) => void;
 };
+
+//* -------------------- ERROR TYPES ---------------------- */
 
 export class EpubParsingError extends Error {
    constructor(message: string) {

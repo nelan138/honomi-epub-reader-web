@@ -4,8 +4,9 @@ import {
    unwrapAsync,
 } from '@src/utilities';
 import { getBookFromDB } from '@src/services/dexie/bookRepo';
-import { NotFoundError, UnexpectedRuntimeError } from '@src/types';
-import type { Section } from '@src/services/epub/epubParser.ts';
+import { NotFoundError, UnexpectedRuntimeError, type Section } from '@src/types';
+
+/* *** */
 
 export function useReader() {
    const openBook = async (bookId: number) => {

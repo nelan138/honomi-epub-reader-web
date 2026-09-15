@@ -7,6 +7,8 @@ import {
 } from '@src/types';
 import { unwrapAsync } from '@src/utilities';
 
+/* *** */
+
 const DB_NAME = 'Honomi';
 const DB_VERSION = 1;
 

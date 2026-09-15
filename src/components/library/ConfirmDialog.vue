@@ -9,6 +9,8 @@ import {
    DialogTitle,
 } from 'reka-ui';
 
+/* *** */
+
 const open = defineModel<boolean>('open', { required: true });
 
 const { title, message } = defineProps<{

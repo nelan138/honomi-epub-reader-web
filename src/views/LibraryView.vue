@@ -67,9 +67,9 @@ const handleDeletingBook = async (bookId: number) => {
 const { shelves, addShelf, deleteShelf, renameShelf, collapseShelf, expandShelf, moveShelfUp, moveShelfDown } =
    useShelves();
 
-const shelfOptions = computed<{ id: number; name: string }[]>(() =>
-   shelves.value.map(({ id, name }) => ({ id, name }))
-);
+type ShelfOption = { id: number; name: string };
+
+const shelfOptions = computed<ShelfOption[]>(() => shelves.value.map(({ id, name }) => ({ id, name })));
 
 const bookShelfMap = computed(() => {
    const map = new Map<number, BookCardType[]>();

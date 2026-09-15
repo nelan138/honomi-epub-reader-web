@@ -2,6 +2,8 @@
 import type { BookCard } from '@src/types';
 import { cleanUpBlobUrls } from '@src/utilities';
 
+/* *** */
+
 const props = defineProps<{
    book: BookCard;
 }>();

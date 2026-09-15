@@ -3,6 +3,8 @@ import LibraryView from '@src/views/LibraryView.vue';
 import NotFoundView from '@src/views/NotFoundView.vue';
 import ReaderView from '@src/views/ReaderView.vue';
 
+/* *** */
+
 export const router = createRouter({
    history: createWebHistory(),
    routes: [
