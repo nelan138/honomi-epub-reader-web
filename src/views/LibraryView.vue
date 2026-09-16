@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useShelves } from '@src/composables/library/useShelves';
 import { useTheme } from '@src/composables/library/useTheme';
 import { useBooks } from '@src/composables/library/useBooks';
 import { useReader } from '@src/composables/reader/useReader';
@@ -8,8 +7,13 @@ import { unwrapAsync } from '@src/utilities';
 import { useSelectDialog } from '@src/composables/library/useSelectDialog';
 import { useInputDialog } from '@src/composables/library/useInputDialog';
 import { useConfirmDialog } from '@src/composables/library/useConfirmDialog';
+import { useShelfStore } from '@src/composables/library/useShelfStore';
 
 /* *** */
+
+onMounted(() => {
+   shelfStore.load();
+});
 
 const { toggleTheme } = useTheme();
 
@@ -64,12 +68,10 @@ const handleDeletingBook = async (bookId: number) => {
 
 /* SHELF SECTION */
 
-const { shelves, addShelf, deleteShelf, renameShelf, collapseShelf, expandShelf, moveShelfUp, moveShelfDown } =
-   useShelves();
+const shelfStore = useShelfStore();
 
 type ShelfOption = { id: number; name: string };
-
-const shelfOptions = computed<ShelfOption[]>(() => shelves.value.map(({ id, name }) => ({ id, name })));
+const shelfOptions = computed<ShelfOption[]>(() => shelfStore.shelves.map(({ id, name }) => ({ id, name })));
 
 const bookShelfMap = computed(() => {
    const map = new Map<number, BookCardType[]>();
@@ -91,7 +93,7 @@ const handleAddingShelf = async () => {
       alert('Shelf name cannot be empty');
       return;
    }
-   if (shelfName) addShelf(shelfName);
+   if (shelfName) shelfStore.addShelf(shelfName);
 };
 
 const handleRenamingShelf = async (shelfId: number) => {
@@ -101,13 +103,13 @@ const handleRenamingShelf = async (shelfId: number) => {
       alert('Name cannot be empty');
       return;
    }
-   if (newName) renameShelf(shelfId, newName);
+   if (newName) shelfStore.renameShelf(shelfId, newName);
 };
 
 const handleDeletingShelf = async (shelfId: number) => {
    const [confirm, error] = await unwrapAsync(confirmDialogPrompt());
    if (error) throw new UnexpectedRuntimeError(error.message);
-   if (confirm) deleteShelf(shelfId);
+   if (confirm) shelfStore.deleteShelf(shelfId);
 };
 </script>
 
@@ -130,13 +132,13 @@ const handleDeletingShelf = async (shelfId: number) => {
    <LibraryHeader @toggle-theme="toggleTheme" @add-shelf="handleAddingShelf" @import-files="importBooks" />
 
    <ul>
-      <li v-for="shelf in shelves" :key="shelf.id">
+      <li v-for="shelf in shelfStore.shelves" :key="shelf.id">
          <Shelf
             @rename="handleRenamingShelf"
-            @move-up="moveShelfUp"
-            @move-down="moveShelfDown"
-            @expand="expandShelf"
-            @collapse="collapseShelf"
+            @move-up="shelfStore.moveShelfUp"
+            @move-down="shelfStore.moveShelfDown"
+            @expand="shelfStore.expandShelf"
+            @collapse="shelfStore.collapseShelf"
             @delete="handleDeletingShelf"
             :shelf="shelf"
          >

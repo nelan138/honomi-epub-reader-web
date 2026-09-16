@@ -15,6 +15,7 @@
       "@vueuse/core": "npm:@vueuse/core@^14.4.0",
       "dexie": "npm:dexie@^4.4.5",
       "fflate": "npm:fflate@^0.8.3",
+      "pinia": "npm:pinia@^4.0.3",
       "prettier": "npm:prettier@^3.9.6",
       "prettier-plugin-tailwindcss": "npm:prettier-plugin-tailwindcss@^0.8.1",
       "reka-ui": "npm:reka-ui@^2.10.4",

@@ -23,7 +23,7 @@ const progress = computed(() => {
    return ((charOffset.value * 100) / charCount.value).toFixed(2);
 });
 
-const getUserReadingProgress = () => {
+const getUserReadingProgress = (): number => {
    let headerHeight = 0;
    const header = document.querySelector('header');
    if (!header) headerHeight = 0;
@@ -32,23 +32,47 @@ const getUserReadingProgress = () => {
    const x = screen.width / 2;
    const y = headerHeight + 1;
 
-   const p = document.elementFromPoint(x, y)?.closest('p');
-   if (!p) {
-      return charOffset.value; // no paragraph found, return previous value
+   const start = document.elementFromPoint(x, y);
+   if (!start) {
+      console.warn('No element found at the specified point');
+      return 0;
    }
+
+   let p: HTMLParagraphElement | null = null;
+
+   const directMatch = start.closest('p');
+
+   if (directMatch) {
+      console.log('Direct match found:', directMatch);
+      p = directMatch;
+   } else {
+      console.log('No direct match found, using TreeWalker to find the closest paragraph element');
+      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_ELEMENT);
+      walker.currentNode = start;
+
+      while (walker.previousNode()) {
+         const node = walker.currentNode as Element;
+         if (node.tagName === 'P') {
+            console.log('Found paragraph element:', node);
+            p = node as HTMLParagraphElement;
+            break;
+         }
+      }
+   }
+
+   if (!p) return 0;
 
    const _charOffset = p.getAttribute('data-char-offset');
    if (!_charOffset) throw new UnexpectedRuntimeError('Missing data-char-offset attribute on paragraph element');
 
    const value = parseInt(_charOffset);
+   if (isNaN(value)) throw new UnexpectedRuntimeError('Invalid data-char-offset attribute value on paragraph element');
+
    return value;
 };
 
 // ! < > Execute every time user stops scrolling
 const onScrollEnd = () => {
-   if (isLoading.value) return;
-
-   console.log('Scroll ended, updating reading progress...');
    charOffset.value = getUserReadingProgress();
    updateBookReadingProgressInDB(bookId, charOffset.value); // runs in bg
 };

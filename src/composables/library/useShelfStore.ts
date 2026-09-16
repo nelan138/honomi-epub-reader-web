@@ -1,8 +1,6 @@
-import {
-   NotFoundError,
-   type ShelfRecord,
-   UnexpectedRuntimeError,
-} from '@src/types';
+import { defineStore } from 'pinia';
+import { NotFoundError, type ShelfRecord, UnexpectedRuntimeError } from '@src/types.ts';
+import { unwrapAsync } from '@src/utilities.ts';
 import {
    addShelfToDB,
    collapseShelfInDB,
@@ -11,29 +9,57 @@ import {
    getShelvesFromDB,
    renameShelfInDB,
    swapShelfDisplayOrdersInDB,
-} from '@src/services/dexie/shelfRepo';
-import { defaultShelf } from '@src/services/dexie/database';
-import { unwrapAsync } from '@src/utilities';
-import Dexie from 'dexie';
+} from '@src/services/dexie/shelfRepo.ts';
+import { Dexie } from 'dexie';
+import { defaultShelf } from '@src/services/dexie/database.ts';
 
 /* *** */
 
-export function useShelves() {
+export const useShelfStore = defineStore('shelf', () => {
    const shelves = ref<ShelfRecord[]>([]);
 
    const syncWithDB = async () => {
-      const [shelfRecords, error] = await unwrapAsync(getShelvesFromDB());
+      const [data, error] = await unwrapAsync(getShelvesFromDB());
       if (error) {
-         alert('Failed to sync with database: ' + error.message);
-         shelves.value = [];
-         return;
+         if (error instanceof Dexie.DexieError) {
+            console.error('Failed to sync with database: ' + (error as Error).message);
+            shelves.value = [];
+            return;
+         }
+         else { throw error; }
       }
-
-      shelves.value = shelfRecords;
-      shelves.value.sort((a, b) => a.displayOrder - b.displayOrder); // ! to display in order
+      shelves.value = data;
    };
 
-   onMounted(syncWithDB); // runs in the background
+   let isLoading = false;
+   let isLoaded = false;
+
+   async function load() {
+      if (isLoading || isLoaded) return;
+      isLoading = true;
+      await syncWithDB();
+      isLoading = false;
+      isLoaded = true;
+   }
+
+   async function addShelf(name: string) {
+      const [data, error] = await unwrapAsync(addShelfToDB({
+         name,
+         expanded: true,
+      }));
+
+      if (error) {
+         if (error instanceof Dexie.DexieError) {
+            await syncWithDB();
+            console.error('Failed to add shelf: ' + (error as Error).message);
+            return;
+         }
+         else { throw new UnexpectedRuntimeError(error.message); }
+      }
+
+      const { id, displayOrder } = data;
+      shelves.value.push({ id, displayOrder, name, expanded: true });
+   }
 
    const shiftDisplayOrdersUp = (startFrom: number) => {
       shelves.value.forEach((shelf) => {
@@ -41,34 +67,7 @@ export function useShelves() {
       });
    };
 
-   /* All operations follow Optimistic UI Update pattern:
-      * 1. Update the UI first
-      * 2. Then update the database
-      ! 3. If database update fails, rollback with syncWithDB() and alert the user
-   */
-
-   const addShelf = async (name: string) => {
-      const shelf: Omit<ShelfRecord, 'id' | 'displayOrder'> = {
-         name,
-         expanded: true,
-      };
-
-      const [result, error] = await unwrapAsync(addShelfToDB(shelf));
-      if (error) {
-         if (error instanceof Dexie.DexieError) {
-            await syncWithDB();
-            alert('Failed to add shelf: ' + (error as Error).message);
-            return;
-         }
-         else { throw new UnexpectedRuntimeError(error.message); }
-      }
-      const { id, displayOrder } = result;
-      const addedShelf: ShelfRecord = { id, displayOrder, ...shelf };
-
-      shelves.value.push(addedShelf);
-   };
-
-   const deleteShelf = async (shelfId: number) => {
+   async function deleteShelf(shelfId: number) {
       const targetShelf = shelves.value.find((shelf) => shelf.id === shelfId);
       if (!targetShelf) throw new NotFoundError('Shelf does not exist!'); // ! only happens if i made a mistake somewhere, otherwise should never happen
 
@@ -84,9 +83,9 @@ export function useShelves() {
          }
          else { throw new UnexpectedRuntimeError(error.message); }
       }
-   };
+   }
 
-   const renameShelf = async (shelfId: number, newName: string) => {
+   async function renameShelf(shelfId: number, newName: string) {
       const targetShelf = shelves.value.find((shelf) => shelf.id === shelfId);
       if (!targetShelf) throw new NotFoundError('Shelf does not exist!'); // ! only happens if i made a mistake somewhere, otherwise should never happen
 
@@ -101,9 +100,9 @@ export function useShelves() {
          }
          else { throw new UnexpectedRuntimeError(error.message); }
       }
-   };
+   }
 
-   const collapseShelf = async (shelfId: number) => {
+   async function collapseShelf(shelfId: number) {
       const targetShelf = shelves.value.find((shelf) => shelf.id === shelfId);
       if (!targetShelf) throw new NotFoundError('Shelf does not exist!'); // ! only happens if i made a mistake somewhere, otherwise should never happen
 
@@ -117,9 +116,9 @@ export function useShelves() {
          }
          else { throw new UnexpectedRuntimeError(error.message); }
       }
-   };
+   }
 
-   const expandShelf = async (shelfId: number) => {
+   async function expandShelf(shelfId: number) {
       const targetShelf = shelves.value.find((shelf) => shelf.id === shelfId);
       if (!targetShelf) throw new NotFoundError('Shelf does not exist!'); // ! only happens if i made a mistake somewhere, otherwise should never happen
 
@@ -133,12 +132,10 @@ export function useShelves() {
          }
          else { throw new UnexpectedRuntimeError(error.message); }
       }
-   };
+   }
 
-   async function moveShelf(shelfId: number, direction: 'up' | 'down') {
-      const indexOfTargetShelf = shelves.value.findIndex((shelf) =>
-         shelf.id === shelfId
-      );
+   const moveShelf = async (shelfId: number, direction: 'up' | 'down') => {
+      const indexOfTargetShelf = shelves.value.findIndex((shelf) => shelf.id === shelfId);
       const targetShelf = shelves.value[indexOfTargetShelf];
       if (!targetShelf) throw new NotFoundError('Shelf does not exist!'); // ! only happens if i made a mistake somewhere, otherwise should never happen
 
@@ -164,8 +161,7 @@ export function useShelves() {
       );
 
       const shelfToSwap = shelves.value[indexOfShelfToSwap];
-      if (!shelfToSwap)
-         throw new NotFoundError('Shelf to swap does not exist!'); // ! only happens if i made a mistake somewhere, otherwise should never happen
+      if (!shelfToSwap) throw new NotFoundError('Shelf to swap does not exist!'); // ! only happens if i made a mistake somewhere, otherwise should never happen
 
       [targetShelf.displayOrder, shelfToSwap.displayOrder] = [
          shelfToSwap.displayOrder,
@@ -186,15 +182,22 @@ export function useShelves() {
          }
          else { throw new UnexpectedRuntimeError(error.message); }
       }
-   }
-   const moveShelfUp = async (shelfId: number) =>
-      await moveShelf(shelfId, 'up');
+   };
 
-   const moveShelfDown = async (shelfId: number) =>
-      await moveShelf(shelfId, 'down');
+   async function moveShelfUp(shelfId: number) {
+      return await moveShelf(shelfId, 'up');
+   }
+
+   async function moveShelfDown(shelfId: number) {
+      return await moveShelf(shelfId, 'down');
+   }
 
    return {
       shelves,
+      isLoading,
+      isLoaded,
+      load,
+      syncWithDB,
       addShelf,
       deleteShelf,
       renameShelf,
@@ -203,4 +206,4 @@ export function useShelves() {
       moveShelfUp,
       moveShelfDown,
    };
-}
+});
