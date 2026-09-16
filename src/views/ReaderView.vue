@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useReader } from '@src/composables/reader/useReader';
-import type { Section } from '@src/types';
+import { updateBookReadingProgressInDB } from '@src/services/dexie/bookRepo';
+import { UnexpectedRuntimeError, type Section } from '@src/types';
 import { navigateToNotFoundPage, unwrapAsync } from '@src/utilities';
 
 /* *** */
@@ -9,34 +10,111 @@ const route = useRoute();
 const params = route.params.bookId as string | undefined;
 const bookId = params ? parseInt(params) : NaN;
 
-const { getChapters } = useReader();
+const { getBook } = useReader();
 
-const chapters = shallowRef<Section[]>([]);
+const sections = shallowRef<Section[]>([]);
+const isLoading = computed(() => sections.value.length === 0);
+
+const charCount = ref<number>(0);
+const charOffset = ref<number>(0);
+
+const progress = computed(() => {
+   if (charCount.value === 0) return 0;
+   return ((charOffset.value * 100) / charCount.value).toFixed(2);
+});
+
+const getUserReadingProgress = () => {
+   let headerHeight = 0;
+   const header = document.querySelector('header');
+   if (!header) headerHeight = 0;
+   else headerHeight = header.getBoundingClientRect().height;
+
+   const x = screen.width / 2;
+   const y = headerHeight + 1;
+
+   const p = document.elementFromPoint(x, y)?.closest('p');
+   if (!p) {
+      return charOffset.value; // no paragraph found, return previous value
+   }
+
+   const _charOffset = p.getAttribute('data-char-offset');
+   if (!_charOffset) throw new UnexpectedRuntimeError('Missing data-char-offset attribute on paragraph element');
+
+   const value = parseInt(_charOffset);
+   return value;
+};
+
+// ! < > Execute every time user stops scrolling
+const onScrollEnd = () => {
+   if (isLoading.value) return;
+
+   console.log('Scroll ended, updating reading progress...');
+   charOffset.value = getUserReadingProgress();
+   updateBookReadingProgressInDB(bookId, charOffset.value); // runs in bg
+};
 
 onMounted(async () => {
-   const [data, error] = await unwrapAsync(getChapters(bookId));
-   if (!data) {
+   const [book, error] = await unwrapAsync(getBook(bookId));
+   if (!book) {
       console.warn(error.message);
       navigateToNotFoundPage();
       return;
    }
-   chapters.value = data;
+   sections.value = book.sections;
+
+   await nextTick();
+   charCount.value = book.charCount;
+   charOffset.value = book.readCharCount;
+
+   const paragraphs = Array.from(document.querySelectorAll<HTMLElement>('p[data-char-offset]'));
+
+   let target: HTMLElement | undefined;
+   for (const p of paragraphs) {
+      const value = p.getAttribute('data-char-offset');
+      if (!value) throw new UnexpectedRuntimeError('Missing data-char-offset attribute on paragraph element');
+      if (parseInt(value) <= book.readCharCount) {
+         target = p;
+      } else break;
+   }
+
+   requestAnimationFrame(() => {
+      if (book.readCharCount === 0) window.scrollTo({ top: 0 });
+      else {
+         target?.scrollIntoView({
+            behavior: 'instant',
+            block: 'start',
+         });
+      }
+
+      document.addEventListener('scrollend', onScrollEnd, { passive: false });
+   });
+});
+
+onUnmounted(() => {
+   document.removeEventListener('scrollend', onScrollEnd);
 });
 </script>
 
 <template>
    <ReaderHeader />
-   <div v-if="chapters.length === 0" class="my-auto w-full p-8 text-center">Loading...</div>
-   <div v-else class="scrollbar-thin p-4 font-sans">
+   <div
+      v-if="isLoading"
+      class="text-ink/60 flex min-h-[60vh] w-full flex-col items-center justify-center gap-3 p-8 font-sans"
+   >
+      <i class="fa-solid fa-circle-notch text-highlight animate-spin text-2xl"></i>
+      <span class="text-xs font-medium tracking-widest uppercase">Loading...</span>
+   </div>
+
+   <div v-else class="p-4 font-sans">
       <ul>
-         <li v-for="chapter in chapters" :key="chapter.idref">
-            <BookChapter :content="chapter.content" />
+         <li v-for="section in sections" :key="section.idref">
+            <BookChapter :content="section.content" />
          </li>
       </ul>
 
       <footer class="sticky bottom-0 z-50 py-2 text-right text-xs">
-         <span> 67/76 - </span>
-         <span> 67% </span>
+         <span> {{ charOffset }}/{{ charCount }} - </span>
+         <span> {{ progress }}% </span>
       </footer>
    </div>
 </template>

@@ -1,15 +1,34 @@
 <script setup lang="ts">
 import { useTheme } from '@src/composables/library/useTheme';
 import { navigateToHomePage } from '@src/utilities';
+import { useScroll } from '@vueuse/core';
 
 /* *** */
+
+const { y, directions } = useScroll(window);
+const isHeaderVisible = ref(true);
+
+watch([() => directions.top, () => directions.bottom, y], () => {
+   if (y.value <= 10) {
+      isHeaderVisible.value = true;
+   } else if (directions.top) {
+      // Scrolling up: reveal and latch open
+      isHeaderVisible.value = true;
+   } else if (directions.bottom) {
+      // Scrolling down: hide
+      isHeaderVisible.value = false;
+   }
+});
 
 const { toggleTheme } = useTheme();
 </script>
 
 <template>
    <header
-      class="hover:border-b-highlight bg-surface border-b-stroke/50 sticky top-0 z-100 mx-auto flex w-full items-center justify-between border-b-2 px-4 py-2 md:px-16 xl:px-32 2xl:px-64"
+      :class="[
+         isHeaderVisible ? 'translate-y-0' : '-translate-y-full',
+         'hover:border-b-highlight bg-surface border-b-stroke/50 fixed top-0 z-50 mx-auto flex w-full items-center justify-between border-b-2 px-4 py-2 transition-transform duration-300 md:px-16 xl:px-32 2xl:px-64',
+      ]"
    >
       <ul class="text-ink/70 flex gap-6">
          <li>

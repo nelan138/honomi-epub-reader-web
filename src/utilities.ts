@@ -23,9 +23,7 @@ export async function unwrapAsync<T>(
       return [data, null];
    }
    catch (error) {
-      const safeError = error instanceof Error
-         ? error
-         : new Error(String(error));
+      const safeError = error instanceof Error ? error : new Error(String(error));
       return [null, safeError];
    }
 }
@@ -37,9 +35,7 @@ export function unwrapSync<T>(
       return [fn(), null];
    }
    catch (error) {
-      const safeError = error instanceof Error
-         ? error
-         : new Error(String(error));
+      const safeError = error instanceof Error ? error : new Error(String(error));
       return [null, safeError];
    }
 }
@@ -67,3 +63,6 @@ export function createDeferredPromise<T>(): DeferredPromise<T> {
 }
 
 export const DANGEROUS_CHAR_REGEX = /[<>"'`;/\\|&$]/;
+
+export const domParser = new DOMParser();
+export const xmlSerializer = new XMLSerializer();

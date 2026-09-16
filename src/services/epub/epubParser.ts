@@ -1,7 +1,21 @@
 import { makeBook } from '@src/vendor/epub-parser-js/index.ts';
 import { type Book, EpubParsingError, type Section } from '@src/types.ts';
 import { strFromU8 } from 'fflate';
-import { UNICODE_GLYPH_REGEX } from '@src/utilities.ts';
+import { domParser, UNICODE_GLYPH_REGEX, xmlSerializer } from '@src/utilities.ts';
+
+let defaultCoverBlob: Blob | null = null;
+async function getDefaultCoverBlob(): Promise<Blob> {
+   if (defaultCoverBlob) return Promise.resolve(defaultCoverBlob);
+
+   const defaultCoverUrl = new URL('@src/assets/default-book-cover.jpeg', import.meta.url).href;
+   defaultCoverBlob = await fetch(defaultCoverUrl).then((res) => res.blob());
+   if (!defaultCoverBlob) {
+      console.warn('[Epub] Failed to fetch default cover image, using empty Blob instead.');
+      defaultCoverBlob = new Blob();
+   }
+
+   return defaultCoverBlob;
+}
 
 export class EpubParser {
    constructor(private file: File) {}
@@ -11,9 +25,6 @@ export class EpubParser {
    }
 
    async parse(): Promise<Book> {
-      const domParser = new DOMParser();
-      const xmlSerializer = new XMLSerializer();
-
       const book = await makeBook(this.file);
 
       const archive = book.archive;
@@ -100,8 +111,9 @@ export class EpubParser {
          return body;
       };
 
+      let runningCharCount = 0;
       const processBookSections = (): Section[] => {
-         const sections: Section[] = [];
+         const _sections: Section[] = [];
          for (const spineItem of spine) {
             if (!spineItem.linear) { // Skip non-linear cuz im lazy >.<
                console.warn(`Skipping non-linear section: ${spineItem.id}`);
@@ -149,34 +161,29 @@ export class EpubParser {
             }
 
             const processedBody = processImageTags(body, manifestItem.href);
+
+            const pTags = processedBody.getElementsByTagName('p');
+            for (const p of pTags) {
+               runningCharCount += getElementCharacterCount(p.innerHTML);
+               p.setAttribute('data-char-offset', runningCharCount.toString());
+            }
+
             const content = xmlSerializer.serializeToString(processedBody);
 
-            sections.push({
+            _sections.push({
                content,
                idref: spineItem.id,
             });
          }
-         return sections;
+         return _sections;
       };
 
       const sections = processBookSections();
 
-      const charCount = sections.reduce((acc, section) => {
-         // 'text/html' cuz don't wanna think too much
-         const doc = domParser.parseFromString(
-            section.content,
-            'text/html',
-         );
-
-         // Drop noise tags
-         for (const element of doc.querySelectorAll('rt, rp, style, script')) element.remove();
-
-         const rawText = doc.body?.textContent ?? '';
-         return acc + (rawText.match(UNICODE_GLYPH_REGEX)?.length ?? 0);
-      }, 0);
+      const cover = book.cover ?? await getDefaultCoverBlob();
 
       return {
-         cover: book.cover ?? null,
+         cover,
          metadata: {
             title: book.metadata.title,
             creator: book.metadata.creator ?? 'Unknown',
@@ -184,10 +191,24 @@ export class EpubParser {
             language: book.metadata.language,
          },
          sections,
-         charCount,
+         charCount: runningCharCount,
          images,
       };
    }
+}
+
+export function getElementCharacterCount(htmlString: string): number {
+   // 'text/html' cuz don't wanna think too much
+   const doc = domParser.parseFromString(
+      htmlString,
+      'text/html',
+   );
+
+   // Drop noise tags
+   for (const element of doc.querySelectorAll('rt, rp, style, script')) element.remove();
+
+   const rawText = doc.body?.textContent ?? '';
+   return rawText.match(UNICODE_GLYPH_REGEX)?.length ?? 0;
 }
 
 // i don't wanna deal with img so i excluded it

@@ -15,8 +15,7 @@ const emit = defineEmits<{
    open: [bookId: number];
 }>();
 
-const defaultCover = '../assets/default-book-cover.jpeg';
-const coverUrl = props.book.cover ? URL.createObjectURL(props.book.cover) : new URL(defaultCover, import.meta.url).href;
+const coverUrl = URL.createObjectURL(props.book.cover);
 
 onUnmounted(() => cleanUpBlobUrls([coverUrl]));
 </script>

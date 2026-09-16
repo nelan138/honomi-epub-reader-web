@@ -1,6 +1,6 @@
 import { db, defaultShelf } from '@src/services/dexie/database';
 import { type BookRecord, NotFoundError } from '@src/types';
-import type { Book } from '@src/services/epub/epubParser.ts';
+import type { Book } from '@src/types';
 
 /* *** */
 
@@ -72,7 +72,7 @@ export async function changeBookShelfInDB(
    });
 }
 
-export async function updateBookProgressInDB(
+export async function updateBookReadingProgressInDB(
    bookId: number,
    readCharCount: number,
 ): Promise<void> {

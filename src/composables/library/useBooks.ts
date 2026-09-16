@@ -1,9 +1,4 @@
-import {
-   type BookCard,
-   EpubParsingError,
-   NotFoundError,
-   UnexpectedRuntimeError,
-} from '@src/types';
+import { type BookCard, EpubParsingError, NotFoundError, UnexpectedRuntimeError } from '@src/types';
 import {
    addBookToDB,
    changeBookShelfInDB,

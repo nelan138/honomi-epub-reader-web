@@ -82,24 +82,4 @@ const onSelect = () => {
    </DialogRoot>
 </template>
 
-<style scoped>
-.themed-scroll {
-   /* Firefox */
-   scrollbar-width: thin;
-   scrollbar-color: var(--color-muted) transparent;
-}
-
-/* Chrome, Edge, Safari */
-.themed-scroll::-webkit-scrollbar {
-   width: 6px;
-}
-
-.themed-scroll::-webkit-scrollbar-track {
-   background: transparent;
-}
-
-.themed-scroll::-webkit-scrollbar-thumb {
-   background-color: var(--color-muted); /* Updated to match Firefox */
-   border-radius: 9999px;
-}
-</style>
+<style scoped></style>

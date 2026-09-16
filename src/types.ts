@@ -7,7 +7,7 @@ export type Section = {
  * * What parsed from parser
  */
 export type Book = {
-   cover: Blob | null;
+   cover: Blob;
    metadata: {
       title: string;
       creator: string;
