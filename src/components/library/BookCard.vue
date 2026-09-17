@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { BookCard } from '@src/types';
-import { cleanUpBlobUrls } from '@src/utilities';
+import type { BookCard } from '@src/stores/useBookStore';
+import { cleanUpBlobUrls } from '@src/utils';
 
 /* *** */
 

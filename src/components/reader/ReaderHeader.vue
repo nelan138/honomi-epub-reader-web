@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { useTheme } from '@src/composables/library/useTheme';
-import { navigateToHomePage } from '@src/utilities';
 import { useScroll } from '@vueuse/core';
 
 /* *** */
+
+const emit = defineEmits<{
+   toggleTheme: [];
+   return: [];
+}>();
 
 const { y, directions } = useScroll(window);
 const isHeaderVisible = ref(true);
@@ -19,8 +22,6 @@ watch([() => directions.top, () => directions.bottom, y], () => {
       isHeaderVisible.value = false;
    }
 });
-
-const { toggleTheme } = useTheme();
 </script>
 
 <template>
@@ -32,14 +33,14 @@ const { toggleTheme } = useTheme();
    >
       <ul class="text-ink/70 flex gap-6">
          <li>
-            <button @click="navigateToHomePage" type="button" class="hover:text-highlight hover:cursor-pointer">
+            <button @click="emit('return')" type="button" class="hover:text-highlight hover:cursor-pointer">
                <i class="fa-solid fa-left-long"></i>
             </button>
          </li>
       </ul>
       <ul class="text-ink/70 flex gap-6">
          <li>
-            <button @click="toggleTheme" type="button" class="hover:text-highlight hover:cursor-pointer">
+            <button @click="emit('toggleTheme')" type="button" class="hover:text-highlight hover:cursor-pointer">
                <i class="fa-solid fa-circle-half-stroke scale-[110%]"></i>
             </button>
          </li>

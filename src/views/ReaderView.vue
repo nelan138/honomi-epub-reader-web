@@ -1,12 +1,15 @@
 <script setup lang="ts">
+import { useThemeStore } from '@src/stores/useThemeStore';
 import { useReader } from '@src/composables/reader/useReader';
-import { updateBookReadingProgressInDB } from '@src/services/dexie/bookRepo';
-import { UnexpectedRuntimeError, type Section } from '@src/types';
-import { navigateToNotFoundPage, unwrapAsync } from '@src/utilities';
+import { UnexpectedRuntimeError, unwrapAsync } from '@src/utils';
+
+import type { Section } from '@src/services/epub/epubParser';
+import { updateBookProgressInDB } from '@src/services/dexie/bookRepo';
 
 /* *** */
 
 const route = useRoute();
+const router = useRouter();
 const params = route.params.bookId as string | undefined;
 const bookId = params ? parseInt(params) : NaN;
 
@@ -43,17 +46,14 @@ const getUserReadingProgress = (): number => {
    const directMatch = start.closest('p');
 
    if (directMatch) {
-      console.log('Direct match found:', directMatch);
       p = directMatch;
    } else {
-      console.log('No direct match found, using TreeWalker to find the closest paragraph element');
       const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_ELEMENT);
       walker.currentNode = start;
 
       while (walker.previousNode()) {
          const node = walker.currentNode as Element;
          if (node.tagName === 'P') {
-            console.log('Found paragraph element:', node);
             p = node as HTMLParagraphElement;
             break;
          }
@@ -74,14 +74,14 @@ const getUserReadingProgress = (): number => {
 // ! < > Execute every time user stops scrolling
 const onScrollEnd = () => {
    charOffset.value = getUserReadingProgress();
-   updateBookReadingProgressInDB(bookId, charOffset.value); // runs in bg
+   updateBookProgressInDB(bookId, charOffset.value); // runs in bg
 };
 
 onMounted(async () => {
    const [book, error] = await unwrapAsync(getBook(bookId));
    if (!book) {
       console.warn(error.message);
-      navigateToNotFoundPage();
+      router.push('/404');
       return;
    }
    sections.value = book.sections;
@@ -117,10 +117,15 @@ onMounted(async () => {
 onUnmounted(() => {
    document.removeEventListener('scrollend', onScrollEnd);
 });
+
+const themeStore = useThemeStore();
+onMounted(() => {
+   themeStore.load();
+});
 </script>
 
 <template>
-   <ReaderHeader />
+   <ReaderHeader @return="router.push('/')" @toggle-theme="themeStore.toggleTheme" />
    <div
       v-if="isLoading"
       class="text-ink/60 flex min-h-[60vh] w-full flex-col items-center justify-center gap-3 p-8 font-sans"

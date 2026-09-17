@@ -1,21 +1,25 @@
 <script setup lang="ts">
-import { useTheme } from '@src/composables/library/useTheme';
-import { useBooks } from '@src/composables/library/useBooks';
 import { useReader } from '@src/composables/reader/useReader';
-import { type BookCard as BookCardType, UnexpectedRuntimeError } from '@src/types';
-import { unwrapAsync } from '@src/utilities';
+import { UnexpectedRuntimeError, unwrapAsync } from '@src/utils';
 import { useSelectDialog } from '@src/composables/library/useSelectDialog';
 import { useInputDialog } from '@src/composables/library/useInputDialog';
 import { useConfirmDialog } from '@src/composables/library/useConfirmDialog';
-import { useShelfStore } from '@src/composables/library/useShelfStore';
+import { useShelfStore } from '@src/stores/useShelfStore';
+import { useBookStore, type BookCard } from '@src/stores/useBookStore';
+import { useThemeStore } from '@src/stores/useThemeStore';
 
 /* *** */
 
-onMounted(() => {
-   shelfStore.load();
-});
+// STORES
+const themeStore = useThemeStore();
+const bookStore = useBookStore();
+const shelfStore = useShelfStore();
 
-const { toggleTheme } = useTheme();
+onMounted(() => {
+   themeStore.load();
+   shelfStore.load();
+   bookStore.load();
+});
 
 const {
    isOpen: selectionDialogIsOpen,
@@ -42,12 +46,10 @@ const {
 
 const { openBook } = useReader();
 
-const { books, renameBook, changeBookShelf, deleteBook, importBooks } = useBooks();
-
 const handleChangingBookShelf = async (bookId: number) => {
    const [selectShelfId, error] = await unwrapAsync(selectDialogPrompt());
    if (error) throw new UnexpectedRuntimeError(error.message);
-   if (selectShelfId) changeBookShelf(bookId, selectShelfId);
+   if (selectShelfId) bookStore.changeBookShelf(bookId, selectShelfId);
 };
 
 const handleRenamingBook = async (bookId: number) => {
@@ -57,26 +59,24 @@ const handleRenamingBook = async (bookId: number) => {
       alert('Name cannot be empty');
       return;
    }
-   if (newName) renameBook(bookId, newName);
+   if (newName) bookStore.renameBook(bookId, newName);
 };
 
 const handleDeletingBook = async (bookId: number) => {
    const [confirm, error] = await unwrapAsync(confirmDialogPrompt());
    if (error) throw new UnexpectedRuntimeError(error.message);
-   if (confirm) deleteBook(bookId);
+   if (confirm) bookStore.deleteBook(bookId);
 };
 
 /* SHELF SECTION */
-
-const shelfStore = useShelfStore();
 
 type ShelfOption = { id: number; name: string };
 const shelfOptions = computed<ShelfOption[]>(() => shelfStore.shelves.map(({ id, name }) => ({ id, name })));
 
 const bookShelfMap = computed(() => {
-   const map = new Map<number, BookCardType[]>();
+   const map = new Map<number, BookCard[]>();
 
-   for (const book of books.value) {
+   for (const book of bookStore.books) {
       const list = map.get(book.shelfId);
 
       if (list) list.push(book);
@@ -129,7 +129,11 @@ const handleDeletingShelf = async (shelfId: number) => {
 
    <InputDialog @submit="resolveInputDialogSubmit" @cancel="resolveInputDialogCancel" v-model:open="textDialogIsOpen" />
 
-   <LibraryHeader @toggle-theme="toggleTheme" @add-shelf="handleAddingShelf" @import-files="importBooks" />
+   <LibraryHeader
+      @toggle-theme="themeStore.toggleTheme"
+      @add-shelf="handleAddingShelf"
+      @import-files="bookStore.importBooks"
+   />
 
    <ul>
       <li v-for="shelf in shelfStore.shelves" :key="shelf.id">

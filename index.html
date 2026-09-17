@@ -4,6 +4,28 @@
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <title>Honomi — Bookshelf</title>
+
+      <style>
+         .themed-scroll {
+            /* Firefox */
+            scrollbar-width: thin;
+            scrollbar-color: var(--color-muted) transparent;
+         }
+
+         /* Chrome, Edge, Safari */
+         .themed-scroll::-webkit-scrollbar {
+            width: 6px;
+         }
+
+         .themed-scroll::-webkit-scrollbar-track {
+            background: transparent;
+         }
+
+         .themed-scroll::-webkit-scrollbar-thumb {
+            background-color: var(--color-muted); /* Updated to match Firefox */
+            border-radius: 9999px;
+         }
+      </style>
    </head>
 
    <body

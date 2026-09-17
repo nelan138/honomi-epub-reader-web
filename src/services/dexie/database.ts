@@ -1,30 +1,37 @@
 import { Dexie, type EntityTable } from 'dexie';
-import {
-   type BookRecord,
-   NotFoundError,
-   type ShelfRecord,
-   UnexpectedRuntimeError,
-} from '@src/types';
-import { unwrapAsync } from '@src/utilities';
+import { NotFoundError, UnexpectedRuntimeError, unwrapAsync } from '@src/utils';
+import type { Book } from '@src/services/epub/epubParser.ts';
 
 /* *** */
 
-const DB_NAME = 'Honomi';
-const DB_VERSION = 1;
+export type BookRecord = Book & {
+   id: number;
+   shelfId: number;
+   readCharCount: number; // chars user has read of this book */
+};
 
-export const db = new Dexie(DB_NAME) as Dexie & {
+export type Shelf = {
+   name: string;
+   expanded: boolean;
+};
+
+export type ShelfRecord = Shelf & {
+   id: number;
+   displayOrder: number; // The lower the number, the higher the shelf is displayed in the UI
+};
+
+export const db = new Dexie('Honomi') as Dexie & {
    books: EntityTable<BookRecord, 'id'>;
    shelves: EntityTable<ShelfRecord, 'id'>;
 };
 
-db.version(DB_VERSION).stores({
+db.version(1).stores({
    books: '++id, shelfId',
    shelves: '++id, &name, &displayOrder',
 });
 
-export const DEFAULT_SHELF_ID = 1;
 export const defaultShelf: Readonly<ShelfRecord> = {
-   id: DEFAULT_SHELF_ID,
+   id: 1,
    displayOrder: 1,
    name: 'Your Books',
    expanded: true,
@@ -38,7 +45,7 @@ db.on('populate', () => {
 
 // every time the database opens
 db.on('ready', async () => {
-   const [shelf, error] = await unwrapAsync(db.shelves.get(DEFAULT_SHELF_ID));
+   const [shelf, error] = await unwrapAsync(db.shelves.get(defaultShelf.id));
 
    if (error) {
       throw new UnexpectedRuntimeError(
@@ -48,7 +55,7 @@ db.on('ready', async () => {
 
    if (!shelf) {
       throw new NotFoundError(
-         `Default shelf (ID: ${DEFAULT_SHELF_ID}) not found in DB`,
+         `Default shelf (ID: ${defaultShelf.id}) not found in DB`,
       );
    }
 });

@@ -9,7 +9,7 @@ export const router = createRouter({
    history: createWebHistory(),
    routes: [
       { path: '/', component: LibraryView },
-      { path: '/read/:bookId', component: ReaderView },
+      { path: '/reader/:bookId', component: ReaderView },
       { path: '/:pathMatch(.*)*', component: NotFoundView },
    ],
 });

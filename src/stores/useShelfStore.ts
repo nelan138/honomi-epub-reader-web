@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia';
-import { NotFoundError, type ShelfRecord, UnexpectedRuntimeError } from '@src/types.ts';
-import { unwrapAsync } from '@src/utilities.ts';
+import { NotFoundError, UnexpectedRuntimeError, unwrapAsync } from '@src/utils';
 import {
    addShelfToDB,
    collapseShelfInDB,
@@ -11,7 +10,7 @@ import {
    swapShelfDisplayOrdersInDB,
 } from '@src/services/dexie/shelfRepo.ts';
 import { Dexie } from 'dexie';
-import { defaultShelf } from '@src/services/dexie/database.ts';
+import { defaultShelf, type ShelfRecord } from '@src/services/dexie/database.ts';
 
 /* *** */
 
@@ -142,9 +141,7 @@ export const useShelfStore = defineStore('shelf', () => {
       const minDisplayOrder = defaultShelf.displayOrder + 1;
       const maxDisplayOrder = defaultShelf.displayOrder + shelves.value.length;
 
-      const newDisplayOrder = direction === 'up'
-         ? targetShelf.displayOrder - 1
-         : targetShelf.displayOrder + 1;
+      const newDisplayOrder = direction === 'up' ? targetShelf.displayOrder - 1 : targetShelf.displayOrder + 1;
 
       if (
          newDisplayOrder < minDisplayOrder
@@ -194,8 +191,6 @@ export const useShelfStore = defineStore('shelf', () => {
 
    return {
       shelves,
-      isLoading,
-      isLoaded,
       load,
       syncWithDB,
       addShelf,

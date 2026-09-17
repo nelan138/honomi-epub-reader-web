@@ -1,9 +1,37 @@
-import { makeBook } from '@src/vendor/epub-parser-js/index.ts';
-import { type Book, EpubParsingError, type Section } from '@src/types.ts';
+import { makeBook } from '@src/vendor/epub-parser-js/main.ts';
 import { strFromU8 } from 'fflate';
-import { domParser, UNICODE_GLYPH_REGEX, xmlSerializer } from '@src/utilities.ts';
+import { domParser, EpubParsingError, UNICODE_GLYPH_REGEX, xmlSerializer } from '@src/utils';
+
+/* *** */
+
+const SVG_NS = 'http://www.w3.org/2000/svg';
+const XLINK_NS = 'http://www.w3.org/1999/xlink';
+const XHTML_NS = 'http://www.w3.org/1999/xhtml';
+
+export type Section = {
+   content: string;
+   idref: string;
+};
+
+/**
+ * * What parsed from parser
+ */
+export type Book = {
+   cover: Blob;
+   metadata: {
+      title: string;
+      creator: string;
+      publisher: string;
+      language: string;
+   };
+   sections: Section[];
+
+   charCount: number;
+   images: Record<string, Blob>;
+};
 
 let defaultCoverBlob: Blob | null = null;
+
 async function getDefaultCoverBlob(): Promise<Blob> {
    if (defaultCoverBlob) return Promise.resolve(defaultCoverBlob);
 
@@ -67,11 +95,11 @@ export class EpubParser {
          }
 
          // * <svg:image> tags
-         const svgImages = body.getElementsByTagNameNS('http://www.w3.org/2000/svg', 'image');
+         const svgImages = body.getElementsByTagNameNS(SVG_NS, 'image');
 
          for (const svgImg of svgImages) {
             const src = svgImg.getAttribute('href')
-               ?? svgImg.getAttributeNS('http://www.w3.org/1999/xlink', 'href')
+               ?? svgImg.getAttributeNS(XLINK_NS, 'href')
                ?? svgImg.getAttribute('xlink:href');
 
             if (!src) {
@@ -149,10 +177,7 @@ export class EpubParser {
 
             const body = doc.body
                ?? doc.getElementsByTagName('body')[0]
-               ?? doc.getElementsByTagNameNS(
-                  'http://www.w3.org/1999/xhtml',
-                  'body',
-               )[0];
+               ?? doc.getElementsByTagNameNS(XHTML_NS, 'body')[0];
 
             if (!body) {
                throw new EpubParsingError(
@@ -178,19 +203,15 @@ export class EpubParser {
          return _sections;
       };
 
-      const sections = processBookSections();
-
-      const cover = book.cover ?? await getDefaultCoverBlob();
-
       return {
-         cover,
+         cover: book.cover ?? await getDefaultCoverBlob(),
          metadata: {
             title: book.metadata.title,
             creator: book.metadata.creator ?? 'Unknown',
             publisher: book.metadata.publisher ?? 'Unknown',
             language: book.metadata.language,
          },
-         sections,
+         sections: processBookSections(),
          charCount: runningCharCount,
          images,
       };

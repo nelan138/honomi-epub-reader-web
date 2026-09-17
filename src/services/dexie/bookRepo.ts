@@ -1,12 +1,11 @@
-import { db, defaultShelf } from '@src/services/dexie/database';
-import { type BookRecord, NotFoundError } from '@src/types';
-import type { Book } from '@src/types';
+import { type BookRecord, db, defaultShelf } from '@src/services/dexie/database';
+
+import { NotFoundError } from '@src/utils';
+import type { Book } from '@src/services/epub/epubParser.ts';
 
 /* *** */
 
-export async function addBookToDB(
-   book: Book,
-): Promise<{ bookId: number; shelfId: number }> {
+export async function addBookToDB(book: Book): Promise<{ bookId: number; shelfId: number }> {
    const store = db.books;
 
    const bookId = await store.add({
@@ -36,27 +35,19 @@ export async function deleteBookFromDB(bookId: number): Promise<void> {
    const store = db.books;
    const deletedCount = await store.where('id').equals(bookId).delete();
 
-   if (deletedCount === 0)
-      throw new NotFoundError(`Book with ID ${bookId} not found`);
+   if (deletedCount === 0) throw new NotFoundError(`Book with ID ${bookId} not found`);
 }
 
-export async function renameBookInDB(
-   bookId: number,
-   newTitle: string,
-): Promise<void> {
+export async function renameBookInDB(bookId: number, newTitle: string): Promise<void> {
    const store = db.books;
    const updatedCount = await store.update(bookId, {
       'metadata.title': newTitle,
    });
 
-   if (updatedCount === 0)
-      throw new NotFoundError(`Book with ID ${bookId} not found`);
+   if (updatedCount === 0) throw new NotFoundError(`Book with ID ${bookId} not found`);
 }
 
-export async function changeBookShelfInDB(
-   bookId: number,
-   shelfId: number,
-): Promise<void> {
+export async function changeBookShelfInDB(bookId: number, shelfId: number): Promise<void> {
    const bookStore = db.books;
    const shelfStore = db.shelves;
 
@@ -72,10 +63,7 @@ export async function changeBookShelfInDB(
    });
 }
 
-export async function updateBookReadingProgressInDB(
-   bookId: number,
-   readCharCount: number,
-): Promise<void> {
+export async function updateBookProgressInDB(bookId: number, readCharCount: number): Promise<void> {
    const store = db.books;
    const updatedCount = await store.update(bookId, {
       readCharCount: readCharCount,

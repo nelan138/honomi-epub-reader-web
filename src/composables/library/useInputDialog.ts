@@ -1,5 +1,4 @@
-import { createDeferredPromise } from '@src/utilities';
-import { type DeferredPromise, UnexpectedRuntimeError } from '@src/types';
+import { createDeferredPromise, type DeferredPromise, UnexpectedRuntimeError } from '@src/utils';
 
 /* *** */
 

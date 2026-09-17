@@ -1,4 +1,5 @@
-import { type BookCard, EpubParsingError, NotFoundError, UnexpectedRuntimeError } from '@src/types';
+import { EpubParsingError, NotFoundError, UnexpectedRuntimeError, unwrapAsync } from '@src/utils';
+
 import {
    addBookToDB,
    changeBookShelfInDB,
@@ -6,19 +7,25 @@ import {
    getBooksFromDB,
    renameBookInDB,
 } from '@src/services/dexie/bookRepo';
-import { unwrapAsync } from '@src/utilities';
 import Dexie from 'dexie';
 import { EpubParser } from '@src/services/epub/epubParser';
+import { defineStore } from 'pinia';
+import type { BookRecord } from '@src/services/dexie/database.ts';
 
 /* *** */
 
-export function useBooks() {
+export type BookCard = Pick<
+   BookRecord,
+   'id' | 'shelfId' | 'readCharCount' | 'metadata' | 'cover' | 'charCount'
+>;
+
+export const useBookStore = defineStore('book', () => {
    const books = ref<BookCard[]>([]);
 
    const syncWithDB = async () => {
       const [bookRecords, error] = await unwrapAsync(getBooksFromDB());
       if (error) {
-         alert('Failed to sync with database: ' + error.message);
+         console.error('Failed to sync with database: ' + error.message);
          books.value = [];
          return;
       }
@@ -35,7 +42,16 @@ export function useBooks() {
       });
    };
 
-   onMounted(syncWithDB); // runs in the background
+   let isLoading = false;
+   let isLoaded = false;
+
+   async function load() {
+      if (isLoading || isLoaded) return;
+      isLoading = true;
+      await syncWithDB();
+      isLoading = false;
+      isLoaded = true;
+   }
 
    /* All operations follow Optimistic UI Update pattern:
       * 1. Update the UI first
@@ -43,7 +59,7 @@ export function useBooks() {
       ! 3. If database update fails, rollback with syncWithDB() and alert the user
    */
 
-   const deleteBook = async (id: number) => {
+   async function deleteBook(id: number) {
       books.value = books.value.filter((book) => book.id !== id);
 
       const [_, error] = await unwrapAsync(deleteBookFromDB(id));
@@ -56,9 +72,9 @@ export function useBooks() {
          }
          else { throw new UnexpectedRuntimeError(error.message); }
       }
-   };
+   }
 
-   const renameBook = async (id: number, name: string) => {
+   async function renameBook(id: number, name: string) {
       const targetBook = books.value.find((book) => book.id === id);
       if (!targetBook) {
          alert('Book does not exist!');
@@ -76,9 +92,9 @@ export function useBooks() {
          }
          else { throw new UnexpectedRuntimeError(error.message); }
       }
-   };
+   }
 
-   const changeBookShelf = async (bookId: number, shelfId: number) => {
+   async function changeBookShelf(bookId: number, shelfId: number) {
       const targetBook = books.value.find((book) => book.id === bookId);
       if (!targetBook) throw new NotFoundError('Book does not exist!');
 
@@ -96,9 +112,9 @@ export function useBooks() {
          }
          else { throw new UnexpectedRuntimeError(error.message); }
       }
-   };
+   }
 
-   const importBooks = async (files: FileList) => {
+   async function importBooks(files: FileList) {
       let failedBookCount = 0;
       const totalBookCount = files.length;
 
@@ -143,13 +159,14 @@ export function useBooks() {
             `Failed to import ${failedBookCount} out of ${totalBookCount} books. Check console for details.`,
          );
       }
-   };
+   }
 
    return {
       books,
+      load,
       renameBook,
       changeBookShelf,
       deleteBook,
       importBooks,
    };
-}
+});

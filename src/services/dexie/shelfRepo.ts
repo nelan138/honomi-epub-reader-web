@@ -1,12 +1,10 @@
-import { db } from '@src/services/dexie/database';
-import type { ShelfRecord } from '@src/types';
+import { db, type Shelf, type ShelfRecord } from '@src/services/dexie/database';
 
 /* *** */
 
-export async function addShelfToDB(
-   shelf: Pick<ShelfRecord, 'name' | 'expanded'>,
-): Promise<{ id: number; displayOrder: number }> {
+export async function addShelfToDB(shelf: Shelf): Promise<{ id: number; displayOrder: number }> {
    const store = db.shelves;
+
    const last = await db.shelves.orderBy('displayOrder').last();
    const maxDisplayOrder = last?.displayOrder ?? 0;
 
@@ -20,13 +18,12 @@ export async function addShelfToDB(
 
 export async function getShelvesFromDB(): Promise<ShelfRecord[]> {
    const store = db.shelves;
-   return await store.toArray();
+   const records = await store.toArray();
+
+   return records;
 }
 
-export async function swapShelfDisplayOrdersInDB(
-   shelfId1: number,
-   shelfId2: number,
-): Promise<void> {
+export async function swapShelfDisplayOrdersInDB(shelfId1: number, shelfId2: number): Promise<void> {
    const store = db.shelves;
    await db.transaction('rw', store, async () => {
       const shelf1 = await store.get(shelfId1);
@@ -50,12 +47,14 @@ export async function swapShelfDisplayOrdersInDB(
 export async function deleteShelfFromDB(shelfId: number): Promise<void> {
    const shelfStore = db.shelves;
    const bookStore = db.books;
+
    await db.transaction('readwrite', bookStore, shelfStore, async () => {
       const record = await shelfStore.get(shelfId);
       if (!record) throw new Error('Shelf does not exist!');
 
       await bookStore.where('shelfId').equals(shelfId).delete();
       await shelfStore.delete(shelfId);
+
       await shelfStore.where('displayOrder').above(record.displayOrder).modify(
          (shelf) => {
             shelf.displayOrder -= 1;
@@ -64,27 +63,18 @@ export async function deleteShelfFromDB(shelfId: number): Promise<void> {
    });
 }
 
-export async function renameShelfInDB(
-   shelfId: number,
-   newName: string,
-): Promise<void> {
+export async function renameShelfInDB(shelfId: number, newName: string): Promise<void> {
    const store = db.shelves;
+
    await db.transaction('rw', store, async () => {
-      const record = await store.get(shelfId) as
-         | Required<ShelfRecord>
-         | undefined;
+      const record = await store.get(shelfId) as ShelfRecord | undefined;
       if (record === undefined) throw new Error('Shelf does not exist');
 
-      await store.update(shelfId, {
-         name: newName,
-      });
+      await store.update(shelfId, { name: newName });
    });
 }
 
-async function updateShelfExpanded(
-   shelfId: number,
-   expanded: boolean,
-): Promise<void> {
+async function updateShelfExpanded(shelfId: number, expanded: boolean): Promise<void> {
    const store = db.shelves;
 
    const record = await store.where(':id').equals(shelfId).firstKey();
@@ -94,9 +84,9 @@ async function updateShelfExpanded(
 }
 
 export async function expandShelfInDB(shelfId: number): Promise<void> {
-   return await updateShelfExpanded(shelfId, true);
+   await updateShelfExpanded(shelfId, true);
 }
 
 export async function collapseShelfInDB(shelfId: number): Promise<void> {
-   return await updateShelfExpanded(shelfId, false);
+   await updateShelfExpanded(shelfId, false);
 }

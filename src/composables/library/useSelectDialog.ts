@@ -1,5 +1,4 @@
-import { createDeferredPromise } from '@src/utilities';
-import { type DeferredPromise, UnexpectedRuntimeError } from '@src/types';
+import { createDeferredPromise, type DeferredPromise, UnexpectedRuntimeError } from '@src/utils';
 
 /* *** */
 
@@ -23,8 +22,7 @@ export function useSelectDialog() {
    };
 
    const resolveSelect = (optionId: number) => {
-      if (userSelect === null)
-         throw new UnexpectedRuntimeError('Promise is null');
+      if (userSelect === null) throw new UnexpectedRuntimeError('Promise is null');
 
       closeDialog();
       userSelect.resolve(optionId);
@@ -32,8 +30,7 @@ export function useSelectDialog() {
    };
 
    const resolveCancel = () => {
-      if (userSelect === null)
-         throw new UnexpectedRuntimeError('Promise is null');
+      if (userSelect === null) throw new UnexpectedRuntimeError('Promise is null');
 
       closeDialog();
       userSelect.resolve(null);

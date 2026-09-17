@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { navigateToHomePage } from '@src/utilities';
+const router = useRouter();
 </script>
 <template>
    <div class="bg-bg text-ink flex min-h-dvh flex-col font-serif">
@@ -7,7 +7,7 @@ import { navigateToHomePage } from '@src/utilities';
          class="hover:border-b-highlight bg-surface border-b-stroke/50 sticky top-0 z-100 mx-auto flex w-full items-center justify-between border-b-2 px-4 py-2 transition-colors md:px-16 xl:px-32 2xl:px-64"
       >
          <button
-            @click="navigateToHomePage"
+            @click="router.push('/')"
             type="button"
             class="hover:text-highlight transition-colors hover:cursor-pointer"
          >

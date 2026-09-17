@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { defaultShelf } from '@src/services/dexie/database';
-import type { ShelfRecord } from '@src/types';
+import type { ShelfRecord } from '@src/services/dexie/shelfRepo';
 
 /* *** */
 

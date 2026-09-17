@@ -1,13 +1,16 @@
-import { domParser, navigateTo, navigateToNotFoundPage, unwrapAsync } from '@src/utilities';
+import { domParser, NotFoundError, UnexpectedRuntimeError, unwrapAsync } from '@src/utils';
 import { getBookFromDB } from '@src/services/dexie/bookRepo';
-import { type BookRecord, NotFoundError, UnexpectedRuntimeError } from '@src/types';
+import type { BookRecord } from '@src/services/dexie/database.ts';
 
 /* *** */
 
 export function useReader() {
+   const router = useRouter();
+
    const openBook = async (bookId: number) => {
-      const [error] = await unwrapAsync(navigateTo(`/read/${bookId}`));
-      if (error) await navigateToNotFoundPage();
+      const [book] = await unwrapAsync(getBookFromDB(bookId));
+      if (book) router.push(`reader/${bookId}`);
+      else router.push('/');
    };
 
    const blobUrls: string[] = [];
