@@ -1,5 +1,7 @@
 /* * CONSTANTS * */
 
+import type { Book } from '@src/services/epub/epubParser.ts';
+
 export const domParser = new DOMParser();
 export const xmlSerializer = new XMLSerializer();
 
@@ -50,6 +52,56 @@ export function createDeferredPromise<T>(): DeferredPromise<T> {
    });
 
    return { promise, resolve, reject };
+}
+
+export function debugBook(book: Book): void {
+   console.groupCollapsed(
+      `%c[Book Debug] %c${book.metadata.title || 'Untitled'}`,
+      'color: #3b82f6; font-weight: bold;',
+      'color: inherit;',
+   );
+
+   // 1. High-level Metadata & Stats
+   console.group('Overview');
+   console.log('Title:', book.metadata.title);
+   console.log('Creator:', book.metadata.creator);
+   console.log('Publisher:', book.metadata.publisher);
+   console.log('Language:', book.metadata.language);
+   console.log('Total Characters:', book.totalCharacters.toLocaleString());
+   console.log(
+      'Cover:',
+      book.cover ? `${book.cover.type || 'blob'} (${(book.cover.size / 1024).toFixed(1)} KB)` : 'None',
+   );
+   console.groupEnd();
+
+   // 2. Sections Summary (compact table view)
+   console.groupCollapsed(`Sections (${book.sections.length})`);
+   console.table(
+      book.sections.map((section, index) => ({
+         index,
+         idref: section.idref,
+         charLength: section.content.length,
+         snippet: section.content.slice(0, 40).replace(/\s+/g, ' ') + '...',
+      })),
+   );
+   console.groupEnd();
+
+   // 3. Images Summary (IDs, MIME types, and sizes)
+   const imageEntries = Object.entries(book.images);
+   console.groupCollapsed(`Images (${imageEntries.length})`);
+   console.table(
+      imageEntries.map(([id, blob]) => ({
+         id,
+         type: blob.type || 'unknown',
+         sizeKB: +(blob.size / 1024).toFixed(2),
+      })),
+   );
+   console.groupEnd();
+
+   // 4. Raw object handle for interactive inspection if needed
+   console.log('Raw Book Object:', book);
+
+   console.groupEnd();
 }
 
 /* OBJECTS & CLASSES */

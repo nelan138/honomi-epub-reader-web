@@ -16,7 +16,7 @@ import type { BookRecord } from '@src/services/dexie/database.ts';
 
 export type BookCard = Pick<
    BookRecord,
-   'id' | 'shelfId' | 'readCharCount' | 'metadata' | 'cover' | 'charCount'
+   'id' | 'shelfId' | 'charactersRead' | 'metadata' | 'cover' | 'totalCharacters'
 >;
 
 export const useBookStore = defineStore('book', () => {
@@ -47,10 +47,10 @@ export const useBookStore = defineStore('book', () => {
          return {
             id: record.id,
             shelfId: record.shelfId,
-            readCharCount: record.readCharCount,
+            charactersRead: record.charactersRead,
             metadata: record.metadata,
             cover: record.cover,
-            charCount: record.charCount,
+            totalCharacters: record.totalCharacters,
          };
       });
    };
@@ -154,10 +154,10 @@ export const useBookStore = defineStore('book', () => {
          const addedBook: BookCard = {
             id,
             shelfId,
-            readCharCount: 0,
+            charactersRead: 0,
             metadata: book.metadata,
             cover: book.cover,
-            charCount: book.charCount,
+            totalCharacters: book.totalCharacters,
          };
 
          books.value.push(addedBook); // update UI

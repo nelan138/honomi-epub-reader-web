@@ -10,7 +10,7 @@ export async function addBookToDB(book: Book): Promise<{ bookId: number; shelfId
 
    const bookId = await store.add({
       ...book,
-      readCharCount: 0,
+      charactersRead: 0,
       shelfId: defaultShelf.id,
    });
 
@@ -63,10 +63,10 @@ export async function changeBookShelfInDB(bookId: number, shelfId: number): Prom
    });
 }
 
-export async function updateBookProgressInDB(bookId: number, readCharCount: number): Promise<void> {
+export async function updateCharactersReadInDB(bookId: number, charactersRead: number): Promise<void> {
    const store = db.books;
    const updatedCount = await store.update(bookId, {
-      readCharCount: readCharCount,
+      charactersRead: charactersRead,
    });
 
    if (updatedCount === 0) throw new NotFoundError('Book does not exist!');

@@ -7,7 +7,7 @@ import type { Book } from '@src/services/epub/epubParser.ts';
 export type BookRecord = Book & {
    id: number;
    shelfId: number;
-   readCharCount: number; // chars user has read of this book */
+   charactersRead: number; // chars user has read of this book */
 };
 
 export type Shelf = {

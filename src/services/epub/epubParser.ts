@@ -26,7 +26,7 @@ export type Book = {
    };
    sections: Section[];
 
-   charCount: number;
+   totalCharacters: number;
    images: Record<string, Blob>;
 };
 
@@ -65,10 +65,10 @@ export class EpubParser {
       // todo: might refactor if feel like it, too lazy rn >.<
       const processImageTags = (body: Element, chapterPath: string): Element => {
          // * <img> tags
-         for (const img of body.getElementsByTagName('img')) {
-            const src = img.getAttribute('src');
+         for (const imageEl of body.getElementsByTagName('img')) {
+            const src = imageEl.getAttribute('src');
             if (!src) {
-               console.warn('<img> tag missing src attribute, skipping:', img);
+               console.warn('<img> tag missing src attribute, skipping:', imageEl);
                continue;
             }
 
@@ -91,19 +91,17 @@ export class EpubParser {
             }
 
             images[resolvedSrc] = blob;
-            img.setAttribute('src', resolvedSrc);
+            imageEl.setAttribute('src', resolvedSrc);
          }
 
          // * <svg:image> tags
-         const svgImages = body.getElementsByTagNameNS(SVG_NS, 'image');
-
-         for (const svgImg of svgImages) {
-            const src = svgImg.getAttribute('href')
-               ?? svgImg.getAttributeNS(XLINK_NS, 'href')
-               ?? svgImg.getAttribute('xlink:href');
+         for (const svgImageEl of body.getElementsByTagNameNS(SVG_NS, 'image')) {
+            const src = svgImageEl.getAttribute('href')
+               ?? svgImageEl.getAttributeNS(XLINK_NS, 'href')
+               ?? svgImageEl.getAttribute('xlink:href');
 
             if (!src) {
-               console.warn('<svg:image> tag missing href attribute, skipping:', svgImg);
+               console.warn('<svg:image> tag missing href attribute, skipping:', svgImageEl);
                continue;
             }
 
@@ -127,7 +125,7 @@ export class EpubParser {
             images[resolvedSrc] = blob;
 
             // ! Replace the svg wrapper
-            const svgWrapper = svgImg.closest('svg');
+            const svgWrapper = svgImageEl.closest('svg');
             if (!svgWrapper) break;
 
             const img = body.ownerDocument.createElement('img');
@@ -190,7 +188,7 @@ export class EpubParser {
             const pTags = processedBody.getElementsByTagName('p');
             for (const p of pTags) {
                runningCharCount += getElementCharacterCount(p.innerHTML);
-               p.setAttribute('data-char-offset', runningCharCount.toString());
+               p.setAttribute('data-characters-read', runningCharCount.toString());
             }
 
             const content = xmlSerializer.serializeToString(processedBody);
@@ -212,7 +210,7 @@ export class EpubParser {
             language: book.metadata.language,
          },
          sections: processBookSections(),
-         charCount: runningCharCount,
+         totalCharacters: runningCharCount,
          images,
       };
    }

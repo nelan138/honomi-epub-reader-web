@@ -2,7 +2,7 @@
 import { useThemeStore } from '@src/stores/useThemeStore';
 import { cleanUpBlobUrls, domParser, UnexpectedRuntimeError, unwrapAsync } from '@src/utils';
 
-import { getBookFromDB, updateBookProgressInDB } from '@src/services/dexie/bookRepo';
+import { getBookFromDB } from '@src/services/dexie/bookRepo';
 import { useReaderStore } from '@src/stores/useReaderStore';
 import BookSection from '@src/components/reader/BookSection.vue';
 
@@ -12,16 +12,6 @@ const themeStore = useThemeStore();
 
 onMounted(() => {
    themeStore.load();
-});
-
-const onScrollEnd = () => {
-   const currentCharOffset = getCurrentCharOffset();
-   readerStore.updateReadCharCount(currentCharOffset);
-   console.log('Scroll ended. Current char offset:', currentCharOffset);
-};
-
-onMounted(() => {
-   document.addEventListener('scrollend', onScrollEnd);
 });
 
 const readerStore = useReaderStore();
@@ -44,26 +34,38 @@ onMounted(async () => {
 
    await readerStore.load(bookId);
 
-   // await nextTick();
+   await nextTick();
 
-   if (readerStore.readCharCount === 0) {
-      window.scrollTo({ top: 0 });
-      return;
+   if (readerStore.charactersRead === 0) {
+      globalThis.scrollTo({ top: 0 });
+   } else {
+      // FIX LATER: target is not found because of content visibility auto
+      const target = document.querySelector(`p[data-characters-read="${readerStore.charactersRead}"]`);
+      if (!target) {
+         throw new UnexpectedRuntimeError(
+            `No paragraph found with data-characters-read="${readerStore.charactersRead}"`
+         );
+      }
+      target.scrollIntoView({
+         behavior: 'instant',
+         block: 'start',
+      });
    }
 
-   const target = document.querySelector(`p[data-char-offset="${readerStore.readCharCount}"]`);
-   if (!target) {
-      throw new UnexpectedRuntimeError(`No paragraph found with data-char-offset="${readerStore.readCharCount}"`);
-   }
-
-   target?.scrollIntoView({
-      behavior: 'instant',
-      block: 'start',
+   requestAnimationFrame(() => {
+      globalThis.addEventListener('scrollend', onScrollEnd);
    });
 });
 
+const onScrollEnd = () => {
+   const charactersRead = getCurrentCharactersRead();
+   if (charactersRead === readerStore.charactersRead) return;
+
+   readerStore.updateCharactersRead(charactersRead);
+};
+
 onUnmounted(() => {
-   updateBookProgressInDB(bookId, readerStore.readCharCount);
+   readerStore.updateCharactersRead(readerStore.charactersRead, { syncWithDb: true });
 });
 
 onUnmounted(() => {
@@ -71,7 +73,7 @@ onUnmounted(() => {
 });
 
 onUnmounted(() => {
-   document.removeEventListener('scrollend', onScrollEnd);
+   globalThis.removeEventListener('scrollend', onScrollEnd);
 });
 
 onUnmounted(() => {
@@ -94,8 +96,8 @@ const sectionTails = computed(() => {
          continue;
       }
 
-      const charOffset = lastP.getAttribute('data-char-offset');
-      if (!charOffset) throw new UnexpectedRuntimeError('No data-char-offset attribute found on <p> element');
+      const charOffset = lastP.getAttribute('data-characters-read');
+      if (!charOffset) throw new UnexpectedRuntimeError('No data-characters-read attribute found on <p> element');
 
       offsets.push(parseInt(charOffset));
    }
@@ -105,7 +107,7 @@ const sectionTails = computed(() => {
 
 let charOffsetCache = 0;
 
-const getCurrentCharOffset = () => {
+const getCurrentCharactersRead = () => {
    let headerHeight = 0;
    const header = document.querySelector('header');
    if (header) headerHeight = header.getBoundingClientRect().bottom;
@@ -122,8 +124,8 @@ const getCurrentCharOffset = () => {
    let paragraphEl = targetEl.closest('p');
 
    if (paragraphEl) {
-      const attr = paragraphEl.getAttribute('data-char-offset');
-      if (!attr) throw new UnexpectedRuntimeError('No data-char-offset attribute found on <p> element');
+      const attr = paragraphEl.getAttribute('data-characters-read');
+      if (!attr) throw new UnexpectedRuntimeError('No data-characters-read attribute found on <p> element');
 
       const offset = parseInt(attr);
       charOffsetCache = offset;
@@ -145,8 +147,8 @@ const getCurrentCharOffset = () => {
       }
 
       if (paragraphEl) {
-         const attr = paragraphEl.getAttribute('data-char-offset');
-         if (!attr) throw new UnexpectedRuntimeError('No data-char-offset attribute found on <p> element');
+         const attr = paragraphEl.getAttribute('data-characters-read');
+         if (!attr) throw new UnexpectedRuntimeError('No data-characters-read attribute found on <p> element');
 
          const offset = parseInt(attr);
          charOffsetCache = offset;
@@ -199,7 +201,7 @@ const getCurrentCharOffset = () => {
       </article>
 
       <footer class="sticky bottom-0 z-50 py-2 text-right text-xs">
-         
+         <span>{{ readerStore.charactersRead }}/{{ readerStore.totalCharacters }} - </span>
          <span> {{ readerStore.progress }}% </span>
       </footer>
    </div>

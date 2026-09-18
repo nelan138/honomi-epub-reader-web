@@ -1,72 +1,36 @@
 import { defineStore } from 'pinia';
-import type { BookRecord } from '@src/services/dexie/database.ts';
 import { domParser, UnexpectedRuntimeError, unwrapAsync } from '@src/utils.ts';
-import { getBookFromDB } from '@src/services/dexie/bookRepo.ts';
+import { getBookFromDB, updateCharactersReadInDB } from '@src/services/dexie/bookRepo.ts';
 import type { Section } from '@src/services/epub/epubParser.ts';
 
 export const useReaderStore = defineStore('reader', () => {
-   // STATEs
+   // * STATEs
 
-   const book = ref<BookRecord>();
+   const sections = ref<Section[]>([]);
+   const totalCharacters = ref(0);
+   const charactersRead = ref(0);
 
    const isLoading = ref(false);
    const isLoaded = ref(false);
 
-   // GETTERs
+   // * PRIVATE STATEs
 
-   const charCount = computed(() => book.value?.charCount ?? 0);
-   const readCharCount = computed(() => book.value?.readCharCount ?? 0);
+   let bookId: number | null = null;
 
-   const progress = computed(() => {
-      if (!book.value) return 0;
+   // * GETTERs
 
-      const readCharCount = book.value.readCharCount;
-      const charCount = book.value.charCount;
+   const progress = computed((): string => {
+      if (
+         !isLoaded.value
+         || isLoading.value
+         || totalCharacters.value === 0 || charactersRead.value === 0
+      ) { return '0.00'; }
 
-      if (charCount === 0) return 0;
-
-      return (readCharCount * 100 / charCount).toFixed(2);
-   });
-
-   const sections = computed((): Section[] => {
-      if (!book.value) return [];
-
-      console.log('Running sections computed property...');
-
-      const images = book.value.images;
-      const _sections: Section[] = [];
-
-      for (const section of book.value.sections) {
-         const doc = domParser.parseFromString(section.content, 'application/xhtml+xml');
-
-         const body = doc.body ?? doc.getElementsByTagName('body')[0];
-         if (!body) {
-            console.log('No <body> tag found in section content:', section.content);
-            throw new UnexpectedRuntimeError('No <body> tag found!');
-         }
-
-         for (const imgTag of body.getElementsByTagName('img')) {
-            const src = imgTag.getAttribute('src');
-            if (!src) throw new UnexpectedRuntimeError('Image with no src attribute!');
-
-            const blob = images[src];
-            if (!blob) throw new UnexpectedRuntimeError(`Image blob not found: ${src}`);
-
-            const blobUrl = URL.createObjectURL(blob);
-            imgTag.setAttribute('src', blobUrl);
-         }
-
-         _sections.push({
-            content: body.innerHTML,
-            idref: section.idref,
-         });
-      }
-
-      return _sections;
+      return (charactersRead.value * 100 / totalCharacters.value).toFixed(2);
    });
 
    const blobUrls = computed(() => {
-      if (!book.value) return [];
+      if (!isLoaded.value || isLoading.value) return [];
 
       const urls: string[] = [];
 
@@ -85,43 +49,105 @@ export const useReaderStore = defineStore('reader', () => {
    });
 
    // ACTIONS
-   function reset() {
-      book.value = undefined;
 
-      isLoading.value = false;
-      isLoaded.value = false;
-   }
+   const loadSections = (_sections: Section[], _images: Record<string, Blob>) => {
+      const newSections: Section[] = [];
 
-   async function load(bookId: number) {
+      for (const section of _sections) {
+         const doc = domParser.parseFromString(section.content, 'application/xhtml+xml');
+
+         const body = doc.body ?? doc.getElementsByTagName('body')[0];
+         if (!body) {
+            console.log('No <body> tag found in section content:', section.content);
+            throw new UnexpectedRuntimeError('No <body> tag found!');
+         }
+
+         for (const imageEl of body.getElementsByTagName('img')) {
+            const src = imageEl.getAttribute('src');
+            if (!src) throw new UnexpectedRuntimeError('Image with no src attribute!');
+
+            const blob = _images[src];
+            if (!blob) throw new UnexpectedRuntimeError(`Image blob not found: ${src}`);
+
+            const blobUrl = URL.createObjectURL(blob);
+            imageEl.setAttribute('src', blobUrl);
+         }
+
+         newSections.push({
+            content: body.innerHTML,
+            idref: section.idref,
+         });
+      }
+
+      sections.value = newSections;
+   };
+
+   async function load(_bookId: number) {
+      bookId = _bookId;
+
       if (isLoading.value || isLoaded.value) return;
 
       isLoading.value = true;
 
-      const [data, _] = await unwrapAsync(getBookFromDB(bookId));
-      if (!data) throw new UnexpectedRuntimeError(`Failed to load book with ID ${bookId}`);
+      const [book] = await unwrapAsync(getBookFromDB(_bookId));
+      if (!book) throw new UnexpectedRuntimeError(`Failed to load book with ID ${_bookId}`);
 
-      book.value = data;
+      console.log('Loading Reader');
+      // debugBook(data);
+
+      totalCharacters.value = book.totalCharacters;
+      charactersRead.value = book.charactersRead;
+      loadSections(book.sections, book.images);
 
       isLoading.value = false;
       isLoaded.value = true;
    }
 
-   function updateReadCharCount(newCount: number) {
-      if (!book.value) throw new UnexpectedRuntimeError('No book loaded');
+   function reset() {
+      bookId = null;
 
-      book.value.readCharCount = newCount;
+      isLoading.value = false;
+      isLoaded.value = false;
+
+      totalCharacters.value = 0;
+      charactersRead.value = 0;
+
+      sections.value = [];
+   }
+
+   /** this DOES NOT sync with DB by default */
+   function updateCharactersRead(value: number, options?: { syncWithDb: boolean }) {
+      console.log('This runs');
+
+      if (value < 0 || value > totalCharacters.value)
+         throw new UnexpectedRuntimeError('Invalid charactersRead value: ' + value);
+
+      if (charactersRead.value === value) return;
+
+      charactersRead.value = value;
+      if (options?.syncWithDb) {
+         if (!bookId) throw new UnexpectedRuntimeError('Book ID is not set. Cannot sync with DB.');
+
+         updateCharactersReadInDB(bookId, value);
+      }
    }
 
    return {
-      load,
-      reset,
+      // STATEs
       isLoading,
       isLoaded,
-      charCount,
-      readCharCount,
-      progress,
-      updateReadCharCount,
+
       sections,
+      totalCharacters,
+      charactersRead,
+
+      // GETTERs
+      progress,
       blobUrls,
+
+      // ACTIONs
+      load,
+      reset,
+      updateCharactersRead,
    };
 });
