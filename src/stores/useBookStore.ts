@@ -20,7 +20,20 @@ export type BookCard = Pick<
 >;
 
 export const useBookStore = defineStore('book', () => {
+   // STATEs
+
    const books = ref<BookCard[]>([]);
+
+   const isLoading = ref(false);
+   const isLoaded = ref(false);
+
+   // ACTIONs
+
+   function reset() {
+      books.value = [];
+      isLoading.value = false;
+      isLoaded.value = false;
+   }
 
    const syncWithDB = async () => {
       const [bookRecords, error] = await unwrapAsync(getBooksFromDB());
@@ -42,15 +55,12 @@ export const useBookStore = defineStore('book', () => {
       });
    };
 
-   let isLoading = false;
-   let isLoaded = false;
-
    async function load() {
-      if (isLoading || isLoaded) return;
-      isLoading = true;
+      if (isLoading.value || isLoaded.value) return;
+      isLoading.value = true;
       await syncWithDB();
-      isLoading = false;
-      isLoaded = true;
+      isLoading.value = false;
+      isLoaded.value = true;
    }
 
    /* All operations follow Optimistic UI Update pattern:
@@ -163,7 +173,10 @@ export const useBookStore = defineStore('book', () => {
 
    return {
       books,
+      isLoading,
+      isLoaded,
       load,
+      reset,
       renameBook,
       changeBookShelf,
       deleteBook,

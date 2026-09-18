@@ -1,9 +1,19 @@
 type Theme = 'dark' | 'light';
 
 export function useThemeStore() {
+   // STATEs
    const theme = ref<Theme>('dark');
 
-   // update the document class and localStorage whenever the theme changes
+   const isLoading = ref(false);
+   const isLoaded = ref(false);
+
+   // ACTIONs
+   function reset() {
+      theme.value = 'dark';
+      isLoading.value = false;
+      isLoaded.value = false;
+   }
+
    const updateTheme = (newTheme: Theme) => {
       document.documentElement.classList.toggle('dark', newTheme === 'dark');
       localStorage.setItem('theme', newTheme);
@@ -11,20 +21,17 @@ export function useThemeStore() {
       theme.value = newTheme;
    };
 
-   let isLoading = false;
-   let isLoaded = false;
-
    function load() {
-      if (isLoading || isLoaded) return;
-      isLoading = true;
+      if (isLoading.value || isLoaded.value) return;
+      isLoading.value = true;
 
       const storedTheme = localStorage.getItem('theme') as Theme | null;
 
       if (!storedTheme) localStorage.setItem('theme', theme.value);
       else updateTheme(storedTheme);
 
-      isLoaded = true;
-      isLoading = false;
+      isLoaded.value = true;
+      isLoading.value = false;
    }
 
    const toggleTheme = () => {
@@ -62,5 +69,5 @@ export function useThemeStore() {
       });
    };
 
-   return { theme, toggleTheme, load };
+   return { theme, toggleTheme, load, reset, isLoading, isLoaded };
 }

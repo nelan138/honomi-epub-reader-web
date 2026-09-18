@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useReader } from '@src/composables/reader/useReader';
 import { UnexpectedRuntimeError, unwrapAsync } from '@src/utils';
 import { useSelectDialog } from '@src/composables/library/useSelectDialog';
 import { useInputDialog } from '@src/composables/library/useInputDialog';
@@ -10,16 +9,24 @@ import { useThemeStore } from '@src/stores/useThemeStore';
 
 /* *** */
 
-// STORES
-const themeStore = useThemeStore();
-const bookStore = useBookStore();
-const shelfStore = useShelfStore();
-
 onMounted(() => {
    themeStore.load();
    shelfStore.load();
    bookStore.load();
 });
+
+onUnmounted(() => {
+   bookStore.reset();
+   shelfStore.reset();
+   themeStore.reset();
+});
+
+const router = useRouter();
+
+// STORES
+const themeStore = useThemeStore();
+const bookStore = useBookStore();
+const shelfStore = useShelfStore();
 
 const {
    isOpen: selectionDialogIsOpen,
@@ -43,8 +50,6 @@ const {
 } = useConfirmDialog();
 
 /* BOOK SECTION */
-
-const { openBook } = useReader();
 
 const handleChangingBookShelf = async (bookId: number) => {
    const [selectShelfId, error] = await unwrapAsync(selectDialogPrompt());
@@ -153,7 +158,7 @@ const handleDeletingShelf = async (shelfId: number) => {
             >
                <li v-if="shelf.expanded" v-for="book in bookShelfMap.get(shelf.id) ?? []" :key="book.id">
                   <BookCard
-                     @open="openBook"
+                     @open="() => router.push(`/reader/${book.id}`)"
                      @rename="handleRenamingBook"
                      @delete="handleDeletingBook"
                      @change-shelf="handleChangingBookShelf"

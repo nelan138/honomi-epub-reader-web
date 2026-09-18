@@ -1,133 +1,185 @@
 <script setup lang="ts">
 import { useThemeStore } from '@src/stores/useThemeStore';
-import { useReader } from '@src/composables/reader/useReader';
-import { UnexpectedRuntimeError, unwrapAsync } from '@src/utils';
+import { cleanUpBlobUrls, domParser, UnexpectedRuntimeError, unwrapAsync } from '@src/utils';
 
-import type { Section } from '@src/services/epub/epubParser';
-import { updateBookProgressInDB } from '@src/services/dexie/bookRepo';
+import { getBookFromDB, updateBookProgressInDB } from '@src/services/dexie/bookRepo';
+import { useReaderStore } from '@src/stores/useReaderStore';
+import BookSection from '@src/components/reader/BookSection.vue';
 
 /* *** */
 
+const themeStore = useThemeStore();
+
+onMounted(() => {
+   themeStore.load();
+});
+
+const onScrollEnd = () => {
+   const currentCharOffset = getCurrentCharOffset();
+   readerStore.updateReadCharCount(currentCharOffset);
+   console.log('Scroll ended. Current char offset:', currentCharOffset);
+};
+
+onMounted(() => {
+   document.addEventListener('scrollend', onScrollEnd);
+});
+
+const readerStore = useReaderStore();
+
 const route = useRoute();
 const router = useRouter();
+
 const params = route.params.bookId as string | undefined;
 const bookId = params ? parseInt(params) : NaN;
 
-const { getBook } = useReader();
-
-const sections = shallowRef<Section[]>([]);
-const isLoading = computed(() => sections.value.length === 0);
-
-const charCount = ref<number>(0);
-const charOffset = ref<number>(0);
-
-const progress = computed(() => {
-   if (charCount.value === 0) return 0;
-   return ((charOffset.value * 100) / charCount.value).toFixed(2);
-});
-
-const getUserReadingProgress = (): number => {
-   let headerHeight = 0;
-   const header = document.querySelector('header');
-   if (!header) headerHeight = 0;
-   else headerHeight = header.getBoundingClientRect().height;
-
-   const x = screen.width / 2;
-   const y = headerHeight + 1;
-
-   const start = document.elementFromPoint(x, y);
-   if (!start) {
-      console.warn('No element found at the specified point');
-      return 0;
-   }
-
-   let p: HTMLParagraphElement | null = null;
-
-   const directMatch = start.closest('p');
-
-   if (directMatch) {
-      p = directMatch;
-   } else {
-      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_ELEMENT);
-      walker.currentNode = start;
-
-      while (walker.previousNode()) {
-         const node = walker.currentNode as Element;
-         if (node.tagName === 'P') {
-            p = node as HTMLParagraphElement;
-            break;
-         }
-      }
-   }
-
-   if (!p) return 0;
-
-   const _charOffset = p.getAttribute('data-char-offset');
-   if (!_charOffset) throw new UnexpectedRuntimeError('Missing data-char-offset attribute on paragraph element');
-
-   const value = parseInt(_charOffset);
-   if (isNaN(value)) throw new UnexpectedRuntimeError('Invalid data-char-offset attribute value on paragraph element');
-
-   return value;
-};
-
-// ! < > Execute every time user stops scrolling
-const onScrollEnd = () => {
-   charOffset.value = getUserReadingProgress();
-   updateBookProgressInDB(bookId, charOffset.value); // runs in bg
-};
-
+// LoadingをまってScrollingを実行する
 onMounted(async () => {
-   const [book, error] = await unwrapAsync(getBook(bookId));
-   if (!book) {
+   const [_, error] = await unwrapAsync(getBookFromDB(bookId));
+
+   if (error) {
       console.warn(error.message);
       router.push('/404');
       return;
    }
-   sections.value = book.sections;
 
-   await nextTick();
-   charCount.value = book.charCount;
-   charOffset.value = book.readCharCount;
+   await readerStore.load(bookId);
 
-   const paragraphs = Array.from(document.querySelectorAll<HTMLElement>('p[data-char-offset]'));
+   // await nextTick();
 
-   let target: HTMLElement | undefined;
-   for (const p of paragraphs) {
-      const value = p.getAttribute('data-char-offset');
-      if (!value) throw new UnexpectedRuntimeError('Missing data-char-offset attribute on paragraph element');
-      if (parseInt(value) <= book.readCharCount) {
-         target = p;
-      } else break;
+   if (readerStore.readCharCount === 0) {
+      window.scrollTo({ top: 0 });
+      return;
    }
 
-   requestAnimationFrame(() => {
-      if (book.readCharCount === 0) window.scrollTo({ top: 0 });
-      else {
-         target?.scrollIntoView({
-            behavior: 'instant',
-            block: 'start',
-         });
-      }
+   const target = document.querySelector(`p[data-char-offset="${readerStore.readCharCount}"]`);
+   if (!target) {
+      throw new UnexpectedRuntimeError(`No paragraph found with data-char-offset="${readerStore.readCharCount}"`);
+   }
 
-      document.addEventListener('scrollend', onScrollEnd, { passive: false });
+   target?.scrollIntoView({
+      behavior: 'instant',
+      block: 'start',
    });
+});
+
+onUnmounted(() => {
+   updateBookProgressInDB(bookId, readerStore.readCharCount);
+});
+
+onUnmounted(() => {
+   cleanUpBlobUrls(readerStore.blobUrls);
 });
 
 onUnmounted(() => {
    document.removeEventListener('scrollend', onScrollEnd);
 });
 
-const themeStore = useThemeStore();
-onMounted(() => {
-   themeStore.load();
+onUnmounted(() => {
+   readerStore.reset();
+   themeStore.reset();
 });
+
+const sectionTails = computed(() => {
+   if (!readerStore.isLoaded || readerStore.isLoading) return [];
+   const offsets: number[] = [];
+
+   for (const section of readerStore.sections) {
+      const doc = domParser.parseFromString(section.content, 'application/xhtml+xml');
+
+      const paragraphs = Array.from(doc.querySelectorAll('p'));
+      const lastP = paragraphs.at(-1);
+
+      if (!lastP) {
+         offsets.push(0);
+         continue;
+      }
+
+      const charOffset = lastP.getAttribute('data-char-offset');
+      if (!charOffset) throw new UnexpectedRuntimeError('No data-char-offset attribute found on <p> element');
+
+      offsets.push(parseInt(charOffset));
+   }
+
+   return offsets;
+});
+
+let charOffsetCache = 0;
+
+const getCurrentCharOffset = () => {
+   let headerHeight = 0;
+   const header = document.querySelector('header');
+   if (header) headerHeight = header.getBoundingClientRect().bottom;
+
+   const x = globalThis.innerWidth / 2;
+   const y = headerHeight + 10;
+
+   const targetEl = document.elementFromPoint(x, y);
+   if (!targetEl) {
+      console.warn('No element found at the specified point (x, y):', { x, y });
+      return charOffsetCache;
+   }
+
+   let paragraphEl = targetEl.closest('p');
+
+   if (paragraphEl) {
+      const attr = paragraphEl.getAttribute('data-char-offset');
+      if (!attr) throw new UnexpectedRuntimeError('No data-char-offset attribute found on <p> element');
+
+      const offset = parseInt(attr);
+      charOffsetCache = offset;
+      return offset;
+   }
+
+   // * Fallback 1: There may exist >= 1 <p> in the current <section>
+   else {
+      const sectionEl = targetEl.closest('section[data-section-index]');
+      if (!sectionEl) {
+         console.warn('Somehow user have scroll out of all rendered sections');
+         return charOffsetCache;
+      }
+
+      for (const p of sectionEl.querySelectorAll('p')) {
+         if (p.getBoundingClientRect().top > y) break;
+
+         paragraphEl = p;
+      }
+
+      if (paragraphEl) {
+         const attr = paragraphEl.getAttribute('data-char-offset');
+         if (!attr) throw new UnexpectedRuntimeError('No data-char-offset attribute found on <p> element');
+
+         const offset = parseInt(attr);
+         charOffsetCache = offset;
+
+         return offset;
+      }
+
+      // * Fallback 2: There may exist >= 1 <p> in previous section(s)
+      else {
+         const sectionIndexAttr = sectionEl.getAttribute('data-section-index');
+         if (!sectionIndexAttr)
+            throw new UnexpectedRuntimeError('No data-section-index attribute found on <section> element');
+
+         const sectionIndex = parseInt(sectionIndexAttr);
+         if (sectionIndex === 0) {
+            charOffsetCache = 0;
+            return 0;
+         }
+
+         const offset = sectionTails.value[sectionIndex - 1];
+         if (offset === undefined) throw new UnexpectedRuntimeError('No offset found for previous section');
+
+         charOffsetCache = offset;
+         return offset;
+      }
+   }
+};
 </script>
 
 <template>
    <ReaderHeader @return="router.push('/')" @toggle-theme="themeStore.toggleTheme" />
    <div
-      v-if="isLoading"
+      v-if="readerStore.isLoading"
       class="text-ink/60 flex min-h-[60vh] w-full flex-col items-center justify-center gap-3 p-8 font-sans"
    >
       <i class="fa-solid fa-circle-notch text-highlight animate-spin text-2xl"></i>
@@ -135,15 +187,20 @@ onMounted(() => {
    </div>
 
    <div v-else class="p-4 font-sans">
-      <ul>
-         <li v-for="section in sections" :key="section.idref">
-            <BookChapter :content="section.content" />
-         </li>
-      </ul>
+      <article>
+         <section
+            :data-section-index="index"
+            :data-idref="section.idref"
+            v-for="(section, index) in readerStore.sections"
+            :key="section.idref"
+         >
+            <BookSection :content="section.content" />
+         </section>
+      </article>
 
       <footer class="sticky bottom-0 z-50 py-2 text-right text-xs">
-         <span> {{ charOffset }}/{{ charCount }} - </span>
-         <span> {{ progress }}% </span>
+         
+         <span> {{ readerStore.progress }}% </span>
       </footer>
    </div>
 </template>

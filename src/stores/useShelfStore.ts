@@ -15,7 +15,18 @@ import { defaultShelf, type ShelfRecord } from '@src/services/dexie/database.ts'
 /* *** */
 
 export const useShelfStore = defineStore('shelf', () => {
+   // STATEs
    const shelves = ref<ShelfRecord[]>([]);
+
+   const isLoading = ref(false);
+   const isLoaded = ref(false);
+
+   // ACTIONs
+   function reset() {
+      shelves.value = [];
+      isLoading.value = false;
+      isLoaded.value = false;
+   }
 
    const syncWithDB = async () => {
       const [data, error] = await unwrapAsync(getShelvesFromDB());
@@ -30,15 +41,12 @@ export const useShelfStore = defineStore('shelf', () => {
       shelves.value = data;
    };
 
-   let isLoading = false;
-   let isLoaded = false;
-
    async function load() {
-      if (isLoading || isLoaded) return;
-      isLoading = true;
+      if (isLoading.value || isLoaded.value) return;
+      isLoading.value = true;
       await syncWithDB();
-      isLoading = false;
-      isLoaded = true;
+      isLoading.value = false;
+      isLoaded.value = true;
    }
 
    async function addShelf(name: string) {
@@ -191,7 +199,10 @@ export const useShelfStore = defineStore('shelf', () => {
 
    return {
       shelves,
+      isLoading,
+      isLoaded,
       load,
+      reset,
       syncWithDB,
       addShelf,
       deleteShelf,
