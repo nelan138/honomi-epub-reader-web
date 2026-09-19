@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { useThemeStore } from '@src/stores/useThemeStore';
-import { cleanUpBlobUrls, domParser, UnexpectedRuntimeError, unwrapAsync } from '@src/utils';
+import { cleanUpBlobUrls, UnexpectedRuntimeError, unwrapAsync } from '@src/utils';
 
-import { getBookFromDB } from '@src/services/dexie/bookRepo';
+import { getBookFromDB, updateCharactersReadInDB } from '@src/services/dexie/bookRepo';
 import { useReaderStore } from '@src/stores/useReaderStore';
-import BookSection from '@src/components/reader/BookSection.vue';
+import { useDebounceFn } from '@vueuse/core';
 
 /* *** */
 
@@ -39,17 +39,14 @@ onMounted(async () => {
    if (readerStore.charactersRead === 0) {
       globalThis.scrollTo({ top: 0 });
    } else {
-      // FIX LATER: target is not found because of content visibility auto
-      const target = document.querySelector(`p[data-characters-read="${readerStore.charactersRead}"]`);
+      const target = document.querySelector<HTMLElement>(`p[data-characters-read="${readerStore.charactersRead}"]`);
       if (!target) {
          throw new UnexpectedRuntimeError(
             `No paragraph found with data-characters-read="${readerStore.charactersRead}"`
          );
       }
-      target.scrollIntoView({
-         behavior: 'instant',
-         block: 'start',
-      });
+
+      target.scrollIntoView({ behavior: 'instant', block: 'start' });
    }
 
    requestAnimationFrame(() => {
@@ -57,15 +54,16 @@ onMounted(async () => {
    });
 });
 
-const onScrollEnd = () => {
+// Delay of 500ms
+const onScrollEnd = useDebounceFn(() => {
    const charactersRead = getCurrentCharactersRead();
    if (charactersRead === readerStore.charactersRead) return;
 
-   readerStore.updateCharactersRead(charactersRead);
-};
+   readerStore.updateCharactersRead(charactersRead, { syncWithDb: true });
+}, 500);
 
 onUnmounted(() => {
-   readerStore.updateCharactersRead(readerStore.charactersRead, { syncWithDb: true });
+   updateCharactersReadInDB(bookId, readerStore.charactersRead);
 });
 
 onUnmounted(() => {
@@ -74,6 +72,7 @@ onUnmounted(() => {
 
 onUnmounted(() => {
    globalThis.removeEventListener('scrollend', onScrollEnd);
+   if ('cancel' in onScrollEnd) onScrollEnd.cancel();
 });
 
 onUnmounted(() => {
@@ -81,25 +80,30 @@ onUnmounted(() => {
    themeStore.reset();
 });
 
+// Characters read of each section
 const sectionTails = computed(() => {
    if (!readerStore.isLoaded || readerStore.isLoading) return [];
+
+   const sections = document.querySelectorAll('article > section');
+   if (sections.length === 0) return [];
+
    const offsets: number[] = [];
 
-   for (const section of readerStore.sections) {
-      const doc = domParser.parseFromString(section.content, 'application/xhtml+xml');
-
-      const paragraphs = Array.from(doc.querySelectorAll('p'));
-      const lastP = paragraphs.at(-1);
+   for (const section of sections) {
+      const paragraphs = section.querySelectorAll('p[data-characters-read]');
+      const lastP = paragraphs[paragraphs.length - 1];
 
       if (!lastP) {
-         offsets.push(0);
+         offsets.push(offsets.at(-1) ?? 0);
          continue;
       }
 
       const charOffset = lastP.getAttribute('data-characters-read');
-      if (!charOffset) throw new UnexpectedRuntimeError('No data-characters-read attribute found on <p> element');
+      if (!charOffset) {
+         throw new UnexpectedRuntimeError('Missing data-characters-read attribute on paragraph');
+      }
 
-      offsets.push(parseInt(charOffset));
+      offsets.push(parseInt(charOffset, 10));
    }
 
    return offsets;
@@ -152,7 +156,6 @@ const getCurrentCharactersRead = () => {
 
          const offset = parseInt(attr);
          charOffsetCache = offset;
-
          return offset;
       }
 
@@ -164,13 +167,12 @@ const getCurrentCharactersRead = () => {
 
          const sectionIndex = parseInt(sectionIndexAttr);
          if (sectionIndex === 0) {
+            console.warn('No previous section found, returning 0 as characters read');
             charOffsetCache = 0;
             return 0;
          }
-
          const offset = sectionTails.value[sectionIndex - 1];
          if (offset === undefined) throw new UnexpectedRuntimeError('No offset found for previous section');
-
          charOffsetCache = offset;
          return offset;
       }
@@ -188,23 +190,23 @@ const getCurrentCharactersRead = () => {
       <span class="text-xs font-medium tracking-widest uppercase">Loading...</span>
    </div>
 
-   <div v-else class="p-4 font-sans">
-      <article>
+   <template v-else>
+      <article class="prose prose-headings:text-ink text-ink w-full max-w-full p-4 py-4 font-sans">
          <section
-            :data-section-index="index"
-            :data-idref="section.idref"
             v-for="(section, index) in readerStore.sections"
             :key="section.idref"
-         >
-            <BookSection :content="section.content" />
-         </section>
+            class="[&_img,&_svg]:mx-auto [&_img,&_svg]:block [&_img,&_svg]:max-h-[80dvh] [&_img,&_svg]:max-w-[80dvw]"
+            :data-section-index="index"
+            v-html="section.content"
+         />
       </article>
 
-      <footer class="sticky bottom-0 z-50 py-2 text-right text-xs">
-         <span>{{ readerStore.charactersRead }}/{{ readerStore.totalCharacters }} - </span>
+      <footer class="sticky bottom-0 z-50 py-2 text-right font-sans text-xs">
+         <span>{{ readerStore.charactersRead }} / {{ readerStore.totalCharacters }}</span>
+         <span class="mx-2">ー</span>
          <span> {{ readerStore.progress }}% </span>
       </footer>
-   </div>
+   </template>
 </template>
 
 <style scoped></style>

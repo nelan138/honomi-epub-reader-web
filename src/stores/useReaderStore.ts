@@ -6,7 +6,7 @@ import type { Section } from '@src/services/epub/epubParser.ts';
 export const useReaderStore = defineStore('reader', () => {
    // * STATEs
 
-   const sections = ref<Section[]>([]);
+   const sections = shallowRef<Section[]>([]);
    const totalCharacters = ref(0);
    const charactersRead = ref(0);
 
@@ -117,8 +117,6 @@ export const useReaderStore = defineStore('reader', () => {
 
    /** this DOES NOT sync with DB by default */
    function updateCharactersRead(value: number, options?: { syncWithDb: boolean }) {
-      console.log('This runs');
-
       if (value < 0 || value > totalCharacters.value)
          throw new UnexpectedRuntimeError('Invalid charactersRead value: ' + value);
 

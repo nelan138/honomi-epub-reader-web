@@ -7,8 +7,5 @@ const props = defineProps<{
 
 <template>
    <!-- TODO:  [content-visibility:auto] not working right with scrolling into view -->
-   <div
-      class="prose prose-headings:text-ink text-ink w-full max-w-full py-4 [content-visibility:auto] [&_img,&_svg]:mx-auto [&_img,&_svg]:block [&_img,&_svg]:max-h-[80dvh] [&_img,&_svg]:max-w-[80dvw]"
-      v-html="content"
-   ></div>
+   <div v-html="content"></div>
 </template>

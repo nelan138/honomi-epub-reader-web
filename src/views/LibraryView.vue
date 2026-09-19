@@ -119,20 +119,26 @@ const handleDeletingShelf = async (shelfId: number) => {
 </script>
 
 <template>
-   <ConfirmDialog
-      v-model:open="confirmDialogIsOpen"
-      @confirm="resolveConfirmDialogConfirm"
-      @cancel="resolveConfirmDialogCancel"
-   />
+   <template>
+      <ConfirmDialog
+         v-model:open="confirmDialogIsOpen"
+         @confirm="resolveConfirmDialogConfirm"
+         @cancel="resolveConfirmDialogCancel"
+      />
 
-   <SelectDialog
-      v-model:open="selectionDialogIsOpen"
-      :options="shelfOptions"
-      @cancel="resolveSelectDialogCancel"
-      @select="resolveSelectDialogSelect"
-   />
+      <SelectDialog
+         v-model:open="selectionDialogIsOpen"
+         :options="shelfOptions"
+         @cancel="resolveSelectDialogCancel"
+         @select="resolveSelectDialogSelect"
+      />
 
-   <InputDialog @submit="resolveInputDialogSubmit" @cancel="resolveInputDialogCancel" v-model:open="textDialogIsOpen" />
+      <InputDialog
+         @submit="resolveInputDialogSubmit"
+         @cancel="resolveInputDialogCancel"
+         v-model:open="textDialogIsOpen"
+      />
+   </template>
 
    <LibraryHeader
       @toggle-theme="themeStore.toggleTheme"
@@ -140,35 +146,34 @@ const handleDeletingShelf = async (shelfId: number) => {
       @import-files="bookStore.importBooks"
    />
 
-   <ul>
-      <li v-for="shelf in shelfStore.shelves" :key="shelf.id">
-         <Shelf
-            @rename="handleRenamingShelf"
-            @move-up="shelfStore.moveShelfUp"
-            @move-down="shelfStore.moveShelfDown"
-            @expand="shelfStore.expandShelf"
-            @collapse="shelfStore.collapseShelf"
-            @delete="handleDeletingShelf"
-            :shelf="shelf"
-         >
-            <TransitionGroup
-               tag="ul"
-               name="book-list"
-               class="grid w-full grid-cols-1 gap-4 lg:grid-cols-3 2xl:grid-cols-4"
-            >
-               <li v-if="shelf.expanded" v-for="book in bookShelfMap.get(shelf.id) ?? []" :key="book.id">
-                  <BookCard
-                     @open="() => router.push(`/reader/${book.id}`)"
-                     @rename="handleRenamingBook"
-                     @delete="handleDeletingBook"
-                     @change-shelf="handleChangingBookShelf"
-                     :book="book"
-                  />
-               </li>
-            </TransitionGroup>
-         </Shelf>
-      </li>
-   </ul>
+   <BookShelf
+      v-for="shelf in shelfStore.shelves"
+      :key="shelf.id"
+      :shelf="shelf"
+      @rename="handleRenamingShelf"
+      @delete="handleDeletingShelf"
+      @move-up="shelfStore.moveShelfUp"
+      @move-down="shelfStore.moveShelfDown"
+      @expand="shelfStore.expandShelf"
+      @collapse="shelfStore.collapseShelf"
+   >
+      <TransitionGroup
+         v-if="shelf.expanded"
+         tag="div"
+         name="book-list"
+         class="grid w-full grid-cols-1 gap-4 lg:grid-cols-3 2xl:grid-cols-4"
+      >
+         <BookCard
+            v-for="book in bookShelfMap.get(shelf.id) ?? []"
+            :key="book.id"
+            :book="book"
+            @open="router.push(`/reader/${book.id}`)"
+            @rename="handleRenamingBook"
+            @delete="handleDeletingBook"
+            @change-shelf="handleChangingBookShelf"
+         />
+      </TransitionGroup>
+   </BookShelf>
 </template>
 
 <style scoped>
