@@ -1,5 +1,13 @@
 <script lang="ts" setup>
-import { DialogClose, DialogContent, DialogOverlay, DialogPortal, DialogRoot, DialogTitle } from 'reka-ui';
+import {
+   DialogClose,
+   DialogContent,
+   DialogOverlay,
+   DialogPortal,
+   DialogRoot,
+   DialogTitle,
+   DialogDescription,
+} from 'reka-ui';
 
 /* *** */
 
@@ -36,6 +44,8 @@ const onSubmit = () => {
             class="border-stroke bg-card font-label text-ink fixed top-1/2 left-1/2 z-50 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-xl border p-5 shadow-xl focus:outline-none"
          >
             <DialogTitle class="text-ink text-sm font-semibold"> {{ title || 'Popup' }} </DialogTitle>
+
+            <DialogDescription />
 
             <form @submit.prevent="onSubmit" class="mt-4 space-y-4">
                <div class="relative w-full">

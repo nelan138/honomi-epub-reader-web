@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { UnexpectedRuntimeError } from '@src/utils';
 import { DialogClose, DialogContent, DialogOverlay, DialogPortal, DialogRoot, DialogTitle } from 'reka-ui';
-import { ListboxContent, ListboxItem, ListboxItemIndicator, ListboxRoot } from 'reka-ui';
+import { ListboxContent, ListboxItem, ListboxItemIndicator, ListboxRoot, DialogDescription } from 'reka-ui';
 
 /* *** */
 
@@ -45,6 +45,10 @@ const onSelect = () => {
             class="border-stroke bg-card font-label text-ink fixed top-1/2 left-1/2 z-50 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-xl border p-5 shadow-xl focus:outline-none"
          >
             <DialogTitle class="text-ink text-sm font-semibold"> {{ title || 'Popup' }} </DialogTitle>
+
+            <DialogDescription class="text-muted mt-2 text-xs leading-relaxed">
+               Select an option from the list below.
+            </DialogDescription>
 
             <ListboxRoot
                :default-value="options[0]?.id"

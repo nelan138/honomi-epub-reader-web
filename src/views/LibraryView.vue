@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { UnexpectedRuntimeError, unwrapAsync } from '@src/utils';
-import { useSelectDialog } from '@src/composables/library/useSelectDialog';
-import { useInputDialog } from '@src/composables/library/useInputDialog';
-import { useConfirmDialog } from '@src/composables/library/useConfirmDialog';
+import { useSelectDialog } from '@src/composables/useSelectDialog';
+import { useInputDialog } from '@src/composables/useInputDialog';
+import { useConfirmDialog } from '@src/composables/useConfirmDialog';
 import { useShelfStore } from '@src/stores/useShelfStore';
 import { useBookStore, type BookCard } from '@src/stores/useBookStore';
 import { useThemeStore } from '@src/stores/useThemeStore';
+import { useToast } from '@src/composables/useToast';
 
 /* *** */
 
@@ -116,6 +117,13 @@ const handleDeletingShelf = async (shelfId: number) => {
    if (error) throw new UnexpectedRuntimeError(error.message);
    if (confirm) shelfStore.deleteShelf(shelfId);
 };
+
+const { toast } = useToast();
+
+const handleImportingBooks = async (files: FileList) => {
+   await bookStore.importBooks(files);
+   toast.success('Whatever', `Imported ${files.length} books`, { duration: 1000 });
+};
 </script>
 
 <template>
@@ -140,10 +148,12 @@ const handleDeletingShelf = async (shelfId: number) => {
       />
    </template>
 
+   <Toaster />
+
    <LibraryHeader
       @toggle-theme="themeStore.toggleTheme"
       @add-shelf="handleAddingShelf"
-      @import-files="bookStore.importBooks"
+      @import-files="handleImportingBooks"
    />
 
    <BookShelf
