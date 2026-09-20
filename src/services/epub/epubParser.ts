@@ -1,6 +1,6 @@
 import { makeBook } from '@src/vendor/epub-parser-js/main.ts';
 import { strFromU8 } from 'fflate';
-import { domParser, EpubParsingError, UNICODE_GLYPH_REGEX, xmlSerializer } from '@src/utils';
+import { domParser, EpubParsingError, UNICODE_GLYPH_REGEX, unwrapAsync, xmlSerializer } from '@src/utils';
 
 /* *** */
 
@@ -53,7 +53,10 @@ export class EpubParser {
    }
 
    async parse(): Promise<Book> {
-      const book = await makeBook(this.file);
+      const [book, error] = await unwrapAsync(makeBook(this.file));
+      if (error) {
+         throw new EpubParsingError(`Failed to parse EPUB file: ${error.message}`);
+      }
 
       const archive = book.archive;
       const manifest = book.manifest;

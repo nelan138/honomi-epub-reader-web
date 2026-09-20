@@ -3,11 +3,12 @@
    <head>
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
       <title>Honomi — Bookshelf</title>
 
       <style>
+         /* Firefox */
          .themed-scroll {
-            /* Firefox */
             scrollbar-width: thin;
             scrollbar-color: var(--color-muted) transparent;
          }
@@ -32,6 +33,14 @@
       class="bg-bg text-ink min-h-dvh max-w-dvw font-serif text-base leading-normal font-normal md:text-xl lg:text-base"
    >
       <main id="app"></main>
-      <script type="module" src="./src/main.js"></script>
+
+      <div data-role="portals">
+         <div id="toast"></div>
+         <div id="prompt-dialog"></div>
+         <div id="alert-dialog"></div>
+         <div id="select-dialog"></div>
+      </div>
+
+      <script type="module" src="./src/main.ts"></script>
    </body>
 </html>

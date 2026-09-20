@@ -1,155 +1,185 @@
 <script setup lang="ts">
-import { UnexpectedRuntimeError, unwrapAsync } from '@src/utils';
-import { useSelectDialog } from '@src/composables/useSelectDialog';
-import { useInputDialog } from '@src/composables/useInputDialog';
-import { useConfirmDialog } from '@src/composables/useConfirmDialog';
+import { unwrapAsync } from '@src/utils';
 import { useShelfStore } from '@src/stores/useShelfStore';
-import { useBookStore, type BookCard } from '@src/stores/useBookStore';
+import { useBookStore } from '@src/stores/useBookStore';
 import { useThemeStore } from '@src/stores/useThemeStore';
 import { useToast } from '@src/composables/useToast';
+import { usePrompt } from '@src/composables/usePrompt';
+import { useAlert } from '@src/composables/useAlert';
+import { useSelect } from '@src/composables/useSelect';
 
 /* *** */
 
-onMounted(() => {
-   themeStore.load();
-   shelfStore.load();
-   bookStore.load();
-});
-
-onUnmounted(() => {
-   bookStore.reset();
-   shelfStore.reset();
-   themeStore.reset();
-});
-
-const router = useRouter();
-
-// STORES
 const themeStore = useThemeStore();
 const bookStore = useBookStore();
 const shelfStore = useShelfStore();
 
-const {
-   isOpen: selectionDialogIsOpen,
-   dialogPrompt: selectDialogPrompt,
-   resolveCancel: resolveSelectDialogCancel,
-   resolveSelect: resolveSelectDialogSelect,
-} = useSelectDialog();
+onMounted(() => {
+   themeStore.load();
+   bookStore.load();
+   shelfStore.load();
+});
 
-const {
-   isOpen: textDialogIsOpen,
-   dialogPrompt: inputDialogPrompt,
-   resolveCancel: resolveInputDialogCancel,
-   resolveSubmit: resolveInputDialogSubmit,
-} = useInputDialog();
+onUnmounted(() => {
+   themeStore.reset();
+   bookStore.reset();
+   shelfStore.reset();
+});
 
-const {
-   isOpen: confirmDialogIsOpen,
-   dialogPrompt: confirmDialogPrompt,
-   resolveConfirm: resolveConfirmDialogConfirm,
-   resolveCancel: resolveConfirmDialogCancel,
-} = useConfirmDialog();
+// Portals
+
+const { toast } = useToast();
+const { prompt } = usePrompt();
+const { alert } = useAlert();
+const { select } = useSelect();
+
+const router = useRouter();
 
 /* BOOK SECTION */
 
+const handleImportingBooks = async (files: FileList) => {
+   const [result, error] = await unwrapAsync(bookStore.importBooks(files));
+
+   if (error) toast.error(error.name, error.message);
+   else {
+      if (result !== files.length) {
+         toast.error('Bookstore', `Failed to import ${files.length - result} book(s)`, { duration: 5000 });
+      }
+      if (result !== 0) {
+         toast.success('Bookstore', `Added ${result} book(s)`, { duration: 5000 });
+      }
+   }
+};
+
 const handleChangingBookShelf = async (bookId: number) => {
-   const [selectShelfId, error] = await unwrapAsync(selectDialogPrompt());
-   if (error) throw new UnexpectedRuntimeError(error.message);
-   if (selectShelfId) bookStore.changeBookShelf(bookId, selectShelfId);
+   const selection = await select(shelfSelections.value, {
+      title: 'Choose one',
+      description: 'Select which shelf you want to move this item into.',
+   });
+
+   if (!selection) return;
+
+   if (selection === null) {
+      toast.error('Warning', 'Shelf cannot be null');
+      return;
+   }
+
+   const shelfId = typeof selection.id === 'number' ? selection.id : Number(selection.id);
+
+   const [_, error] = await unwrapAsync(bookStore.changeBookShelf(bookId, shelfId));
+   if (error) {
+      toast.error(error.name, error.message);
+   }
 };
 
 const handleRenamingBook = async (bookId: number) => {
-   const [newName, error] = await unwrapAsync(inputDialogPrompt());
-   if (error) throw new UnexpectedRuntimeError(error.message);
-   if (newName === '') {
-      alert('Name cannot be empty');
+   const input = await prompt({
+      title: 'Rename Book',
+      description: 'Enter a new name for this book.',
+      placeholder: 'Book title...',
+   });
+
+   if (input === null) return;
+
+   if (input === '') {
+      toast.error('Warning', 'Name cannot be empty');
       return;
    }
-   if (newName) bookStore.renameBook(bookId, newName);
+
+   const [_, error] = await unwrapAsync(bookStore.renameBook(bookId, input));
+   if (error) {
+      toast.error(error.name, error.message);
+   }
 };
 
 const handleDeletingBook = async (bookId: number) => {
-   const [confirm, error] = await unwrapAsync(confirmDialogPrompt());
-   if (error) throw new UnexpectedRuntimeError(error.message);
-   if (confirm) bookStore.deleteBook(bookId);
+   const confirmed = await alert({
+      title: 'Delete Book',
+      description: 'Are you sure you want to remove this book? Its progress and cached data will be deleted.',
+      confirmText: 'Delete',
+      cancelText: 'Keep',
+   });
+
+   if (!confirmed) return;
+
+   const [_, error] = await unwrapAsync(bookStore.deleteBook(bookId));
+   if (error) {
+      toast.error(error.name, error.message);
+   }
 };
 
 /* SHELF SECTION */
 
-type ShelfOption = { id: number; name: string };
-const shelfOptions = computed<ShelfOption[]>(() => shelfStore.shelves.map(({ id, name }) => ({ id, name })));
+const shelfSelections = computed(() =>
+   shelfStore.shelves.map((shelf) => ({
+      id: shelf.id,
+      value: shelf.name,
+   }))
+);
 
-const bookShelfMap = computed(() => {
-   const map = new Map<number, BookCard[]>();
-
-   for (const book of bookStore.books) {
-      const list = map.get(book.shelfId);
-
-      if (list) list.push(book);
-      else map.set(book.shelfId, [book]);
-   }
-
-   return map;
-});
+const bookShelfMap = computed(() => Map.groupBy(bookStore.books, (book) => book.shelfId));
 
 const handleAddingShelf = async () => {
-   const [shelfName, error] = await unwrapAsync(inputDialogPrompt());
-   if (error) throw new UnexpectedRuntimeError(error.message);
-   if (shelfName === '') {
-      alert('Shelf name cannot be empty');
+   const input = await prompt({
+      title: 'New Shelf',
+      description: 'Enter a name for the new shelf.',
+      placeholder: 'e.g. Science Fiction, To Read...',
+   });
+
+   if (input === null) return;
+
+   if (input === '') {
+      toast.error('Warning', 'Name cannot be empty');
       return;
    }
-   if (shelfName) shelfStore.addShelf(shelfName);
+
+   const [_, error] = await unwrapAsync(shelfStore.addShelf(input));
+   if (error) {
+      toast.error(error.name, error.message);
+   }
 };
 
 const handleRenamingShelf = async (shelfId: number) => {
-   const [newName, error] = await unwrapAsync(inputDialogPrompt());
-   if (error) throw new UnexpectedRuntimeError(error.message);
-   if (newName === '') {
-      alert('Name cannot be empty');
+   const input = await prompt({
+      title: 'Rename Shelf',
+      description: 'Enter a new name for this shelf.',
+      placeholder: 'Shelf name...',
+   });
+
+   if (input === null) {
+      toast.error('Warning', 'Shelf name cannot be null');
       return;
    }
-   if (newName) shelfStore.renameShelf(shelfId, newName);
+
+   if (input === '') {
+      toast.error('Warning', 'Shelf name cannot be empty');
+      return;
+   }
+
+   const [_, error] = await unwrapAsync(shelfStore.renameShelf(shelfId, input));
+   if (error) {
+      toast.error(error.name, error.message);
+   }
 };
 
 const handleDeletingShelf = async (shelfId: number) => {
-   const [confirm, error] = await unwrapAsync(confirmDialogPrompt());
-   if (error) throw new UnexpectedRuntimeError(error.message);
-   if (confirm) shelfStore.deleteShelf(shelfId);
-};
+   const confirmed = await alert({
+      title: 'Delete Shelf',
+      description: 'Are you sure you want to delete this shelf and all the books exist inside it?',
+      confirmText: 'Delete Shelf',
+      cancelText: 'Cancel',
+   });
 
-const { toast } = useToast();
+   if (!confirmed) return;
 
-const handleImportingBooks = async (files: FileList) => {
-   await bookStore.importBooks(files);
-   toast.success('Whatever', `Imported ${files.length} books`, { duration: 1000 });
+   const [_, error] = await unwrapAsync(shelfStore.deleteShelf(shelfId));
+   if (error) {
+      toast.error(error.name, error.message);
+   }
 };
 </script>
 
 <template>
-   <template>
-      <ConfirmDialog
-         v-model:open="confirmDialogIsOpen"
-         @confirm="resolveConfirmDialogConfirm"
-         @cancel="resolveConfirmDialogCancel"
-      />
-
-      <SelectDialog
-         v-model:open="selectionDialogIsOpen"
-         :options="shelfOptions"
-         @cancel="resolveSelectDialogCancel"
-         @select="resolveSelectDialogSelect"
-      />
-
-      <InputDialog
-         @submit="resolveInputDialogSubmit"
-         @cancel="resolveInputDialogCancel"
-         v-model:open="textDialogIsOpen"
-      />
-   </template>
-
-   <Toaster />
-
    <LibraryHeader
       @toggle-theme="themeStore.toggleTheme"
       @add-shelf="handleAddingShelf"

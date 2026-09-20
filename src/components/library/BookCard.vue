@@ -38,10 +38,12 @@ onUnmounted(() => cleanUpBlobUrls([coverUrl]));
             <p class="text-muted truncate text-[80%]">{{ book.metadata.publisher }}</p>
             <p class="text-muted truncate text-[80%] uppercase">{{ book.metadata.language }}</p>
          </div>
-         <div class="bg-stroke/10 h-1 overflow-hidden rounded-full">
+
+         <!-- Progress bar -->
+         <div class="bg-muted/15 h-1 overflow-hidden rounded-full">
             <div
                class="bg-tertiary h-full rounded-full"
-               :style="{ width: `${((book.charactersRead * 100) / book.totalCharacters).toFixed(0)}%` }"
+               :style="{ width: `${(book.charactersRead * 100) / book.totalCharacters}%` }"
             ></div>
          </div>
 

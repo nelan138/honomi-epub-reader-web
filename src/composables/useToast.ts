@@ -8,7 +8,12 @@ export type Notification = {
 
 export const notifications = ref<Notification[]>([]);
 
-export function useToast() {
+export function useToast(): {
+   toast: {
+      success: (_title: string, _description?: string, options?: { duration?: number }) => void;
+      error: (_title: string, _description?: string, options?: { duration?: number }) => void;
+   };
+} {
    const toast = {
       success: (_title: string, _description?: string, options?: { duration?: number }) => {
          notifications.value.push({
