@@ -150,10 +150,7 @@ const handleRenamingShelf = async (shelfId: number) => {
          })
       )?.trim() ?? null;
 
-   if (input === null) {
-      toast.error('Warning', 'Shelf name cannot be null', { duration: 5000 });
-      return;
-   }
+   if (input === null) return;
 
    if (input === '') {
       toast.error('Warning', 'Shelf name cannot be empty', { duration: 5000 });
