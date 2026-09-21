@@ -1,5 +1,5 @@
 import { Dexie, type EntityTable } from 'dexie';
-import { NotFoundError, UnexpectedRuntimeError, unwrapAsync } from '@src/utils';
+import { NotFoundError, RuntimeError, tryCatch } from '@src/utils';
 import type { Book } from '@src/services/epub/epubParser.ts';
 
 /* *** */
@@ -45,10 +45,10 @@ db.on('populate', () => {
 
 // every time the database opens
 db.on('ready', async () => {
-   const [shelf, error] = await unwrapAsync(db.shelves.get(defaultShelf.id));
+   const [shelf, error] = await tryCatch(db.shelves.get(defaultShelf.id));
 
    if (error) {
-      throw new UnexpectedRuntimeError(
+      throw new RuntimeError(
          `Failed to read default shelf: ${error.message}`,
       );
    }

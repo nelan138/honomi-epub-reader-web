@@ -18,7 +18,7 @@ export function usePrompt() {
    /** returns string on submit, null on cancel */
    function prompt(_options: Options): Promise<string | null> {
       if (deferred !== null) {
-         console.warn('Another prompt promise is still running, resolving it with `null`');
+         console.warn('[Dialog] Another prompt promise is still running, resolving it with `null`');
          deferred.resolve(null);
       }
 
@@ -36,7 +36,7 @@ export function usePrompt() {
 
    function submit(_input: string): void {
       if (deferred === null) {
-         console.warn('`submit()` is called before `prompt()`');
+         console.warn('[Dialog] `submit()` is called before `prompt()`');
          return;
       }
 
@@ -48,7 +48,7 @@ export function usePrompt() {
 
    function cancel(): void {
       if (deferred === null) {
-         console.warn('`cancel()` is called before `prompt()`');
+         console.warn('[Dialog] `cancel()` is called before `prompt()`');
          return;
       }
 

@@ -1,7 +1,7 @@
 import { type BookRecord, db, defaultShelf } from '@src/services/dexie/database';
 
-import { NotFoundError } from '@src/utils';
 import type { Book } from '@src/services/epub/epubParser.ts';
+import { NotFoundError } from '@src/utils.ts';
 
 /* *** */
 
@@ -25,17 +25,14 @@ export async function getBooksFromDB(): Promise<BookRecord[]> {
    return books;
 }
 
-export async function getBookFromDB(bookId: number): Promise<BookRecord> {
-   const book = await db.books.get(bookId);
-   if (!book) throw new NotFoundError('Book is not found');
+export async function getBookFromDB(bookId: number): Promise<BookRecord | null> {
+   const book = await db.books.get(bookId) ?? null;
    return book;
 }
 
 export async function deleteBookFromDB(bookId: number): Promise<void> {
    const store = db.books;
-   const deletedCount = await store.where('id').equals(bookId).delete();
-
-   if (deletedCount === 0) throw new NotFoundError(`Book with ID ${bookId} not found`);
+   await store.delete(bookId);
 }
 
 export async function renameBookInDB(bookId: number, newTitle: string): Promise<void> {
@@ -44,7 +41,7 @@ export async function renameBookInDB(bookId: number, newTitle: string): Promise<
       'metadata.title': newTitle,
    });
 
-   if (updatedCount === 0) throw new NotFoundError(`Book with ID ${bookId} not found`);
+   if (updatedCount === 0) throw new NotFoundError('Book does not exist', { entity: 'Book', id: bookId });
 }
 
 export async function changeBookShelfInDB(bookId: number, shelfId: number): Promise<void> {
@@ -53,10 +50,10 @@ export async function changeBookShelfInDB(bookId: number, shelfId: number): Prom
 
    await db.transaction('readwrite', shelfStore, bookStore, async () => {
       const bookRecord = await bookStore.get(bookId);
-      if (!bookRecord) throw new NotFoundError('Book does not exist');
+      if (!bookRecord) throw new NotFoundError('Book does not exist', { entity: 'Book', id: bookId });
 
       const shelf = await shelfStore.get(shelfId);
-      if (!shelf) throw new NotFoundError('Shelf does not exist');
+      if (!shelf) throw new NotFoundError('Shelf does not exist', { entity: 'Shelf', id: shelfId });
 
       bookRecord.shelfId = shelfId;
       await bookStore.put(bookRecord);
@@ -69,5 +66,5 @@ export async function updateCharactersReadInDB(bookId: number, charactersRead: n
       charactersRead: charactersRead,
    });
 
-   if (updatedCount === 0) throw new NotFoundError('Book does not exist!');
+   if (updatedCount === 0) throw new NotFoundError('Book does not exist', { entity: 'Book', id: bookId });
 }

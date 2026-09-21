@@ -1,12 +1,20 @@
 import { makeBook } from '@src/vendor/epub-parser-js/main.ts';
 import { strFromU8 } from 'fflate';
-import { domParser, EpubParsingError, UNICODE_GLYPH_REGEX, unwrapAsync, xmlSerializer } from '@src/utils';
+import { domParser, tryCatch, xmlSerializer } from '@src/utils';
 
 /* *** */
 
-const SVG_NS = 'http://www.w3.org/2000/svg';
-const XLINK_NS = 'http://www.w3.org/1999/xlink';
-const XHTML_NS = 'http://www.w3.org/1999/xhtml';
+export class ParsingError extends Error {
+   constructor(
+      message: string,
+      options?: {
+         cause?: unknown;
+      },
+   ) {
+      super(message, { cause: options?.cause });
+      this.name = 'ParsingError';
+   }
+}
 
 export type Section = {
    content: string;
@@ -30,6 +38,14 @@ export type Book = {
    images: Record<string, Blob>;
 };
 
+// * only letters and numbers
+const UNICODE_GLYPH_REGEX = /[\p{L}\p{N}]/gu;
+
+const SVG_NS = 'http://www.w3.org/2000/svg';
+const XLINK_NS = 'http://www.w3.org/1999/xlink';
+const XHTML_NS = 'http://www.w3.org/1999/xhtml';
+
+/** Module scope */
 let defaultCoverBlob: Blob | null = null;
 
 async function getDefaultCoverBlob(): Promise<Blob> {
@@ -37,8 +53,9 @@ async function getDefaultCoverBlob(): Promise<Blob> {
 
    const defaultCoverUrl = new URL('@src/assets/default-book-cover.jpeg', import.meta.url).href;
    defaultCoverBlob = await fetch(defaultCoverUrl).then((res) => res.blob());
+
    if (!defaultCoverBlob) {
-      console.warn('[Epub] Failed to fetch default cover image, using empty Blob instead.');
+      console.warn('[Epub] Failed to fetch default cover image.');
       defaultCoverBlob = new Blob();
    }
 
@@ -53,10 +70,8 @@ export class EpubParser {
    }
 
    async parse(): Promise<Book> {
-      const [book, error] = await unwrapAsync(makeBook(this.file));
-      if (error) {
-         throw new EpubParsingError(`Failed to parse EPUB file: ${error.message}`);
-      }
+      const [book, error] = await tryCatch(makeBook(this.file));
+      if (error) throw new ParsingError('Failed to parse EPUB file.', { cause: error });
 
       const archive = book.archive;
       const manifest = book.manifest;
@@ -71,7 +86,7 @@ export class EpubParser {
          for (const imageEl of body.getElementsByTagName('img')) {
             const src = imageEl.getAttribute('src');
             if (!src) {
-               console.warn('<img> tag missing src attribute, skipping:', imageEl);
+               console.warn('[Epub] <img> tag missing src attribute, skipping:', imageEl);
                continue;
             }
 
@@ -80,7 +95,7 @@ export class EpubParser {
 
             const buffer = archive[resolvedSrc];
             if (!buffer) {
-               console.warn(`Image not found in archive: ${resolvedSrc}`);
+               console.warn(`[Epub] Image not found in archive: ${resolvedSrc}`);
                continue;
             }
 
@@ -89,7 +104,7 @@ export class EpubParser {
 
             if (resolvedSrc in images) {
                console.warn(
-                  `Duplicate image src found: ${resolvedSrc}, overwriting previous Blob.`,
+                  `[Epub] Duplicate image src found: ${resolvedSrc}, overwriting previous Blob.`,
                );
             }
 
@@ -104,7 +119,7 @@ export class EpubParser {
                ?? svgImageEl.getAttribute('xlink:href');
 
             if (!src) {
-               console.warn('<svg:image> tag missing href attribute, skipping:', svgImageEl);
+               console.warn('[Epub] <svg:image> missing href, skipping:', svgImageEl);
                continue;
             }
 
@@ -113,7 +128,7 @@ export class EpubParser {
 
             const buffer = archive[resolvedSrc];
             if (!buffer) {
-               console.warn(`Image not found in archive: ${resolvedSrc}`);
+               console.warn(`[Epub] Image not found in archive: ${resolvedSrc}`);
                continue;
             }
 
@@ -121,7 +136,7 @@ export class EpubParser {
             const blob = new Blob([buffer as Uint8Array<ArrayBuffer>], { type: mimeType });
             if (resolvedSrc in images) {
                console.warn(
-                  `Duplicate image src found: ${resolvedSrc}, overwriting previous Blob.`,
+                  `[Epub] Duplicate image src found: ${resolvedSrc}, overwriting.`,
                );
             }
 
@@ -145,26 +160,26 @@ export class EpubParser {
          const _sections: Section[] = [];
          for (const spineItem of spine) {
             if (!spineItem.linear) { // Skip non-linear cuz im lazy >.<
-               console.warn(`Skipping non-linear section: ${spineItem.id}`);
+               console.warn(`[Epub] Skipping non-linear section: ${spineItem.id}`);
                continue;
             }
 
             const manifestItem = manifest.get(spineItem.id);
             if (!manifestItem) {
-               throw new EpubParsingError(
+               throw new ParsingError(
                   `Manifest item not found for spine item: ${spineItem.id}`,
                );
             }
 
             if (!(manifestItem.mediaType in SupportedMimeTypes)) {
-               throw new EpubParsingError(
+               throw new ParsingError(
                   `Unsupported media type: ${manifestItem.mediaType}`,
                );
             }
 
             const buffer = archive[manifestItem.href];
             if (!buffer) {
-               throw new EpubParsingError(
+               throw new ParsingError(
                   `Buffer not found for manifest item: ${manifestItem.href}`,
                );
             }
@@ -181,7 +196,7 @@ export class EpubParser {
                ?? doc.getElementsByTagNameNS(XHTML_NS, 'body')[0];
 
             if (!body) {
-               throw new EpubParsingError(
+               throw new ParsingError(
                   `Body element not found for spine item: ${spineItem.id}`,
                );
             }

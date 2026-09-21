@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useThemeStore } from '@src/stores/useThemeStore';
-import { cleanUpBlobUrls, UnexpectedRuntimeError, unwrapAsync } from '@src/utils';
+import { cleanUpBlobUrls, RuntimeError, tryCatch } from '@src/utils';
 
 import { getBookFromDB, updateCharactersReadInDB } from '@src/services/dexie/bookRepo';
 import { useReaderStore } from '@src/stores/useReaderStore';
@@ -24,10 +24,10 @@ const bookId = params ? parseInt(params) : NaN;
 
 // LoadingをまってScrollingを実行する
 onMounted(async () => {
-   const [_, error] = await unwrapAsync(getBookFromDB(bookId));
+   const [_, error] = await tryCatch(getBookFromDB(bookId));
 
    if (error) {
-      console.warn(error.message);
+      console.warn('[Reader]', error.message);
       router.push('/404');
       return;
    }
@@ -41,9 +41,7 @@ onMounted(async () => {
    } else {
       const target = document.querySelector<HTMLElement>(`p[data-characters-read="${readerStore.charactersRead}"]`);
       if (!target) {
-         throw new UnexpectedRuntimeError(
-            `No paragraph found with data-characters-read="${readerStore.charactersRead}"`
-         );
+         throw new RuntimeError(`No paragraph found with data-characters-read="${readerStore.charactersRead}"`);
       }
 
       target.scrollIntoView({ behavior: 'instant', block: 'start' });
@@ -100,7 +98,7 @@ const sectionTails = computed(() => {
 
       const charOffset = lastP.getAttribute('data-characters-read');
       if (!charOffset) {
-         throw new UnexpectedRuntimeError('Missing data-characters-read attribute on paragraph');
+         throw new RuntimeError('Missing data-characters-read attribute on paragraph');
       }
 
       offsets.push(parseInt(charOffset, 10));
@@ -121,7 +119,7 @@ const getCurrentCharactersRead = () => {
 
    const targetEl = document.elementFromPoint(x, y);
    if (!targetEl) {
-      console.warn('No element found at the specified point (x, y):', { x, y });
+      console.warn('[Reader] No element found at:', { x, y });
       return charOffsetCache;
    }
 
@@ -129,7 +127,7 @@ const getCurrentCharactersRead = () => {
 
    if (paragraphEl) {
       const attr = paragraphEl.getAttribute('data-characters-read');
-      if (!attr) throw new UnexpectedRuntimeError('No data-characters-read attribute found on <p> element');
+      if (!attr) throw new RuntimeError('No data-characters-read attribute found on <p> element');
 
       const offset = parseInt(attr);
       charOffsetCache = offset;
@@ -140,7 +138,7 @@ const getCurrentCharactersRead = () => {
    else {
       const sectionEl = targetEl.closest('section[data-section-index]');
       if (!sectionEl) {
-         console.warn('Somehow user have scroll out of all rendered sections');
+         console.warn('[Reader] Scrolled out of all rendered sections');
          return charOffsetCache;
       }
 
@@ -152,7 +150,7 @@ const getCurrentCharactersRead = () => {
 
       if (paragraphEl) {
          const attr = paragraphEl.getAttribute('data-characters-read');
-         if (!attr) throw new UnexpectedRuntimeError('No data-characters-read attribute found on <p> element');
+         if (!attr) throw new RuntimeError('No data-characters-read attribute found on <p> element');
 
          const offset = parseInt(attr);
          charOffsetCache = offset;
@@ -162,17 +160,16 @@ const getCurrentCharactersRead = () => {
       // * Fallback 2: There may exist >= 1 <p> in previous section(s)
       else {
          const sectionIndexAttr = sectionEl.getAttribute('data-section-index');
-         if (!sectionIndexAttr)
-            throw new UnexpectedRuntimeError('No data-section-index attribute found on <section> element');
+         if (!sectionIndexAttr) throw new RuntimeError('No data-section-index attribute found on <section> element');
 
          const sectionIndex = parseInt(sectionIndexAttr);
          if (sectionIndex === 0) {
-            console.warn('No previous section found, returning 0 as characters read');
+            console.warn('[Reader] No previous section found, returning 0');
             charOffsetCache = 0;
             return 0;
          }
          const offset = sectionTails.value[sectionIndex - 1];
-         if (offset === undefined) throw new UnexpectedRuntimeError('No offset found for previous section');
+         if (offset === undefined) throw new RuntimeError('No offset found for previous section');
          charOffsetCache = offset;
          return offset;
       }

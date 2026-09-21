@@ -5,25 +5,12 @@ import type { Book } from '@src/services/epub/epubParser.ts';
 export const domParser = new DOMParser();
 export const xmlSerializer = new XMLSerializer();
 
-export const UNICODE_GLYPH_REGEX = /[\p{L}\p{N}]/gu; // only letters and numbers
-export const DANGEROUS_CHAR_REGEX = /[<>"'`;/\\|&$]/;
+/* * FUNCTIONS * */
 
-export async function unwrapAsync<T>(promise: Promise<T>): Promise<[T, null] | [null, Error]> {
+export async function tryCatch<T>(promise: Promise<T>): Promise<[T, null] | [null, Error]> {
    try {
       const data = await promise;
       return [data, null];
-   }
-   catch (error) {
-      const safeError = error instanceof Error ? error : new Error(String(error));
-      return [null, safeError];
-   }
-}
-
-/* * FUNCTIONS * */
-
-export function unwrapSync<T>(fn: () => T): [T, null] | [null, Error] {
-   try {
-      return [fn(), null];
    }
    catch (error) {
       const safeError = error instanceof Error ? error : new Error(String(error));
@@ -104,25 +91,22 @@ export function debugBook(book: Book): void {
    console.groupEnd();
 }
 
-/* OBJECTS & CLASSES */
-
-export class EpubParsingError extends Error {
-   constructor(message: string) {
-      super(message);
-      this.name = this.constructor.name;
-   }
-}
-
-export class UnexpectedRuntimeError extends Error {
-   constructor(message: string) {
-      super(message);
-      this.name = this.constructor.name;
-   }
-}
-
 export class NotFoundError extends Error {
-   constructor(message: string) {
-      super(message);
-      this.name = this.constructor.name;
+   readonly entity?: string;
+
+   constructor(
+      message: string,
+      options?: { entity?: string; cause?: unknown },
+   ) {
+      super(message, { cause: options?.cause });
+      this.name = 'NotFoundError';
+      this.entity = options?.entity;
+   }
+}
+
+export class RuntimeError extends Error {
+   constructor(message: string, options?: { cause?: unknown }) {
+      super(message, options);
+      this.name = 'RuntimeError';
    }
 }

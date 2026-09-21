@@ -18,7 +18,7 @@ export function useAlert() {
    /** true on confirm, false on cancel */
    function alert(_options: Options): Promise<boolean> {
       if (deferred !== null) {
-         console.warn('Another alert promise is still running, resolving it with `false`');
+         console.warn('[Dialog] Another alert promise is still running, resolving it with `false`');
          deferred.resolve(false);
       }
 
@@ -36,7 +36,7 @@ export function useAlert() {
 
    function confirm(): void {
       if (deferred === null) {
-         console.warn('`confirm()` used before alert()');
+         console.warn('[Dialog] `confirm()` used before alert()');
          return;
       }
 
@@ -47,7 +47,7 @@ export function useAlert() {
 
    function cancel(): void {
       if (deferred === null) {
-         console.warn('`cancel()` used before alert()');
+         console.warn('[Dialog] `cancel()` used before alert()');
          return;
       }
 

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { NotFoundError, UnexpectedRuntimeError, unwrapAsync } from '@src/utils';
+import { NotFoundError, RuntimeError, tryCatch } from '@src/utils';
 import {
    addShelfToDB,
    collapseShelfInDB,
@@ -28,7 +28,7 @@ export const useShelfStore = defineStore('shelf', () => {
    }
 
    const syncWithDB = async () => {
-      const [data, error] = await unwrapAsync(getShelvesFromDB());
+      const [data, error] = await tryCatch(getShelvesFromDB());
       if (error) throw error;
 
       shelves.value = data;
@@ -48,7 +48,7 @@ export const useShelfStore = defineStore('shelf', () => {
    }
 
    async function addShelf(name: string) {
-      const [result, error] = await unwrapAsync(addShelfToDB({
+      const [result, error] = await tryCatch(addShelfToDB({
          name,
          expanded: true,
       }));
@@ -76,7 +76,7 @@ export const useShelfStore = defineStore('shelf', () => {
       shiftDisplayOrdersUp(targetShelf.displayOrder);
 
       // Sync
-      const [_, error] = await unwrapAsync(deleteShelfFromDB(shelfId));
+      const [_, error] = await tryCatch(deleteShelfFromDB(shelfId));
       if (error) {
          syncWithDB();
          throw error;
@@ -91,7 +91,7 @@ export const useShelfStore = defineStore('shelf', () => {
       targetShelf.name = newName;
 
       // Sync
-      const [_, error] = await unwrapAsync(renameShelfInDB(shelfId, newName));
+      const [_, error] = await tryCatch(renameShelfInDB(shelfId, newName));
       if (error) {
          await syncWithDB();
          throw error;
@@ -106,7 +106,7 @@ export const useShelfStore = defineStore('shelf', () => {
       targetShelf.expanded = false;
 
       // Sync
-      const [_, error] = await unwrapAsync(collapseShelfInDB(shelfId));
+      const [_, error] = await tryCatch(collapseShelfInDB(shelfId));
       if (error) {
          await syncWithDB();
          throw error;
@@ -121,7 +121,7 @@ export const useShelfStore = defineStore('shelf', () => {
       targetShelf.expanded = true;
 
       // Sync
-      const [_, error] = await unwrapAsync(expandShelfInDB(shelfId));
+      const [_, error] = await tryCatch(expandShelfInDB(shelfId));
       if (error) {
          await syncWithDB();
          throw error;
@@ -140,7 +140,7 @@ export const useShelfStore = defineStore('shelf', () => {
       const newDisplayOrder = direction === 'up' ? targetShelf.displayOrder - 1 : targetShelf.displayOrder + 1;
 
       if (newDisplayOrder < minDisplayOrder || newDisplayOrder > maxDisplayOrder)
-         throw new UnexpectedRuntimeError('Cannot move shelf beyond the bounds of the shelf list!');
+         throw new RuntimeError('Cannot move shelf beyond the bounds of the shelf list!');
 
       const indexOfShelfToSwap = shelves.value.findIndex(
          (shelf) => shelf.displayOrder === newDisplayOrder,
@@ -157,7 +157,7 @@ export const useShelfStore = defineStore('shelf', () => {
       shelves.value[indexOfTargetShelf] = shelfToSwap;
       shelves.value[indexOfShelfToSwap] = targetShelf;
 
-      const [_, error] = await unwrapAsync(
+      const [_, error] = await tryCatch(
          swapShelfDisplayOrdersInDB(targetShelf.id, shelfToSwap.id),
       );
 

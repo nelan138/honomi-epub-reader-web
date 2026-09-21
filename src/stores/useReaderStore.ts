@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { domParser, UnexpectedRuntimeError, unwrapAsync } from '@src/utils.ts';
+import { domParser, RuntimeError, tryCatch } from '@src/utils.ts';
 import { getBookFromDB, updateCharactersReadInDB } from '@src/services/dexie/bookRepo.ts';
 import type { Section } from '@src/services/epub/epubParser.ts';
 
@@ -39,7 +39,7 @@ export const useReaderStore = defineStore('reader', () => {
 
          for (const imgTag of doc.getElementsByTagName('img')) {
             const src = imgTag.getAttribute('src');
-            if (!src) throw new UnexpectedRuntimeError('Image with no src attribute!');
+            if (!src) throw new RuntimeError('Image with no src attribute!');
 
             urls.push(src);
          }
@@ -59,15 +59,15 @@ export const useReaderStore = defineStore('reader', () => {
          const body = doc.body ?? doc.getElementsByTagName('body')[0];
          if (!body) {
             console.log('No <body> tag found in section content:', section.content);
-            throw new UnexpectedRuntimeError('No <body> tag found!');
+            throw new RuntimeError('No <body> tag found!');
          }
 
          for (const imageEl of body.getElementsByTagName('img')) {
             const src = imageEl.getAttribute('src');
-            if (!src) throw new UnexpectedRuntimeError('Image with no src attribute!');
+            if (!src) throw new RuntimeError('Image with no src attribute!');
 
             const blob = _images[src];
-            if (!blob) throw new UnexpectedRuntimeError(`Image blob not found: ${src}`);
+            if (!blob) throw new RuntimeError(`Image blob not found: ${src}`);
 
             const blobUrl = URL.createObjectURL(blob);
             imageEl.setAttribute('src', blobUrl);
@@ -89,10 +89,9 @@ export const useReaderStore = defineStore('reader', () => {
 
       isLoading.value = true;
 
-      const [book] = await unwrapAsync(getBookFromDB(_bookId));
-      if (!book) throw new UnexpectedRuntimeError(`Failed to load book with ID ${_bookId}`);
+      const [book, error] = await tryCatch(getBookFromDB(_bookId));
+      if (book === null || error) throw new RuntimeError(`Failed to load book with ID ${_bookId}`);
 
-      console.log('Loading Reader');
       // debugBook(data);
 
       totalCharacters.value = book.totalCharacters;
@@ -117,14 +116,13 @@ export const useReaderStore = defineStore('reader', () => {
 
    /** this DOES NOT sync with DB by default */
    function updateCharactersRead(value: number, options?: { syncWithDb: boolean }) {
-      if (value < 0 || value > totalCharacters.value)
-         throw new UnexpectedRuntimeError('Invalid charactersRead value: ' + value);
+      if (value < 0 || value > totalCharacters.value) throw new RuntimeError('Invalid charactersRead value: ' + value);
 
       if (charactersRead.value === value) return;
 
       charactersRead.value = value;
       if (options?.syncWithDb) {
-         if (!bookId) throw new UnexpectedRuntimeError('Book ID is not set. Cannot sync with DB.');
+         if (!bookId) throw new RuntimeError('Book ID is not set. Cannot sync with DB.');
 
          updateCharactersReadInDB(bookId, value);
       }

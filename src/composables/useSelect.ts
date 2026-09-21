@@ -26,7 +26,7 @@ export function useSelect() {
       _options?: { title?: string; description?: string },
    ): Promise<Selection | null> {
       if (deferred !== null) {
-         console.warn('Another select promise is still running, resolving it with `null`');
+         console.warn('[Dialog] Another select promise is still running, resolving it with `null`');
          deferred.resolve(null);
       }
 
@@ -46,7 +46,7 @@ export function useSelect() {
 
    function cancel() {
       if (deferred === null) {
-         console.warn('`cancel()` used before select()');
+         console.warn('[Dialog] `cancel()` used before select()');
          return;
       }
 
@@ -58,7 +58,7 @@ export function useSelect() {
 
    function confirm(_option: Selection) {
       if (deferred === null) {
-         console.warn('`confirm()` used before select()');
+         console.warn('[Dialog] `confirm()` used before select()');
          return;
       }
 

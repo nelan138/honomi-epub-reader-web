@@ -1,4 +1,4 @@
-import { EpubParsingError, NotFoundError, unwrapAsync } from '@src/utils';
+import { NotFoundError, tryCatch } from '@src/utils';
 
 import {
    addBookToDB,
@@ -7,7 +7,7 @@ import {
    getBooksFromDB,
    renameBookInDB,
 } from '@src/services/dexie/bookRepo';
-import { EpubParser } from '@src/services/epub/epubParser';
+import { EpubParser, ParsingError } from '@src/services/epub/epubParser';
 import { defineStore } from 'pinia';
 import type { BookRecord } from '@src/services/dexie/database.ts';
 
@@ -35,7 +35,7 @@ export const useBookStore = defineStore('book', () => {
    }
 
    const syncWithDB = async () => {
-      const [bookRecords, error] = await unwrapAsync(getBooksFromDB());
+      const [bookRecords, error] = await tryCatch(getBooksFromDB());
       if (error) throw error;
 
       books.value = bookRecords.map((record) => ({
@@ -70,7 +70,7 @@ export const useBookStore = defineStore('book', () => {
    async function deleteBook(id: number) {
       books.value = books.value.filter((book) => book.id !== id);
 
-      const [_, error] = await unwrapAsync(deleteBookFromDB(id));
+      const [_, error] = await tryCatch(deleteBookFromDB(id));
 
       if (error) {
          await syncWithDB();
@@ -86,7 +86,7 @@ export const useBookStore = defineStore('book', () => {
       target.metadata.title = name;
 
       // Sync
-      const [_, error] = await unwrapAsync(renameBookInDB(id, name));
+      const [_, error] = await tryCatch(renameBookInDB(id, name));
 
       if (error) {
          await syncWithDB();
@@ -102,7 +102,7 @@ export const useBookStore = defineStore('book', () => {
       target.shelfId = shelfId;
 
       // Sync later
-      const [_, error] = await unwrapAsync(changeBookShelfInDB(bookId, shelfId));
+      const [_, error] = await tryCatch(changeBookShelfInDB(bookId, shelfId));
 
       if (error) {
          await syncWithDB();
@@ -115,21 +115,21 @@ export const useBookStore = defineStore('book', () => {
       let count = 0;
 
       for (const file of files) {
-         const [book, error] = await unwrapAsync(EpubParser.parse(file));
+         const [book, error] = await tryCatch(EpubParser.parse(file));
 
          if (error) {
-            if (error instanceof EpubParsingError) {
-               console.warn('[Epub] Failed to import one file', error.message);
+            if (error instanceof ParsingError) {
+               console.warn('[Epub] Failed to import one file', error.cause ?? error.message);
 
                continue;
             }
             else { throw error; }
          }
 
-         const [result, error2] = await unwrapAsync(addBookToDB(book));
+         const [result, error2] = await tryCatch(addBookToDB(book));
 
          if (error2) {
-            console.warn('[Epub] Failed to import one file', error2.message);
+            console.warn('[Epub] Failed to import', file.name + ':', error2.cause ?? error2.message);
 
             continue;
          }

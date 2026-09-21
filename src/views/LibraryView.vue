@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { unwrapAsync } from '@src/utils';
+import { tryCatch } from '@src/utils';
 import { useShelfStore } from '@src/stores/useShelfStore';
 import { useBookStore } from '@src/stores/useBookStore';
 import { useThemeStore } from '@src/stores/useThemeStore';
@@ -29,16 +29,15 @@ onUnmounted(() => {
 // Portals
 
 const { toast } = useToast();
+
 const { prompt } = usePrompt();
 const { alert } = useAlert();
 const { select } = useSelect();
 
-const router = useRouter();
-
 /* BOOK SECTION */
 
 const handleImportingBooks = async (files: FileList) => {
-   const [result, error] = await unwrapAsync(bookStore.importBooks(files));
+   const [result, error] = await tryCatch(bookStore.importBooks(files));
 
    if (error) toast.error(error.name, error.message);
    else {
@@ -66,7 +65,7 @@ const handleChangingBookShelf = async (bookId: number) => {
 
    const shelfId = typeof selection.id === 'number' ? selection.id : Number(selection.id);
 
-   const [_, error] = await unwrapAsync(bookStore.changeBookShelf(bookId, shelfId));
+   const [_, error] = await tryCatch(bookStore.changeBookShelf(bookId, shelfId));
    if (error) {
       toast.error(error.name, error.message);
    }
@@ -86,7 +85,7 @@ const handleRenamingBook = async (bookId: number) => {
       return;
    }
 
-   const [_, error] = await unwrapAsync(bookStore.renameBook(bookId, input));
+   const [_, error] = await tryCatch(bookStore.renameBook(bookId, input));
    if (error) {
       toast.error(error.name, error.message);
    }
@@ -102,7 +101,7 @@ const handleDeletingBook = async (bookId: number) => {
 
    if (!confirmed) return;
 
-   const [_, error] = await unwrapAsync(bookStore.deleteBook(bookId));
+   const [_, error] = await tryCatch(bookStore.deleteBook(bookId));
    if (error) {
       toast.error(error.name, error.message);
    }
@@ -133,7 +132,7 @@ const handleAddingShelf = async () => {
       return;
    }
 
-   const [_, error] = await unwrapAsync(shelfStore.addShelf(input));
+   const [_, error] = await tryCatch(shelfStore.addShelf(input));
    if (error) {
       toast.error(error.name, error.message);
    }
@@ -156,7 +155,7 @@ const handleRenamingShelf = async (shelfId: number) => {
       return;
    }
 
-   const [_, error] = await unwrapAsync(shelfStore.renameShelf(shelfId, input));
+   const [_, error] = await tryCatch(shelfStore.renameShelf(shelfId, input));
    if (error) {
       toast.error(error.name, error.message);
    }
@@ -172,11 +171,13 @@ const handleDeletingShelf = async (shelfId: number) => {
 
    if (!confirmed) return;
 
-   const [_, error] = await unwrapAsync(shelfStore.deleteShelf(shelfId));
+   const [_, error] = await tryCatch(shelfStore.deleteShelf(shelfId));
    if (error) {
       toast.error(error.name, error.message);
    }
 };
+
+const router = useRouter();
 </script>
 
 <template>
