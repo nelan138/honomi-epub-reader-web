@@ -32,26 +32,21 @@ const {} = defineProps<{
          v-model:open="notification.active"
          :duration="notification.duration"
          @update:open="handleDismiss(notification)"
-         class="data-[state=open]:animate-slideIn data-[state=closed]:animate-hide data-[swipe=end]:animate-swipeOut grid grid-cols-[auto_max-content] items-center gap-x-3.75 rounded-lg border bg-white p-3.75 shadow-sm [grid-template-areas:'title_action'_'description_action'] data-[swipe=cancel]:translate-x-0 data-[swipe=cancel]:transition-[transform_200ms_ease-out] data-[swipe=move]:translate-x-(--reka-toast-swipe-move-x)"
+         class="data-[state=open]:animate-slideIn data-[state=closed]:animate-hide data-[swipe=end]:animate-swipeOut bg-surface border-highlight grid grid-cols-[auto_max-content] items-center gap-x-3.75 rounded-lg border-2 p-3.75 shadow-sm [grid-template-areas:'title_action'_'description_action'] data-[swipe=cancel]:translate-x-0 data-[swipe=cancel]:transition-[transform_200ms_ease-out] data-[swipe=move]:translate-x-(--reka-toast-swipe-move-x)"
       >
-         <ToastTitle class="text-slate12 mb-1.25 text-sm font-medium [grid-area:title]">
+         <ToastTitle class="text-ink mb-1.25 pb-2 text-base font-medium [grid-area:title]">
             {{ notification.title }}
          </ToastTitle>
          <ToastDescription as-child>
-            <span class="text-slate11 text-sm opacity-90 [grid-area:description]">
+            <span class="text-muted text-sm [grid-area:description]">
                {{ notification.description }}
             </span>
          </ToastDescription>
-         <ToastClose
-            class="rounded p-1 text-slate-500 [grid-area:action] hover:bg-slate-100 hover:text-slate-900 focus:outline-none"
-            aria-label="Close"
-         >
-            ✕
-         </ToastClose>
+         <ToastClose class="text-tertiary rounded p-1 [grid-area:action] focus:outline-none"> ✕ </ToastClose>
       </ToastRoot>
       <ToastPortal :to="to">
          <ToastViewport
-            class="fixed right-0 bottom-0 z-2147483647 m-0 flex w-97.5 max-w-[100vw] list-none flex-col gap-2.5 p-(--viewport-padding) outline-none [--viewport-padding:25px]"
+            class="fixed right-0 bottom-0 z-1000 m-0 flex w-97.5 max-w-[100vw] list-none flex-col gap-2.5 p-(--viewport-padding) outline-none [--viewport-padding:25px]"
          />
       </ToastPortal>
    </ToastProvider>

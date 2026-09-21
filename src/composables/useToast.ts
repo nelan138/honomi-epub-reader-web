@@ -4,6 +4,7 @@ export type Notification = {
    description: string;
    duration: number; // ms
    active: boolean;
+   type: 'success' | 'error';
 };
 
 export const notifications = ref<Notification[]>([]);
@@ -22,6 +23,7 @@ export function useToast(): {
             description: _description ?? '',
             duration: options?.duration ?? 1000,
             active: true,
+            type: 'success',
          });
       },
       error: (_title: string, _description?: string, options?: { duration?: number }) => {
@@ -31,6 +33,7 @@ export function useToast(): {
             description: _description ?? '',
             duration: options?.duration ?? 1000,
             active: true,
+            type: 'error',
          });
       },
    };
