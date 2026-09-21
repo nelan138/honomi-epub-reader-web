@@ -192,6 +192,8 @@ const router = useRouter();
       @import-files="handleImportingBooks"
    />
 
+   <div>test, if this is working</div>
+
    <BookShelf
       v-for="shelf in shelfStore.shelves"
       :key="shelf.id"
