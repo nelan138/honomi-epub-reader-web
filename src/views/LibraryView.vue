@@ -37,15 +37,11 @@ const { select } = useSelect();
 /* BOOK SECTION */
 
 const handleImportingBooks = async (files: FileList) => {
-   const [result, error] = await tryCatch(bookStore.importBooks(files));
-
-   if (error) toast.error(error.name, error.message);
-   else {
-      if (result !== files.length) {
-         toast.error('Bookstore', `Failed to import ${files.length - result} book(s)`, { duration: 5000 });
-      }
-      if (result !== 0) {
-         toast.success('Bookstore', `Added ${result} book(s)`, { duration: 5000 });
+   for (const file of files) {
+      const [_, error] = await tryCatch(bookStore.addBook(file));
+      if (error) {
+         toast.error(`Failed to add ${file.name}`, error.message, { duration: 5000 });
+         continue;
       }
    }
 };
@@ -72,11 +68,14 @@ const handleChangingBookShelf = async (bookId: number) => {
 };
 
 const handleRenamingBook = async (bookId: number) => {
-   const input = await prompt({
-      title: 'Rename Book',
-      description: 'Enter a new name for this book.',
-      placeholder: 'Book title...',
-   });
+   const input =
+      (
+         await prompt({
+            title: 'Rename Book',
+            description: 'Enter a new name for this book.',
+            placeholder: 'Book title...',
+         })
+      )?.trim() ?? null;
 
    if (input === null) return;
 
@@ -119,16 +118,19 @@ const shelfSelections = computed(() =>
 const bookShelfMap = computed(() => Map.groupBy(bookStore.books, (book) => book.shelfId));
 
 const handleAddingShelf = async () => {
-   const input = await prompt({
-      title: 'New Shelf',
-      description: 'Enter a name for the new shelf.',
-      placeholder: 'e.g. Science Fiction, To Read...',
-   });
+   const input =
+      (
+         await prompt({
+            title: 'New Shelf',
+            description: 'Enter a name for the new shelf.',
+            placeholder: 'e.g. Science Fiction, To Read...',
+         })
+      )?.trim() ?? null;
 
    if (input === null) return;
 
    if (input === '') {
-      toast.error('Warning', 'Name cannot be empty');
+      toast.error('Warning', 'Name cannot be empty', { duration: 5000 });
       return;
    }
 
@@ -139,25 +141,28 @@ const handleAddingShelf = async () => {
 };
 
 const handleRenamingShelf = async (shelfId: number) => {
-   const input = await prompt({
-      title: 'Rename Shelf',
-      description: 'Enter a new name for this shelf.',
-      placeholder: 'Shelf name...',
-   });
+   const input =
+      (
+         await prompt({
+            title: 'Rename Shelf',
+            description: 'Enter a new name for this shelf.',
+            placeholder: 'Shelf name...',
+         })
+      )?.trim() ?? null;
 
    if (input === null) {
-      toast.error('Warning', 'Shelf name cannot be null');
+      toast.error('Warning', 'Shelf name cannot be null', { duration: 5000 });
       return;
    }
 
    if (input === '') {
-      toast.error('Warning', 'Shelf name cannot be empty');
+      toast.error('Warning', 'Shelf name cannot be empty', { duration: 5000 });
       return;
    }
 
    const [_, error] = await tryCatch(shelfStore.renameShelf(shelfId, input));
    if (error) {
-      toast.error(error.name, error.message);
+      toast.error(error.name, error.message, { duration: 5000 });
    }
 };
 

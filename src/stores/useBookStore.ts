@@ -1,4 +1,4 @@
-import { NotFoundError, tryCatch } from '@src/utils';
+import { NotFoundError, RuntimeError, tryCatch } from '@src/utils';
 
 import {
    addBookToDB,
@@ -110,48 +110,27 @@ export const useBookStore = defineStore('book', () => {
       }
    }
 
-   /** Returns number books successfully imported */
-   async function importBooks(files: FileList): Promise<number> {
-      let count = 0;
+   // throws ParsingError or RuntimeError
+   async function addBook(file: File): Promise<void> {
+      const [book, error] = await tryCatch(EpubParser.parse(file));
 
-      for (const file of files) {
-         const [book, error] = await tryCatch(EpubParser.parse(file));
-
-         if (error) {
-            if (error instanceof ParsingError) {
-               console.warn('[Epub] Failed to import one file', error.cause ?? error.message);
-
-               continue;
-            }
-            else { throw error; }
-         }
-
-         const [result, error2] = await tryCatch(addBookToDB(book));
-
-         if (error2) {
-            console.warn('[Epub] Failed to import', file.name + ':', error2.cause ?? error2.message);
-
-            continue;
-         }
-
-         const { bookId: id, shelfId } = result;
-
-         // update UI
-         count += 1;
-
-         books.value.push({
-            id,
-            shelfId,
-            charactersRead: 0,
-            metadata: book.metadata,
-            cover: book.cover,
-            totalCharacters: book.totalCharacters,
-         });
+      if (error) {
+         if (error instanceof ParsingError) throw error;
+         else throw new RuntimeError('Failed to import' + file.name, { cause: error });
       }
 
-      if (count !== files.length) await syncWithDB();
+      const [result, error2] = await tryCatch(addBookToDB(book));
 
-      return count;
+      if (error2) throw new RuntimeError('Failed to import' + file.name, { cause: error2 });
+
+      books.value.push({
+         id: result.bookId,
+         shelfId: result.shelfId,
+         charactersRead: 0,
+         metadata: book.metadata,
+         cover: book.cover,
+         totalCharacters: book.totalCharacters,
+      });
    }
 
    return {
@@ -160,9 +139,9 @@ export const useBookStore = defineStore('book', () => {
       isLoaded,
       load,
       reset,
+      addBook,
       renameBook,
       changeBookShelf,
       deleteBook,
-      importBooks,
    };
 });

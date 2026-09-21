@@ -29,7 +29,7 @@ watch(active, (value) => {
          <DialogOverlay class="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs" />
 
          <DialogContent
-            class="border-stroke bg-card font-label text-ink fixed top-1/2 left-1/2 z-50 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-xl border p-5 shadow-xl focus:outline-none"
+            class="border-stroke bg-card font-label text-ink fixed top-1/2 left-1/2 z-50 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-xl border p-4 shadow-xl focus:outline-none"
             :disable-outside-pointer-events="true"
             @escape-key-down.prevent="cancel"
             @pointer-down-outside.prevent

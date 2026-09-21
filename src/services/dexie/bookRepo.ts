@@ -41,7 +41,7 @@ export async function renameBookInDB(bookId: number, newTitle: string): Promise<
       'metadata.title': newTitle,
    });
 
-   if (updatedCount === 0) throw new NotFoundError('Book does not exist', { entity: 'Book', id: bookId });
+   if (updatedCount === 0) throw new NotFoundError('Book does not exist');
 }
 
 export async function changeBookShelfInDB(bookId: number, shelfId: number): Promise<void> {
@@ -50,10 +50,10 @@ export async function changeBookShelfInDB(bookId: number, shelfId: number): Prom
 
    await db.transaction('readwrite', shelfStore, bookStore, async () => {
       const bookRecord = await bookStore.get(bookId);
-      if (!bookRecord) throw new NotFoundError('Book does not exist', { entity: 'Book', id: bookId });
+      if (!bookRecord) throw new NotFoundError('Book does not exist');
 
       const shelf = await shelfStore.get(shelfId);
-      if (!shelf) throw new NotFoundError('Shelf does not exist', { entity: 'Shelf', id: shelfId });
+      if (!shelf) throw new NotFoundError('Shelf does not exist');
 
       bookRecord.shelfId = shelfId;
       await bookStore.put(bookRecord);
@@ -66,5 +66,5 @@ export async function updateCharactersReadInDB(bookId: number, charactersRead: n
       charactersRead: charactersRead,
    });
 
-   if (updatedCount === 0) throw new NotFoundError('Book does not exist', { entity: 'Book', id: bookId });
+   if (updatedCount === 0) throw new NotFoundError('Book does not exist');
 }
