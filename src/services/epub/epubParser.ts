@@ -48,6 +48,7 @@ const XHTML_NS = 'http://www.w3.org/1999/xhtml';
 /** Module scope */
 let defaultCoverBlob: Blob | null = null;
 
+/** does not throw on fail */
 async function getDefaultCoverBlob(): Promise<Blob> {
    if (defaultCoverBlob) return Promise.resolve(defaultCoverBlob);
 
@@ -165,24 +166,12 @@ export class EpubParser {
             }
 
             const manifestItem = manifest.get(spineItem.id);
-            if (!manifestItem) {
-               throw new ParsingError(
-                  `Manifest item not found for spine item: ${spineItem.id}`,
-               );
-            }
+            if (!manifestItem) throw new ParsingError('Manifest item not found');
 
-            if (!(manifestItem.mediaType in SupportedMimeTypes)) {
-               throw new ParsingError(
-                  `Unsupported media type: ${manifestItem.mediaType}`,
-               );
-            }
+            if (!(manifestItem.mediaType in SupportedMimeTypes)) throw new ParsingError('Unsupported media type');
 
             const buffer = archive[manifestItem.href];
-            if (!buffer) {
-               throw new ParsingError(
-                  `Buffer not found for manifest item: ${manifestItem.href}`,
-               );
-            }
+            if (!buffer) throw new ParsingError('Spine item not found in archive');
 
             const raw = strFromU8(buffer);
             // 'application/xhtml+xml' cuz don't wanna think too much
@@ -191,28 +180,21 @@ export class EpubParser {
                'application/xhtml+xml',
             );
 
-            const body = doc.body
+            const bodyEl = doc.body
                ?? doc.getElementsByTagName('body')[0]
                ?? doc.getElementsByTagNameNS(XHTML_NS, 'body')[0];
 
-            if (!body) {
-               throw new ParsingError(
-                  `Body element not found for spine item: ${spineItem.id}`,
-               );
+            if (!bodyEl) throw new ParsingError('No <body> found');
+
+            const processedBodyEl = processImageTags(bodyEl, manifestItem.href);
+
+            for (const paragraphEl of processedBodyEl.getElementsByTagName('p')) {
+               runningCharCount += getElementCharacterCount(paragraphEl.innerHTML);
+               paragraphEl.setAttribute('data-characters-read', runningCharCount.toString());
             }
-
-            const processedBody = processImageTags(body, manifestItem.href);
-
-            const pTags = processedBody.getElementsByTagName('p');
-            for (const p of pTags) {
-               runningCharCount += getElementCharacterCount(p.innerHTML);
-               p.setAttribute('data-characters-read', runningCharCount.toString());
-            }
-
-            const content = xmlSerializer.serializeToString(processedBody);
 
             _sections.push({
-               content,
+               content: xmlSerializer.serializeToString(processedBodyEl),
                idref: spineItem.id,
             });
          }
