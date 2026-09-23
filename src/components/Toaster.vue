@@ -55,15 +55,11 @@ const {} = defineProps<{
 <style lang="css" scoped>
 :global(html) {
    --toast-bg: #ffffff;
-   --ink: #0f172a;
-   --muted: #475569;
    --toast-border: #e2e8f0;
 }
 
 :global(html.dark) {
    --toast-bg: #1e293b;
-   --ink: #f8fafc;
-   --muted: #cbd5e1;
    --toast-border: #334155;
 }
 </style>
