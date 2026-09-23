@@ -54,10 +54,11 @@ function onFileChange(event: Event) {
 <style scoped>
 :global(html) {
    --library-header-bg: #f6f2e6;
-   --library-header-border: var(--tertiary);
+   --library-header-border: #ded6c5;
 }
+
 :global(html.dark) {
    --library-header-bg: #15181a;
-   --library-header-border: var(--tertiary);
+   --library-header-border: #2e353c;
 }
 </style>

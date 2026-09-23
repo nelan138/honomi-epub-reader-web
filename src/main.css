@@ -27,7 +27,6 @@
    --ink: #2b2620;
    --muted: #7a6f5d;
    --highlight: #a8763e;
-   --tertiary: #4a5d45;
 }
 
 .dark {
@@ -37,5 +36,4 @@
    --ink: #fffffe;
    --muted: #94a1b2;
    --highlight: #7f5af0;
-   --tertiary: #2cb67d;
 }
