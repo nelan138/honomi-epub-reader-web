@@ -13,15 +13,15 @@ const { to } = defineProps<{
 <template>
    <DialogRoot v-model:open="active">
       <DialogPortal :to="to">
-         <DialogOverlay class="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs" />
+         <DialogOverlay class="fixed inset-0 z-50 bg-(--select-overlay) backdrop-blur-xs" />
 
          <DialogContent
-            class="border-stroke bg-card font-label text-ink fixed top-1/2 left-1/2 z-50 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-xl border p-4 shadow-xl focus:outline-none"
+            class="fixed top-1/2 left-1/2 z-50 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-xl border border-(--select-border) bg-(--select-bg) p-4 shadow-xl focus:outline-none"
             @pointer-down-outside.prevent
             :disable-outside-pointer-events="true"
             @escape-key-down.prevent="cancel"
          >
-            <DialogTitle class="text-ink text-base font-semibold"> {{ options.title ?? 'Select' }}</DialogTitle>
+            <DialogTitle class="text-base font-semibold"> {{ options.title ?? 'Select' }}</DialogTitle>
 
             <DialogDescription class="text-muted mt-2 text-xs leading-relaxed">
                {{ options.description ?? 'Choose one option below' }}
@@ -30,11 +30,11 @@ const { to } = defineProps<{
             <ListboxRoot class="py-4" :orientation="'vertical'" :highlight-on-hover="true" :required="true">
                <ListboxContent class="themed-scroll max-h-56 w-full overflow-y-auto">
                   <ListboxItem
-                     class="text-ink data-highlighted:bg-highlight/10 data-highlighted:text-ink data-[state=checked]:text-ink focus-visible:bg-highlight/10 focus-visible:text-ink relative flex cursor-pointer items-center justify-between truncate px-3 py-2 pr-4 text-sm transition-colors outline-none select-none data-[state=checked]:font-medium"
                      v-for="selection in selections"
                      :key="selection.id"
                      :value="selection.value"
                      @select.prevent="confirm(selection)"
+                     class="relative flex cursor-pointer items-center justify-between truncate bg-(--item-bg) px-3 py-2 pr-4 text-sm text-(--item-text) transition-colors outline-none select-none focus-visible:bg-(--selected-item-bg) focus-visible:text-(--selected-item-text) data-highlighted:bg-(--selected-item-bg) data-highlighted:text-(--selected-item-text) data-[state=checked]:bg-(--selected-item-bg) data-[state=checked]:font-medium data-[state=checked]:text-(--selected-item-text)"
                   >
                      {{ selection.value }}
                   </ListboxItem>
@@ -43,7 +43,7 @@ const { to } = defineProps<{
 
             <button
                type="button"
-               class="bg-highlight text-card ml-auto block rounded-md px-3 py-1.5 text-sm font-medium transition-opacity hover:opacity-90"
+               class="ml-auto block rounded-md bg-(--select-cancel-btn-bg) px-3 py-1.5 text-sm font-medium text-(--select-cancel-btn-text) transition-opacity hover:opacity-90"
                @click="cancel"
             >
                Cancel
@@ -52,3 +52,31 @@ const { to } = defineProps<{
       </DialogPortal>
    </DialogRoot>
 </template>
+
+<style lang="css" scoped>
+:global(html) {
+   --select-overlay: rgb(43 38 32 / 0.45);
+   --select-bg: #faf7f0;
+   --select-border: #ded6c5;
+   --select-cancel-btn-bg: #ffeac1;
+   --select-cancel-btn-text: #5a4f43;
+
+   --item-text: #2b2620;
+   --selected-item-text: #8c6d46;
+   --item-bg: transparent;
+   --selected-item-bg: #efe8da;
+}
+
+:global(html.dark) {
+   --select-overlay: rgb(10 12 14 / 0.7);
+   --select-bg: #1a1e22;
+   --select-border: #2e353c;
+   --select-cancel-btn-bg: #d4a373;
+   --select-cancel-btn-text: #15181a;
+
+   --item-text: #e6edf3;
+   --selected-item-text: #d4a373;
+   --item-bg: transparent;
+   --selected-item-bg: #242a30;
+}
+</style>
