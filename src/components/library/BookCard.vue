@@ -65,11 +65,7 @@ onUnmounted(() => cleanUpBlobUrls([coverUrl]));
             </li>
 
             <li>
-               <button
-                  @click="emit('delete', book.id)"
-                  type="button"
-                  class="aspect-square hover:cursor-pointer hover:text-red-400"
-               >
+               <button @click="emit('delete', book.id)" type="button" class="aspect-square hover:cursor-pointer">
                   <i class="fa-solid fa-trash"></i>
                </button>
             </li>
@@ -81,13 +77,17 @@ onUnmounted(() => cleanUpBlobUrls([coverUrl]));
 <style scoped>
 :global(html) {
    --card: #f6f2e6;
-   --card-border: var(--tertiary);
-   --progress-bar-bg: #e0e0e0;
-   --progress-bar-color: var(--ink);
+   --card-border: #ded6c5;
+
+   --progress-bar-bg: #e5ded0;
+   --progress-bar-color: #8c6d46;
 }
 
 :global(html.dark) {
    --card: #15181a;
-   --progress-bar-bg: #3e3e3e;
+   --card-border: #2e353c;
+
+   --progress-bar-bg: #262b30;
+   --progress-bar-color: #878f97;
 }
 </style>
