@@ -20,35 +20,23 @@ const emit = defineEmits<{
 <template>
    <section class="w-full p-4 md:px-16 xl:px-32 2xl:px-64">
       <header class="flex justify-between py-2">
-         <h2 class="font-label text-ink/60 flex w-full items-center font-medium tracking-widest uppercase">
+         <h2 class="flex w-full items-center font-serif font-medium tracking-widest uppercase">
             {{ shelf.name }}
          </h2>
 
-         <ul class="text-ink/50 flex gap-4 text-[80%] lg:gap-6">
+         <ul class="flex gap-4 text-[80%] lg:gap-6">
             <li :class="{ hidden: shelf.name === defaultShelf.name }">
-               <button
-                  @click="emit('move-up', shelf.id)"
-                  type="button"
-                  class="hover:text-highlight hover:cursor-pointer"
-               >
+               <button @click="emit('move-up', shelf.id)" type="button" class="hover:cursor-pointer">
                   <i class="fa-solid fa-circle-up"></i>
                </button>
             </li>
             <li :class="{ hidden: shelf.name === defaultShelf.name }">
-               <button
-                  @click="emit('move-down', shelf.id)"
-                  type="button"
-                  class="hover:text-highlight hover:cursor-pointer"
-               >
+               <button @click="emit('move-down', shelf.id)" type="button" class="hover:cursor-pointer">
                   <i class="fa-solid fa-circle-down"></i>
                </button>
             </li>
             <li :class="{ hidden: shelf.name === defaultShelf.name }">
-               <button
-                  @click="emit('rename', shelf.id)"
-                  type="button"
-                  class="hover:text-highlight hover:cursor-pointer"
-               >
+               <button @click="emit('rename', shelf.id)" type="button" class="hover:cursor-pointer">
                   <i class="fa-solid fa-pencil"></i>
                </button>
             </li>
@@ -56,18 +44,14 @@ const emit = defineEmits<{
                <button
                   @click="shelf.expanded ? emit('collapse', shelf.id) : emit('expand', shelf.id)"
                   type="button"
-                  class="hover:text-highlight hover:cursor-pointer"
+                  class="hover:cursor-pointer"
                >
                   <i v-if="shelf.expanded" class="fa-solid fa-caret-down"></i>
                   <i v-else class="fa-solid fa-caret-right"></i>
                </button>
             </li>
             <li :class="{ hidden: shelf.name === defaultShelf.name }">
-               <button
-                  @click="emit('delete', shelf.id)"
-                  type="button"
-                  class="hover:text-highlight hover:cursor-pointer"
-               >
+               <button @click="emit('delete', shelf.id)" type="button" class="hover:cursor-pointer">
                   <i class="fa-solid fa-x"></i>
                </button>
             </li>
