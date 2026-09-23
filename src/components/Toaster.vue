@@ -32,17 +32,17 @@ const {} = defineProps<{
          v-model:open="notification.active"
          :duration="notification.duration"
          @update:open="handleDismiss(notification)"
-         class="data-[state=open]:animate-slideIn data-[state=closed]:animate-hide data-[swipe=end]:animate-swipeOut bg-surface border-highlight grid grid-cols-[auto_max-content] items-center gap-x-3.75 rounded-lg border-2 p-3.75 shadow-sm [grid-template-areas:'title_action'_'description_action'] data-[swipe=cancel]:translate-x-0 data-[swipe=cancel]:transition-[transform_200ms_ease-out] data-[swipe=move]:translate-x-(--reka-toast-swipe-move-x)"
+         class="data-[state=open]:animate-slideIn data-[state=closed]:animate-hide data-[swipe=end]:animate-swipeOut grid grid-cols-[auto_max-content] items-center gap-x-3.75 rounded-lg border-2 border-(--toast-border) bg-(--toast-bg) p-3.75 shadow-sm [grid-template-areas:'title_action'_'description_action'] data-[swipe=cancel]:translate-x-0 data-[swipe=cancel]:transition-[transform_200ms_ease-out] data-[swipe=move]:translate-x-(--reka-toast-swipe-move-x)"
       >
-         <ToastTitle class="text-ink mb-1.25 pb-2 text-base font-medium [grid-area:title]">
+         <ToastTitle class="mb-1.25 pb-2 text-base font-medium text-(--ink) [grid-area:title]">
             {{ notification.title }}
          </ToastTitle>
          <ToastDescription as-child>
-            <span class="text-muted text-sm [grid-area:description]">
+            <span class="text-sm text-(--muted) [grid-area:description]">
                {{ notification.description }}
             </span>
          </ToastDescription>
-         <ToastClose class="text-tertiary rounded p-1 [grid-area:action] focus:outline-none"> ✕ </ToastClose>
+         <ToastClose class="rounded p-1 text-(--ink) [grid-area:action] focus:outline-none"> ✕ </ToastClose>
       </ToastRoot>
       <ToastPortal :to="to">
          <ToastViewport
@@ -51,3 +51,19 @@ const {} = defineProps<{
       </ToastPortal>
    </ToastProvider>
 </template>
+
+<style lang="css" scoped>
+:global(html) {
+   --toast-bg: #ffffff;
+   --ink: #0f172a;
+   --muted: #475569;
+   --toast-border: #e2e8f0;
+}
+
+:global(html.dark) {
+   --toast-bg: #1e293b;
+   --ink: #f8fafc;
+   --muted: #cbd5e1;
+   --toast-border: #334155;
+}
+</style>
