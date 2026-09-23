@@ -36,7 +36,7 @@ function onFileChange(event: Event) {
          </li>
       </ul>
 
-      <ul class="text-ink/70 flex gap-6">
+      <ul class="flex gap-6">
          <li>
             <button @click="emit('addShelf')" type="button" class="hover:cursor-pointer">
                <i class="fa-solid fa-folder-plus scale-[110%]"></i>
