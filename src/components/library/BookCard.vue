@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { BookCard } from '@src/stores/useBookStore';
 import { cleanUpBlobUrls } from '@src/utils';
+import { ProgressRoot, ProgressIndicator } from 'reka-ui';
 
 /* *** */
 
@@ -39,7 +40,15 @@ onUnmounted(() => cleanUpBlobUrls([coverUrl]));
             <p class="truncate text-[80%] uppercase">{{ book.metadata.language }}</p>
          </div>
 
-         <!-- Todo: Progress bar -->
+         <ProgressRoot
+            :model-value="(book.charactersRead * 100) / book.totalCharacters"
+            class="relative h-1 w-full overflow-hidden rounded-full bg-(--progress-bar-bg)"
+         >
+            <ProgressIndicator
+               class="h-full w-full bg-(--progress-bar-color)"
+               :style="`transform: translateX(-${100 - (book.charactersRead * 100) / book.totalCharacters}%)`"
+            />
+         </ProgressRoot>
 
          <!-- Buttons -->
          <ul @click.stop class="flex justify-end gap-4 md:gap-8 lg:justify-around lg:gap-2">
@@ -73,10 +82,12 @@ onUnmounted(() => cleanUpBlobUrls([coverUrl]));
 :global(html) {
    --card: #f6f2e6;
    --card-border: var(--tertiary);
+   --progress-bar-bg: #e0e0e0;
+   --progress-bar-color: var(--ink);
 }
 
 :global(html.dark) {
    --card: #15181a;
-   --card-border: var(--tertiary);
+   --progress-bar-bg: #3e3e3e;
 }
 </style>
