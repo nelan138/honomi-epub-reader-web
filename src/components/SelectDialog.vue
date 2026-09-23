@@ -23,7 +23,7 @@ const { to } = defineProps<{
          >
             <DialogTitle class="text-base font-semibold"> {{ options.title ?? 'Select' }}</DialogTitle>
 
-            <DialogDescription class="text-muted mt-2 text-xs leading-relaxed">
+            <DialogDescription class="mt-2 text-xs leading-relaxed">
                {{ options.description ?? 'Choose one option below' }}
             </DialogDescription>
 
@@ -58,7 +58,8 @@ const { to } = defineProps<{
    --select-overlay: rgb(43 38 32 / 0.45);
    --select-bg: #faf7f0;
    --select-border: #ded6c5;
-   --select-cancel-btn-bg: #ffeac1;
+
+   --select-cancel-btn-bg: transparent;
    --select-cancel-btn-text: #5a4f43;
 
    --item-text: #2b2620;
@@ -71,8 +72,9 @@ const { to } = defineProps<{
    --select-overlay: rgb(10 12 14 / 0.7);
    --select-bg: #1a1e22;
    --select-border: #2e353c;
-   --select-cancel-btn-bg: #d4a373;
-   --select-cancel-btn-text: #15181a;
+
+   --select-cancel-btn-bg: transparent;
+   --select-cancel-btn-text: #9da7b0;
 
    --item-text: #e6edf3;
    --selected-item-text: #d4a373;

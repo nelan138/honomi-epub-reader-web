@@ -34,15 +34,15 @@ const {} = defineProps<{
          @update:open="handleDismiss(notification)"
          class="data-[state=open]:animate-slideIn data-[state=closed]:animate-hide data-[swipe=end]:animate-swipeOut grid grid-cols-[auto_max-content] items-center gap-x-3.75 rounded-lg border-2 border-(--toast-border) bg-(--toast-bg) p-3.75 shadow-sm [grid-template-areas:'title_action'_'description_action'] data-[swipe=cancel]:translate-x-0 data-[swipe=cancel]:transition-[transform_200ms_ease-out] data-[swipe=move]:translate-x-(--reka-toast-swipe-move-x)"
       >
-         <ToastTitle class="mb-1.25 pb-2 text-base font-medium text-(--ink) [grid-area:title]">
+         <ToastTitle class="mb-1.25 pb-2 text-base font-medium [grid-area:title]">
             {{ notification.title }}
          </ToastTitle>
          <ToastDescription as-child>
-            <span class="text-sm text-(--muted) [grid-area:description]">
+            <span class="text-sm [grid-area:description]">
                {{ notification.description }}
             </span>
          </ToastDescription>
-         <ToastClose class="rounded p-1 text-(--ink) [grid-area:action] focus:outline-none"> ✕ </ToastClose>
+         <ToastClose class="rounded p-1 [grid-area:action] focus:outline-none"> ✕ </ToastClose>
       </ToastRoot>
       <ToastPortal :to="to">
          <ToastViewport
@@ -54,12 +54,12 @@ const {} = defineProps<{
 
 <style lang="css" scoped>
 :global(html) {
-   --toast-bg: #ffffff;
-   --toast-border: #e2e8f0;
+   --toast-bg: #faf7f0;
+   --toast-border: #ded6c5;
 }
 
 :global(html.dark) {
-   --toast-bg: #1e293b;
-   --toast-border: #334155;
+   --toast-bg: #1a1e22;
+   --toast-border: #2e353c;
 }
 </style>

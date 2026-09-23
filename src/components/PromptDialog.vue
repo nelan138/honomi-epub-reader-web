@@ -29,7 +29,7 @@ watch(active, (value) => {
          <DialogOverlay class="fixed inset-0 z-50 bg-(--prompt-overlay) backdrop-blur-xs" />
 
          <DialogContent
-            class="text-ink fixed top-1/2 left-1/2 z-50 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-xl border border-(--prompt-border) bg-(--prompt-bg) p-4 shadow-xl focus:outline-none"
+            class="fixed top-1/2 left-1/2 z-50 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-xl border border-(--prompt-border) bg-(--prompt-bg) p-4 shadow-xl focus:outline-none"
             :disable-outside-pointer-events="true"
             @escape-key-down.prevent="cancel"
             @pointer-down-outside.prevent
@@ -81,22 +81,22 @@ watch(active, (value) => {
 
 <style lang="css" scoped>
 :global(html) {
-   --prompt-overlay: rgb(15 23 42 / 0.4);
-   --prompt-bg: #ffffff;
-   --prompt-border: #e2e8f0;
-   --input-bg: #f8fafc;
-   --input-border: #cbd5e1;
-   --prompt-submit-btn-bg: #2563eb;
-   --prompt-submit-btn-text: #ffffff;
+   --prompt-overlay: rgb(43 38 32 / 0.45);
+   --prompt-bg: #faf7f0;
+   --prompt-border: #ded6c5;
+   --input-bg: #f2ebe0;
+   --input-border: #d4caa8;
+   --prompt-submit-btn-bg: #8c6d46;
+   --prompt-submit-btn-text: #fbf9f4;
 }
 
 :global(html.dark) {
-   --prompt-overlay: rgb(0 0 0 / 0.6);
-   --prompt-bg: #1e293b;
-   --prompt-border: #475569;
-   --input-bg: #334155;
-   --input-border: #64748b;
-   --prompt-submit-btn-bg: #3b82f6;
-   --prompt-submit-btn-text: #ffffff;
+   --prompt-overlay: rgb(10 12 14 / 0.7);
+   --prompt-bg: #1a1e22;
+   --prompt-border: #2e353c;
+   --input-bg: #15181a;
+   --input-border: #38414a;
+   --prompt-submit-btn-bg: #d4a373;
+   --prompt-submit-btn-text: #15181a;
 }
 </style>
