@@ -23,48 +23,34 @@ onUnmounted(() => cleanUpBlobUrls([coverUrl]));
 <template>
    <article
       @click="emit('open', book.id)"
-      class="bg-card border-stroke/20 hover:border-highlight/50 grid min-w-0 grid-cols-[1fr_2fr] rounded-md border p-2 shadow-sm md:p-4"
+      class="grid min-w-0 grid-cols-[1fr_2fr] rounded-md border border-(--card-border) bg-(--card) p-2 shadow-sm md:p-4"
    >
       <!-- Cover -->
-      <div class="border-stroke/15 flex aspect-2/3 h-full items-center overflow-hidden rounded-sm border">
+      <div class="flex aspect-2/3 h-full items-center overflow-hidden rounded-sm border">
          <img class="h-full w-full object-cover" :src="coverUrl" />
       </div>
 
-      <div class="bg-card flex flex-col gap-4 pl-4">
+      <div class="flex flex-col gap-4 pl-4">
          <!-- Metadata -->
-         <div class="flex min-w-0 flex-1 flex-col md:gap-2 md:text-[100%]">
-            <h3 class="font-label line-clamp-2 font-medium break-all">{{ book.metadata.title }}</h3>
-            <p class="text-muted truncate text-[80%]">{{ book.metadata.creator }}</p>
-            <p class="text-muted truncate text-[80%]">{{ book.metadata.publisher }}</p>
-            <p class="text-muted truncate text-[80%] uppercase">{{ book.metadata.language }}</p>
+         <div class="flex min-w-0 flex-1 flex-col font-serif md:gap-2 md:text-[100%]">
+            <h3 class="line-clamp-2 font-sans font-medium break-all">{{ book.metadata.title }}</h3>
+            <p class="truncate text-[80%]">{{ book.metadata.creator }}</p>
+            <p class="truncate text-[80%]">{{ book.metadata.publisher }}</p>
+            <p class="truncate text-[80%] uppercase">{{ book.metadata.language }}</p>
          </div>
 
-         <!-- Progress bar -->
-         <div class="bg-muted/15 h-1 overflow-hidden rounded-full">
-            <div
-               class="bg-tertiary h-full rounded-full"
-               :style="{ width: `${(book.charactersRead * 100) / book.totalCharacters}%` }"
-            ></div>
-         </div>
+         <!-- Todo: Progress bar -->
 
          <!-- Buttons -->
-         <ul @click.stop class="text-ink/60 flex justify-end gap-4 md:gap-8 lg:justify-around lg:gap-2">
+         <ul @click.stop class="flex justify-end gap-4 md:gap-8 lg:justify-around lg:gap-2">
             <li>
-               <button
-                  @click="emit('rename', book.id)"
-                  type="button"
-                  class="hover:text-highlight aspect-square hover:cursor-pointer"
-               >
+               <button @click="emit('rename', book.id)" type="button" class="aspect-square hover:cursor-pointer">
                   <i class="fa-solid fa-pen-to-square"></i>
                </button>
             </li>
 
             <li>
-               <button
-                  @click="emit('changeShelf', book.id)"
-                  type="button"
-                  class="hover:text-highlight aspect-square hover:cursor-pointer"
-               >
+               <button @click="emit('changeShelf', book.id)" type="button" class="aspect-square hover:cursor-pointer">
                   <i class="fa-solid fa-right-left"></i>
                </button>
             </li>
@@ -82,3 +68,15 @@ onUnmounted(() => cleanUpBlobUrls([coverUrl]));
       </div>
    </article>
 </template>
+
+<style scoped>
+:global(html) {
+   --card: #f6f2e6;
+   --card-border: var(--tertiary);
+}
+
+:global(html.dark) {
+   --card: #15181a;
+   --card-border: var(--tertiary);
+}
+</style>
