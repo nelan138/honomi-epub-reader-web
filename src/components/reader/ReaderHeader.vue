@@ -28,22 +28,34 @@ watch([() => directions.top, () => directions.bottom, y], () => {
    <header
       :class="[
          isHeaderVisible ? 'translate-y-0' : '-translate-y-full',
-         'hover:border-b-highlight bg-surface border-b-stroke/50 fixed top-0 z-50 mx-auto flex w-full items-center justify-between border-b-2 px-4 py-2 transition-transform duration-300 md:px-16 xl:px-32 2xl:px-64',
+         'fixed top-0 z-50 mx-auto flex w-full items-center justify-between border-b-2 border-(--reader-header-border) bg-(--reader-header-bg) px-4 py-2 transition-transform duration-300 md:px-16 xl:px-32 2xl:px-64',
       ]"
    >
-      <ul class="text-ink/70 flex gap-6">
+      <ul class="flex gap-6">
          <li>
-            <button @click="emit('return')" type="button" class="hover:text-highlight hover:cursor-pointer">
+            <button @click="emit('return')" type="button" class="hover:cursor-pointer">
                <i class="fa-solid fa-left-long"></i>
             </button>
          </li>
       </ul>
-      <ul class="text-ink/70 flex gap-6">
+      <ul class="flex gap-6">
          <li>
-            <button @click="emit('toggleTheme')" type="button" class="hover:text-highlight hover:cursor-pointer">
+            <button @click="emit('toggleTheme')" type="button" class="hover:cursor-pointer">
                <i class="fa-solid fa-circle-half-stroke scale-[110%]"></i>
             </button>
          </li>
       </ul>
    </header>
 </template>
+
+<style scoped>
+:global(html) {
+   --reader-header-bg: #f6f2e6;
+   --reader-header-border: #ded6c5;
+}
+
+:global(html.dark) {
+   --reader-header-bg: #15181a;
+   --reader-header-border: #2e353c;
+}
+</style>

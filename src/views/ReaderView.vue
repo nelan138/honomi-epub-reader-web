@@ -181,14 +181,14 @@ const getCurrentCharactersRead = () => {
    <ReaderHeader @return="router.push('/')" @toggle-theme="themeStore.toggleTheme" />
    <div
       v-if="readerStore.isLoading"
-      class="text-ink/60 flex min-h-[60vh] w-full flex-col items-center justify-center gap-3 p-8 font-sans"
+      class="flex min-h-[60vh] w-full flex-col items-center justify-center gap-3 p-8 font-sans"
    >
       <i class="fa-solid fa-circle-notch text-highlight animate-spin text-2xl"></i>
       <span class="text-xs font-medium tracking-widest uppercase">Loading...</span>
    </div>
 
    <template v-else>
-      <article class="prose prose-headings:text-ink text-ink w-full max-w-full p-4 py-4 font-sans">
+      <article class="prose prose-headings:text-(--ink) w-full max-w-full p-4 py-4 font-sans text-(--ink)">
          <section
             v-for="(section, index) in readerStore.sections"
             :key="section.idref"
