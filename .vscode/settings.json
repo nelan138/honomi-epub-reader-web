@@ -28,6 +28,7 @@
       "vite",
       "vueuse",
       "xlink",
+      "xmark",
       "XTHML"
    ],
    "deno.enable": true,

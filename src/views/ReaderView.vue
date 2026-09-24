@@ -271,11 +271,13 @@ const openToc = ref(false);
             <DrawerOverlay class="fixed inset-0 z-50 bg-black/50" />
             <DrawerContent
                :disable-outside-pointer-events="false"
-               class="fixed top-0 left-0 z-100 h-full w-80 max-w-[85vw] bg-blue-600 p-4"
+               class="fixed top-0 left-0 z-100 h-full w-80 max-w-[85vw] bg-amber-50 p-4"
                as="aside"
             >
                <DrawerTitle>Table of Content</DrawerTitle>
-               <DrawerClose class="absolute top-4 right-4"> <i class="fa-solid fa-xmark"></i></DrawerClose>
+               <DrawerClose class="absolute top-4 right-4 hover:cursor-pointer">
+                  <i class="fa-solid fa-xmark"></i
+               ></DrawerClose>
                <ul
                   @click="
                      (event) => {
@@ -294,7 +296,7 @@ const openToc = ref(false);
 
       <article
          @click="onAnchorsClicked"
-         class="prose prose-headings:text-(--ink) w-full max-w-full p-4 py-4 font-sans text-(--ink)"
+         class="prose prose-headings:text-(--ink) w-full max-w-full p-4 py-4 font-sans text-(--ink) md:px-16 xl:px-32 2xl:px-64"
       >
          <section
             v-for="(section, index) in readerStore.sections"
