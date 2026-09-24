@@ -17,8 +17,9 @@ export class ParsingError extends Error {
 }
 
 export type Section = {
-   content: string;
+   content: string; // ! html string
    idref: string;
+   path: string; // ! absolute path in archive
 };
 
 /**
@@ -32,6 +33,7 @@ export type Book = {
       publisher: string;
       language: string;
    };
+   // ! each section contains exactly one <body> tag as html string
    sections: Section[];
 
    totalCharacters: number;
@@ -196,6 +198,7 @@ export class EpubParser {
             _sections.push({
                content: xmlSerializer.serializeToString(processedBodyEl),
                idref: spineItem.id,
+               path: manifestItem.href,
             });
          }
          return _sections;

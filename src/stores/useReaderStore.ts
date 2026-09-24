@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { domParser, RuntimeError, tryCatch } from '@src/utils.ts';
+import { domParser, RuntimeError, tryCatch, xmlSerializer } from '@src/utils.ts';
 import { getBookFromDB, updateCharactersReadInDB } from '@src/services/dexie/bookRepo.ts';
 import type { Section } from '@src/services/epub/epubParser.ts';
 
@@ -73,9 +73,16 @@ export const useReaderStore = defineStore('reader', () => {
             imageEl.setAttribute('src', blobUrl);
          }
 
+         const contentWrapper = doc.createElement('div');
+
+         // copy attrs
+         for (const attr of body.attributes) contentWrapper.setAttribute(attr.name, attr.value);
+         contentWrapper.replaceChildren(...body.childNodes);
+
          newSections.push({
-            content: body.innerHTML,
+            content: xmlSerializer.serializeToString(contentWrapper),
             idref: section.idref,
+            path: section.path,
          });
       }
 

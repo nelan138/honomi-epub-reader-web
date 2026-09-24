@@ -192,9 +192,11 @@ const getCurrentCharactersRead = () => {
          <section
             v-for="(section, index) in readerStore.sections"
             :key="section.idref"
-            class="[&_img,&_svg]:mx-auto [&_img,&_svg]:block [&_img,&_svg]:max-h-[80dvh] [&_img,&_svg]:max-w-[80dvw]"
+            :data-id-ref="section.idref"
+            :data-path-ref="section.path"
             :data-section-index="index"
             v-html="section.content"
+            class="[&_img,&_svg]:mx-auto [&_img,&_svg]:block [&_img,&_svg]:max-h-[80dvh] [&_img,&_svg]:max-w-[80dvw]"
          />
       </article>
 
