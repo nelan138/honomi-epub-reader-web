@@ -22,8 +22,7 @@ export type ManifestItem = {
 
 export type NavigationItem = {
    label: string;
-   href: string;
-   fragment?: string;
+   href: string; // resolved path
 };
 
 export type Epub = {

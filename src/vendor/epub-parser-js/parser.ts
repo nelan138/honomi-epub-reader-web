@@ -1,10 +1,4 @@
-import type {
-   Epub,
-   ManifestItem,
-   Metadata,
-   NavigationItem,
-   SpineItem,
-} from './types.ts';
+import type { Epub, ManifestItem, Metadata, NavigationItem, SpineItem } from './types.ts';
 
 /* *** */
 
@@ -34,8 +28,7 @@ function parseXml(
 ): Document {
    const doc = domParser.parseFromString(xml, 'application/xml');
    const err = doc.getElementsByTagName('parsererror');
-   if (err.length > 0)
-      throw new Error(`Failed to parse ${label}: ${err[0]!.textContent}`);
+   if (err.length > 0) throw new Error(`Failed to parse ${label}: ${err[0]!.textContent}`);
    return doc;
 }
 
@@ -117,8 +110,7 @@ function parseContainer(
    archive: Record<string, Uint8Array>,
 ): string {
    const containerData = archive['META-INF/container.xml'];
-   if (!containerData)
-      throw new Error('Missing META-INF/container.xml in EPUB archive.');
+   if (!containerData) throw new Error('Missing META-INF/container.xml in EPUB archive.');
 
    const doc = parseXml(decodeText(containerData), 'container.xml');
    const rootfiles = elementsByNS(doc, NS_CONTAINER, 'rootfile');
@@ -143,27 +135,23 @@ function parseContainer(
 
 function parseMetadata(opfDoc: Document): Metadata {
    const metaEls = elementsByNS(opfDoc, NS_OPF, 'metadata');
-   if (metaEls.length === 0)
-      throw new Error('OPF is missing <metadata> element.');
+   if (metaEls.length === 0) throw new Error('OPF is missing <metadata> element.');
 
    const metaEl = metaEls[0]!;
 
    // Required fields
    const titleEl = elementsByNS(metaEl, NS_DC, 'title')[0];
-   if (!titleEl?.textContent?.trim())
-      throw new Error('Missing required metadata: dc:title.');
+   if (!titleEl?.textContent?.trim()) throw new Error('Missing required metadata: dc:title.');
 
    const languageEl = elementsByNS(metaEl, NS_DC, 'language')[0];
-   if (!languageEl?.textContent?.trim())
-      throw new Error('Missing required metadata: dc:language.');
+   if (!languageEl?.textContent?.trim()) throw new Error('Missing required metadata: dc:language.');
 
    const identifierEl = elementsByNS(
       metaEl,
       NS_DC,
       'identifier',
    )[0];
-   if (!identifierEl?.textContent?.trim())
-      throw new Error('Missing required metadata: dc:identifier.');
+   if (!identifierEl?.textContent?.trim()) throw new Error('Missing required metadata: dc:identifier.');
 
    const metadata: Metadata = {
       title: titleEl.textContent!.trim(),
@@ -187,8 +175,7 @@ function parseMetadata(opfDoc: Document): Metadata {
       NS_DC,
       'publisher',
    )[0];
-   if (publisherEl?.textContent?.trim())
-      metadata.publisher = publisherEl.textContent!.trim();
+   if (publisherEl?.textContent?.trim()) metadata.publisher = publisherEl.textContent!.trim();
 
    // Optional: modified
    // EPUB 3: <meta property="dcterms:modified">
@@ -282,8 +269,7 @@ function parseSpine(
    manifest: Map<string, ManifestItem>,
 ): { spine: SpineItem[]; tocId: string | undefined } {
    const spineEls = elementsByNS(opfDoc, NS_OPF, 'spine');
-   if (spineEls.length === 0)
-      throw new Error('OPF is missing <spine> element.');
+   if (spineEls.length === 0) throw new Error('OPF is missing <spine> element.');
 
    const spineEl = spineEls[0]!;
    const tocId = spineEl.getAttribute('toc') ?? undefined;
@@ -378,8 +364,7 @@ function parseEpub3Nav(
          if (!rawHref) continue;
 
          const { path, fragment } = resolveHref(rawHref, navDir);
-         const entry: NavigationItem = { label, href: path };
-         if (fragment) entry.fragment = fragment;
+         const entry: NavigationItem = { label, href: fragment ? `${path}#${fragment}` : path };
          items.push(entry);
       }
 
@@ -440,8 +425,7 @@ function parseNcx(
       if (!src) continue;
 
       const { path, fragment } = resolveHref(src, ncxDir);
-      const entry: NavigationItem = { label, href: path };
-      if (fragment) entry.fragment = fragment;
+      const entry: NavigationItem = { label, href: fragment ? `${path}#${fragment}` : path };
       items.push(entry);
    }
 
