@@ -207,10 +207,40 @@ const onAnchorsClicked = (event: MouseEvent) => {
       }
    }
 };
+
+const openHeader = ref(true);
 </script>
 
 <template>
-   <ReaderHeader @return="router.push('/')" @toggle-theme="themeStore.toggleTheme" />
+   <Header v-if="openHeader">
+      <ul class="flex gap-6">
+         <li>
+            <button @click="router.push('/')" type="button" class="hover:cursor-pointer">
+               <i class="fa-solid fa-left-long"></i>
+            </button>
+         </li>
+      </ul>
+
+      <ul class="flex gap-6">
+         <li>
+            <button @click="themeStore.toggleTheme" type="button" class="hover:cursor-pointer">
+               <i class="fa-solid fa-circle-half-stroke scale-[110%]"></i>
+            </button>
+         </li>
+      </ul>
+
+      <div class="fixed top-0 left-0 z-50 flex h-10 w-full items-center justify-end bg-transparent px-4">
+         <button @click="openHeader = false" type="button" class="hover:cursor-pointer">
+            <i class="fa-solid fa-angle-up"></i>
+         </button>
+      </div>
+   </Header>
+   <div v-else class="fixed top-0 right-0 z-50 flex h-10 items-center justify-end rounded-b-full border-2 border-(--header-border)  bg-(--header-bg) px-4">
+      <button @click="openHeader = true" type="button" class="hover:cursor-pointer">
+         <i class="fa-solid fa-chevron-down"></i>
+      </button>
+   </div>
+
    <div
       v-if="readerStore.isLoading"
       class="flex min-h-[60vh] w-full flex-col items-center justify-center gap-3 p-8 font-sans"
