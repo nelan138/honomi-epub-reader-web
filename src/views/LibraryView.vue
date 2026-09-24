@@ -7,6 +7,7 @@ import { useToast } from '@src/composables/useToast';
 import { usePrompt } from '@src/composables/usePrompt';
 import { useAlert } from '@src/composables/useAlert';
 import { useSelect } from '@src/composables/useSelect';
+import Header from '@src/components/Header.vue';
 
 /* *** */
 
@@ -183,11 +184,50 @@ const router = useRouter();
 </script>
 
 <template>
-   <LibraryHeader
-      @toggle-theme="themeStore.toggleTheme"
-      @add-shelf="handleAddingShelf"
-      @import-files="handleImportingBooks"
-   />
+   <Header>
+      <ul class="flex gap-6">
+         <li>
+            <label class="cursor-pointer">
+               <i class="fa-solid fa-upload scale-[110%]"></i>
+               <input
+                  @change="
+                     (event) => {
+                        const target = event.target as HTMLInputElement;
+                        if (target.files) handleImportingBooks(target.files);
+                     }
+                  "
+                  class="hidden"
+                  type="file"
+                  accept=".epub,application/epub+zip"
+                  multiple
+               />
+            </label>
+         </li>
+         <li>
+            <a
+               href="https://github.com/nelan138/honomi-epub-reader-web"
+               target="_blank"
+               rel="noopener noreferrer"
+               class=""
+            >
+               <i class="fa-brands fa-github scale-[110%]"></i>
+            </a>
+         </li>
+      </ul>
+
+      <ul class="flex gap-6">
+         <li>
+            <button @click="handleAddingShelf" type="button" class="hover:cursor-pointer">
+               <i class="fa-solid fa-folder-plus scale-[110%]"></i>
+            </button>
+         </li>
+         <li>
+            <button @click="themeStore.toggleTheme" type="button" class="hover:cursor-pointer">
+               <i class="fa-solid fa-circle-half-stroke scale-[110%]"></i>
+            </button>
+         </li>
+      </ul>
+   </Header>
 
    <BookShelf
       v-for="shelf in shelfStore.shelves"

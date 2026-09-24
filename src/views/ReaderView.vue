@@ -209,20 +209,53 @@ const onAnchorsClicked = (event: MouseEvent) => {
    }
 };
 
+const openHeader = ref(true);
 const openToc = ref(false);
 </script>
 
 <template>
-   <ReaderHeader
-      v-if="!openToc"
-      @toggle-toc="
-         () => {
-            openToc = !openToc;
-         }
-      "
-      @return="router.push('/')"
-      @toggle-theme="themeStore.toggleTheme"
-   />
+   <Header v-if="openHeader">
+      <ul class="flex gap-6">
+         <li>
+            <button @click="router.push('/')" type="button" class="hover:cursor-pointer">
+               <i class="fa-solid fa-left-long"></i>
+            </button>
+         </li>
+         <li>
+            <button
+               @click="
+                  () => {
+                     openHeader = false;
+                     openToc = true;
+                  }
+               "
+               type="button"
+               class="hover:cursor-pointer"
+            >
+               <i class="fa-solid fa-list"></i>
+            </button>
+         </li>
+         <li>
+            <button @click="openHeader = false" type="button" class="hover:cursor-pointer">
+               <i class="fa-solid fa-angle-up"></i>
+            </button>
+         </li>
+      </ul>
+
+      <ul class="flex gap-6">
+         <li>
+            <button @click="themeStore.toggleTheme" type="button" class="hover:cursor-pointer">
+               <i class="fa-solid fa-circle-half-stroke scale-[110%]"></i>
+            </button>
+         </li>
+      </ul>
+   </Header>
+
+   <div v-else class="fixed top-0 left-0 z-50 flex h-10 items-center justify-end bg-transparent px-4">
+      <button @click="openHeader = true" type="button" class="hover:cursor-pointer">
+         <i class="fa-solid fa-chevron-down"></i>
+      </button>
+   </div>
 
    <div
       v-if="readerStore.isLoading"
@@ -233,16 +266,16 @@ const openToc = ref(false);
    </div>
 
    <template v-else>
-      <DrawerRoot v-model:open="openToc">
+      <DrawerRoot v-if="openToc" v-model:open="openToc">
          <DrawerPortal :disabled="true">
-            <DrawerOverlay class="fixed inset-0 z-40 bg-black/50" />
+            <DrawerOverlay class="fixed inset-0 z-50 bg-black/50" />
             <DrawerContent
                :disable-outside-pointer-events="false"
-               class="fixed top-0 left-0 z-50 h-full w-80 max-w-[85vw] bg-blue-600"
+               class="fixed top-0 left-0 z-100 h-full w-80 max-w-[85vw] bg-blue-600 p-4"
                as="aside"
             >
                <DrawerTitle>Table of Content</DrawerTitle>
-               <DrawerClose>X</DrawerClose>
+               <DrawerClose class="absolute top-4 right-4"> <i class="fa-solid fa-xmark"></i></DrawerClose>
                <ul
                   @click="
                      (event) => {
