@@ -2,11 +2,14 @@ import { defineStore } from 'pinia';
 import { domParser, RuntimeError, tryCatch, xmlSerializer } from '@src/utils.ts';
 import { getBookFromDB, updateCharactersReadInDB } from '@src/services/dexie/bookRepo.ts';
 import type { Section } from '@src/services/epub/epubParser.ts';
+import type { NavigationItem } from '@src/services/epub/epubParser.ts';
 
 export const useReaderStore = defineStore('reader', () => {
    // * STATEs
 
    const sections = shallowRef<Section[]>([]);
+   const navigation = shallowRef<NavigationItem[]>([]);
+
    const totalCharacters = ref(0);
    const charactersRead = ref(0);
 
@@ -49,6 +52,9 @@ export const useReaderStore = defineStore('reader', () => {
    });
 
    // ACTIONS
+   const loadNavigation = (_navigation: NavigationItem[]) => {
+      navigation.value = _navigation;
+   };
 
    const loadSections = (_sections: Section[], _images: Record<string, Blob>) => {
       const newSections: Section[] = [];
@@ -104,6 +110,7 @@ export const useReaderStore = defineStore('reader', () => {
       totalCharacters.value = book.totalCharacters;
       charactersRead.value = book.charactersRead;
       loadSections(book.sections, book.images);
+      loadNavigation(book.navigation ?? []);
 
       isLoading.value = false;
       isLoaded.value = true;
@@ -119,6 +126,7 @@ export const useReaderStore = defineStore('reader', () => {
       charactersRead.value = 0;
 
       sections.value = [];
+      navigation.value = [];
    }
 
    /** this DOES NOT sync with DB by default */
@@ -141,6 +149,7 @@ export const useReaderStore = defineStore('reader', () => {
       isLoaded,
 
       sections,
+      navigation,
       totalCharacters,
       charactersRead,
 

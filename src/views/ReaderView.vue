@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { DrawerClose, DrawerContent, DrawerOverlay, DrawerPortal, DrawerRoot, DrawerTitle } from 'reka-ui';
 import { useThemeStore } from '@src/stores/useThemeStore';
 import { cleanUpBlobUrls, RuntimeError, tryCatch } from '@src/utils';
 
@@ -207,19 +208,57 @@ const onAnchorsClicked = (event: MouseEvent) => {
       }
    }
 };
+
+const openToc = ref(false);
 </script>
 
 <template>
-   <ReaderHeader @return="router.push('/')" @toggle-theme="themeStore.toggleTheme" />
+   <ReaderHeader
+      v-if="!openToc"
+      @toggle-toc="
+         () => {
+            openToc = !openToc;
+         }
+      "
+      @return="router.push('/')"
+      @toggle-theme="themeStore.toggleTheme"
+   />
+
    <div
       v-if="readerStore.isLoading"
       class="flex min-h-[60vh] w-full flex-col items-center justify-center gap-3 p-8 font-sans"
    >
-      <i class="fa-solid fa-circle-notch text-highlight animate-spin text-2xl"></i>
+      <i class="fa-solid fa-circle-notch animate-spin text-2xl text-(--ink)"></i>
       <span class="text-xs font-medium tracking-widest uppercase">Loading...</span>
    </div>
 
    <template v-else>
+      <DrawerRoot v-model:open="openToc">
+         <DrawerPortal :disabled="true">
+            <DrawerOverlay class="fixed inset-0 z-40 bg-black/50" />
+            <DrawerContent
+               :disable-outside-pointer-events="false"
+               class="fixed top-0 left-0 z-50 h-full w-80 max-w-[85vw] bg-blue-600"
+               as="aside"
+            >
+               <DrawerTitle>Table of Content</DrawerTitle>
+               <DrawerClose>X</DrawerClose>
+               <ul
+                  @click="
+                     (event) => {
+                        openToc = false;
+                        onAnchorsClicked(event);
+                     }
+                  "
+               >
+                  <li v-for="{ label, href } in readerStore.navigation">
+                     <a :href="href"> {{ label }} </a>
+                  </li>
+               </ul>
+            </DrawerContent>
+         </DrawerPortal>
+      </DrawerRoot>
+
       <article
          @click="onAnchorsClicked"
          class="prose prose-headings:text-(--ink) w-full max-w-full p-4 py-4 font-sans text-(--ink)"

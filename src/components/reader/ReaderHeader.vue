@@ -5,6 +5,7 @@ import { useScroll } from '@vueuse/core';
 
 const emit = defineEmits<{
    toggleTheme: [];
+   toggleToc: [];
    return: [];
 }>();
 
@@ -28,7 +29,7 @@ watch([() => directions.top, () => directions.bottom, y], () => {
    <header
       :class="[
          isHeaderVisible ? 'translate-y-0' : '-translate-y-full',
-         'fixed top-0 z-50 mx-auto flex w-full items-center justify-between border-b-2 border-(--reader-header-border) bg-(--reader-header-bg) px-4 py-2 transition-transform duration-300 md:px-16 xl:px-32 2xl:px-64',
+         'fixed top-0 z-100 mx-auto flex w-full items-center justify-between border-b-2 border-(--reader-header-border) bg-(--reader-header-bg) px-4 py-2 transition-transform duration-300 md:px-16 xl:px-32 2xl:px-64',
       ]"
    >
       <ul class="flex gap-6">
@@ -37,7 +38,14 @@ watch([() => directions.top, () => directions.bottom, y], () => {
                <i class="fa-solid fa-left-long"></i>
             </button>
          </li>
+
+         <li>
+            <button @click="emit('toggleToc')" type="button" class="hover:cursor-pointer">
+               <i class="fa-solid fa-list"></i>
+            </button>
+         </li>
       </ul>
+
       <ul class="flex gap-6">
          <li>
             <button @click="emit('toggleTheme')" type="button" class="hover:cursor-pointer">
