@@ -91,7 +91,7 @@ export class EpubParser {
                continue;
             }
 
-            const resolvedSrc = resolvePath(chapterPath, src);
+            const resolvedSrc = resolvePath(src, chapterPath);
             if (!resolvedSrc) continue;
 
             const buffer = archive[resolvedSrc];
@@ -124,7 +124,7 @@ export class EpubParser {
                continue;
             }
 
-            const resolvedSrc = resolvePath(chapterPath, src);
+            const resolvedSrc = resolvePath(src, chapterPath);
             if (!resolvedSrc) continue;
 
             const buffer = archive[resolvedSrc];
@@ -248,64 +248,30 @@ const MIME_MAP: Record<string, string> = {
    avif: 'image/avif',
 };
 
-// ! AI SLOP ALERT BELOW !
-// ? Too lazy to fix, plus it's working >.< ?
-
 function getMimeType(path: string): string {
    const ext = path.split('.').pop()?.toLowerCase() ?? '';
    return MIME_MAP[ext] ?? 'application/octet-stream';
 }
 
-/**
- * Collapse `.` and `..` segments in an already-joined path string.
- * Returns `null` if `..` would escape the archive root (instead of throwing).
- */
-export function normalizePath(path: string): string | null {
-   const stack: string[] = [];
-   for (const seg of path.replace(/\\/g, '/').split('/')) {
-      if (seg === '' || seg === '.') continue;
-      if (seg === '..') {
-         if (stack.length === 0) return null;
-         stack.pop();
+function resolvePath(relative: string, absolute: string): string {
+   if (/^[a-z][a-z0-9+.-]*:/i.test(relative)) return relative;
+
+   const cleanAbsolute = absolute.startsWith('/') ? absolute.substring(1) : absolute;
+   const baseUrl = new URL(`/${cleanAbsolute}`, 'https://honomi.pages.dev/');
+   const resolvedUrl = new URL(relative, baseUrl);
+
+   const safeDecode = (str: string) => {
+      try {
+         return decodeURIComponent(str);
       }
-      else {
-         stack.push(seg);
+      catch {
+         // Fallback: if string contains malformed percent characters
+         return str;
       }
-   }
-   return stack.join('/');
-}
+   };
 
-const EXTERNAL_URI_RE = /^(?:https?:|data:|blob:)/i;
+   // prevent percent-encoding leaks (%20 -> space)
+   const normalizedPath = safeDecode(resolvedUrl.pathname.substring(1));
 
-export function resolvePath(
-   basePath: string,
-   relativeSrc: string,
-): string | null {
-   // 1. External / data / blob URIs — nothing to resolve
-   if (EXTERNAL_URI_RE.test(relativeSrc)) return null;
-
-   // 2. Strip fragment and query string
-   let cleaned = relativeSrc;
-   const hashIdx = cleaned.indexOf('#');
-   if (hashIdx !== -1) cleaned = cleaned.slice(0, hashIdx);
-   const queryIdx = cleaned.indexOf('?');
-   if (queryIdx !== -1) cleaned = cleaned.slice(0, queryIdx);
-
-   // 3. Percent-decode (safe — catch URIError on malformed sequences)
-   let raw: string;
-   try {
-      raw = decodeURIComponent(cleaned);
-   }
-   catch {
-      return null;
-   }
-
-   // 4. Already root-relative (absolute path)
-   if (raw.startsWith('/')) return normalizePath(raw.slice(1));
-
-   // 5. Derive chapter directory (everything up to and including the last '/')
-   const slashIdx = basePath.lastIndexOf('/');
-   const chapterDir = slashIdx !== -1 ? basePath.slice(0, slashIdx + 1) : '';
-
-   return normalizePath(chapterDir + raw);
+   return resolvedUrl.hash ? `${normalizedPath}${safeDecode(resolvedUrl.hash)}` : normalizedPath;
 }
