@@ -190,6 +190,16 @@ export class EpubParser {
 
             const processedBodyEl = processImageTags(bodyEl, manifestItem.href);
 
+            // process anchor tags (href paths)
+            for (const anchorEl of processedBodyEl.getElementsByTagName('a')) {
+               const rawHref = anchorEl.getAttribute('href');
+               if (!rawHref) continue;
+
+               // ! to bypass browser path normalization to http://...
+               anchorEl.setAttribute('href', resolvePath(rawHref, manifestItem.href));
+               // console.log(`[Epub] Resolved anchor href: ${rawHref} -> ${anchorEl.getAttribute('href')}`);
+            }
+
             for (const paragraphEl of processedBodyEl.getElementsByTagName('p')) {
                runningCharCount += getElementCharacterCount(paragraphEl.innerHTML);
                paragraphEl.setAttribute('data-characters-read', runningCharCount.toString());
@@ -256,7 +266,7 @@ function getMimeType(path: string): string {
    return MIME_MAP[ext] ?? 'application/octet-stream';
 }
 
-const URI_SCHEME_REGEX = /^[a-z][a-z0-9+.-]*:/i;
+export const URI_SCHEME_REGEX = /^[a-z][a-z0-9+.-]*:/i;
 
 function resolvePath(relative: string, absolute: string): string {
    // if contains external link

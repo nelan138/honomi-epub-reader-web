@@ -5,6 +5,7 @@ import { cleanUpBlobUrls, RuntimeError, tryCatch } from '@src/utils';
 import { getBookFromDB, updateCharactersReadInDB } from '@src/services/dexie/bookRepo';
 import { useReaderStore } from '@src/stores/useReaderStore';
 import { useDebounceFn } from '@vueuse/core';
+import { URI_SCHEME_REGEX } from '@src/services/epub/epubParser';
 
 /* *** */
 
@@ -175,6 +176,37 @@ const getCurrentCharactersRead = () => {
       }
    }
 };
+
+// replaces href default behavior on clicked
+const onAnchorsClicked = (event: MouseEvent) => {
+   const target = event.target as HTMLElement | null;
+   const anchor = target?.closest('a');
+   if (!anchor) return;
+
+   const href = anchor.getAttribute('href');
+   if (!href) return;
+
+   if (URI_SCHEME_REGEX.test(href) || event.ctrlKey || event.metaKey || event.button === 1) {
+      return;
+   }
+
+   event.preventDefault();
+
+   // scroll into view
+   const [path, fragment] = href.split('#');
+
+   if (fragment) {
+      const targetEl = document.getElementById(fragment);
+      if (targetEl) {
+         targetEl.scrollIntoView({ behavior: 'smooth' });
+      }
+   } else if (path) {
+      const targetSectionEl = document.querySelector(`[data-path-ref="${path}"]`);
+      if (targetSectionEl) {
+         targetSectionEl.scrollIntoView({ behavior: 'smooth' });
+      }
+   }
+};
 </script>
 
 <template>
@@ -188,7 +220,10 @@ const getCurrentCharactersRead = () => {
    </div>
 
    <template v-else>
-      <article class="prose prose-headings:text-(--ink) w-full max-w-full p-4 py-4 font-sans text-(--ink)">
+      <article
+         @click="onAnchorsClicked"
+         class="prose prose-headings:text-(--ink) w-full max-w-full p-4 py-4 font-sans text-(--ink)"
+      >
          <section
             v-for="(section, index) in readerStore.sections"
             :key="section.idref"
