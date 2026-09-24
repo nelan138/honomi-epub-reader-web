@@ -253,8 +253,11 @@ function getMimeType(path: string): string {
    return MIME_MAP[ext] ?? 'application/octet-stream';
 }
 
+const URI_SCHEME_REGEX = /^[a-z][a-z0-9+.-]*:/i;
+
 function resolvePath(relative: string, absolute: string): string {
-   if (/^[a-z][a-z0-9+.-]*:/i.test(relative)) return relative;
+   // if contains external link
+   if (URI_SCHEME_REGEX.test(relative)) return relative;
 
    const cleanAbsolute = absolute.startsWith('/') ? absolute.substring(1) : absolute;
    const baseUrl = new URL(`/${cleanAbsolute}`, 'https://honomi.pages.dev/');
