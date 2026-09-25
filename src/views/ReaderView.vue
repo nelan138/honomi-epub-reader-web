@@ -214,7 +214,7 @@ const openToc = ref(false);
 </script>
 
 <template>
-   <Header class="fixed z-100" v-if="openHeader">
+   <Header v-if="openHeader">
       <ul class="flex gap-6">
          <li>
             <button @click="router.push('/')" type="button" class="hover:cursor-pointer">
