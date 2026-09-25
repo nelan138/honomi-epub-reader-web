@@ -38,19 +38,46 @@
       </div>
    </Header>
 
-   <BookShelf
-      v-for="shelf in shelfStore.shelves"
-      :key="shelf.id"
-      :shelf="shelf"
-      @rename="handleRenamingShelf"
-      @delete="handleDeletingShelf"
-      @move-up="shelfStore.moveShelfUp"
-      @move-down="shelfStore.moveShelfDown"
-      @expand="shelfStore.expandShelf"
-      @collapse="shelfStore.collapseShelf"
-   >
-      <!-- todo: use collapsible later -->
-      <div v-if="shelf.expanded" class="3xl:grid-cols-4 grid w-full grid-cols-1 gap-4 lg:grid-cols-3">
+   <BookShelf v-for="shelf in shelfStore.shelves" :key="shelf.id">
+      <template #label>
+         <h2 class="font-sans font-medium tracking-widest uppercase">
+            {{ shelf.name }}
+         </h2>
+      </template>
+
+      <template #actions>
+         <div class="flex gap-4 text-[80%] lg:gap-6">
+            <template v-if="shelf.name !== defaultShelf.name">
+               <button @click="shelfStore.moveShelfUp(shelf.id)" type="button" class="hover:cursor-pointer">
+                  <i class="fa-solid fa-circle-up"></i>
+               </button>
+
+               <button @click="shelfStore.moveShelfDown(shelf.id)" type="button" class="hover:cursor-pointer">
+                  <i class="fa-solid fa-circle-down"></i>
+               </button>
+
+               <button @click="handleRenamingShelf(shelf.id)" type="button" class="hover:cursor-pointer">
+                  <i class="fa-solid fa-pencil"></i>
+               </button>
+
+               <button @click="handleDeletingShelf(shelf.id)" type="button" class="hover:cursor-pointer">
+                  <i class="fa-solid fa-x"></i>
+               </button>
+            </template>
+
+            <button
+               @click="shelf.expanded ? shelfStore.collapseShelf(shelf.id) : shelfStore.expandShelf(shelf.id)" "
+               type="button"
+               class="hover:cursor-pointer"
+            >
+               <i v-if="shelf.expanded" class="fa-solid fa-caret-down"></i>
+               <i v-else class="fa-solid fa-caret-right"></i>
+            </button>
+
+         </div>
+      </template>
+
+      <template v-if="shelf.expanded"  #books>
          <BookCard
             v-for="book in bookShelfMap.get(shelf.id) ?? []"
             :key="book.id"
@@ -93,7 +120,7 @@
                </button>
             </template>
          </BookCard>
-      </div>
+      </template>
    </BookShelf>
 </template>
 
@@ -107,6 +134,7 @@ import { usePrompt } from '@src/composables/usePrompt';
 import { useAlert } from '@src/composables/useAlert';
 import { useSelect } from '@src/composables/useSelect';
 import { ProgressRoot, ProgressIndicator } from 'reka-ui';
+import { defaultShelf } from '@src/services/dexie/database';
 
 /* *** */
 

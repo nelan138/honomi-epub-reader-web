@@ -1,65 +1,21 @@
-<script setup lang="ts">
-import { defaultShelf, type ShelfRecord } from '@src/services/dexie/database';
-
-/* *** */
-
-const props = defineProps<{
-   shelf: ShelfRecord;
-}>();
-
-const emit = defineEmits<{
-   expand: [shelfId: number];
-   collapse: [shelfId: number];
-   rename: [shelfId: number];
-   delete: [shelfId: number];
-   'move-up': [shelfId: number];
-   'move-down': [shelfId: number];
-}>();
-</script>
-
 <template>
    <section class="w-full p-4 md:px-16 xl:px-32 2xl:px-64">
       <header class="flex justify-between py-2">
-         <h2 class="flex w-full items-center font-serif font-medium tracking-widest uppercase">
-            {{ shelf.name }}
-         </h2>
+         <div class="flex w-full items-center">
+            <slot name="label"> </slot>
+         </div>
 
-         <ul class="flex gap-4 text-[80%] lg:gap-6">
-            <li :class="{ hidden: shelf.name === defaultShelf.name }">
-               <button @click="emit('move-up', shelf.id)" type="button" class="hover:cursor-pointer">
-                  <i class="fa-solid fa-circle-up"></i>
-               </button>
-            </li>
-            <li :class="{ hidden: shelf.name === defaultShelf.name }">
-               <button @click="emit('move-down', shelf.id)" type="button" class="hover:cursor-pointer">
-                  <i class="fa-solid fa-circle-down"></i>
-               </button>
-            </li>
-            <li :class="{ hidden: shelf.name === defaultShelf.name }">
-               <button @click="emit('rename', shelf.id)" type="button" class="hover:cursor-pointer">
-                  <i class="fa-solid fa-pencil"></i>
-               </button>
-            </li>
-            <li>
-               <button
-                  @click="shelf.expanded ? emit('collapse', shelf.id) : emit('expand', shelf.id)"
-                  type="button"
-                  class="hover:cursor-pointer"
-               >
-                  <i v-if="shelf.expanded" class="fa-solid fa-caret-down"></i>
-                  <i v-else class="fa-solid fa-caret-right"></i>
-               </button>
-            </li>
-            <li :class="{ hidden: shelf.name === defaultShelf.name }">
-               <button @click="emit('delete', shelf.id)" type="button" class="hover:cursor-pointer">
-                  <i class="fa-solid fa-x"></i>
-               </button>
-            </li>
-         </ul>
+         <div class="flex gap-4 text-[80%] lg:gap-6">
+            <slot name="actions"></slot>
+         </div>
       </header>
 
-      <slot>
-         <!-- ! Books -->
-      </slot>
+      <div class="3xl:grid-cols-4 grid w-full grid-cols-1 gap-4 lg:grid-cols-3">
+         <slot name="books"> </slot>
+      </div>
    </section>
 </template>
+
+<script setup lang="ts">
+/* *** */
+</script>
