@@ -125,7 +125,6 @@ import { usePrompt } from '@src/composables/usePrompt';
 import { useAlert } from '@src/composables/useAlert';
 import { useSelect } from '@src/composables/useSelect';
 import { defaultShelf } from '@src/services/dexie/database';
-import ProgressBar from '@src/components/ProgressBar.vue';
 
 /* *** */
 

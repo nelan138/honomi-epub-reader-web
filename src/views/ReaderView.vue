@@ -1,5 +1,89 @@
+<template>
+   <Header v-if="openHeader">
+      <ul class="flex gap-6">
+         <li>
+            <button @click="router.push('/')" type="button" class="hover:cursor-pointer">
+               <i class="fa-solid fa-left-long"></i>
+            </button>
+         </li>
+
+         <li>
+            <button
+               @click="
+                  () => {
+                     openHeader = false;
+                     openToc = true;
+                  }
+               "
+               type="button"
+               class="hover:cursor-pointer"
+            >
+               <i class="fa-solid fa-list"></i>
+            </button>
+         </li>
+
+         <li>
+            <button @click="openHeader = false" type="button" class="hover:cursor-pointer">
+               <i class="fa-solid fa-angle-up"></i>
+            </button>
+         </li>
+      </ul>
+
+      <ul class="flex gap-6">
+         <li>
+            <button @click="themeStore.toggleTheme" type="button" class="hover:cursor-pointer">
+               <i class="fa-solid fa-circle-half-stroke scale-[110%]"></i>
+            </button>
+         </li>
+      </ul>
+   </Header>
+
+   <!-- Header toggle -->
+   <div v-else class="fixed top-0 left-0 z-100 flex h-10 items-center justify-end bg-transparent px-4">
+      <button @click="openHeader = true" type="button" class="hover:cursor-pointer">
+         <i class="fa-solid fa-chevron-down"></i>
+      </button>
+   </div>
+
+   <!-- Loading screen -->
+   <LoadingScreen :open="readerStore.isLoading" />
+
+   <TableOfContent v-if="openToc" v-model:open="openToc">
+      <ul
+         @click="
+            (event) => {
+               openToc = false;
+               onAnchorsClicked(event);
+            }
+         "
+      >
+         <li v-for="{ label, href } in readerStore.navigation">
+            <a :href="href"> {{ label }} </a>
+         </li>
+      </ul>
+   </TableOfContent>
+
+   <BookContent @click="onAnchorsClicked">
+      <section
+         v-for="(section, index) in readerStore.sections"
+         :key="section.idref"
+         :data-id-ref="section.idref"
+         :data-path-ref="section.path"
+         :data-section-index="index"
+         v-html="section.content"
+      />
+   </BookContent>
+
+   <Footer>
+      <div class="text-right font-sans text-xs">
+         <span>{{ readerStore.charactersRead }} / {{ readerStore.totalCharacters }}</span>
+         <span class="mx-2">ー</span>
+         <span> {{ readerStore.progress }}% </span>
+      </div>
+   </Footer>
+</template>
+
 <script setup lang="ts">
-import { DrawerClose, DrawerContent, DrawerOverlay, DrawerPortal, DrawerRoot, DrawerTitle } from 'reka-ui';
 import { useThemeStore } from '@src/stores/useThemeStore';
 import { cleanUpBlobUrls, RuntimeError, tryCatch } from '@src/utils';
 
@@ -212,114 +296,5 @@ const onAnchorsClicked = (event: MouseEvent) => {
 const openHeader = ref(true);
 const openToc = ref(false);
 </script>
-
-<template>
-   <Header v-if="openHeader">
-      <ul class="flex gap-6">
-         <li>
-            <button @click="router.push('/')" type="button" class="hover:cursor-pointer">
-               <i class="fa-solid fa-left-long"></i>
-            </button>
-         </li>
-
-         <li>
-            <button
-               @click="
-                  () => {
-                     openHeader = false;
-                     openToc = true;
-                  }
-               "
-               type="button"
-               class="hover:cursor-pointer"
-            >
-               <i class="fa-solid fa-list"></i>
-            </button>
-         </li>
-
-         <li>
-            <button @click="openHeader = false" type="button" class="hover:cursor-pointer">
-               <i class="fa-solid fa-angle-up"></i>
-            </button>
-         </li>
-      </ul>
-
-      <ul class="flex gap-6">
-         <li>
-            <button @click="themeStore.toggleTheme" type="button" class="hover:cursor-pointer">
-               <i class="fa-solid fa-circle-half-stroke scale-[110%]"></i>
-            </button>
-         </li>
-      </ul>
-   </Header>
-
-   <!-- Header toggle -->
-   <div v-else class="fixed top-0 left-0 z-100 flex h-10 items-center justify-end bg-transparent px-4">
-      <button @click="openHeader = true" type="button" class="hover:cursor-pointer">
-         <i class="fa-solid fa-chevron-down"></i>
-      </button>
-   </div>
-
-   <!-- Loading screen -->
-   <div
-      v-if="readerStore.isLoading"
-      class="flex min-h-[60vh] w-full flex-col items-center justify-center gap-3 p-8 font-sans"
-   >
-      <i class="fa-solid fa-circle-notch animate-spin text-2xl text-(--ink)"></i>
-      <span class="text-xs font-medium tracking-widest uppercase">Loading...</span>
-   </div>
-
-   <template v-else>
-      <DrawerRoot v-if="openToc" v-model:open="openToc">
-         <DrawerPortal :disabled="true">
-            <DrawerOverlay class="fixed inset-0 z-100 bg-black/50" />
-            <DrawerContent
-               :disable-outside-pointer-events="false"
-               class="fixed top-0 left-0 z-150 h-full w-80 max-w-[85vw] bg-(--background) p-4 text-(--ink)"
-               as="aside"
-            >
-               <DrawerTitle>Table of Content</DrawerTitle>
-               <DrawerClose class="absolute top-4 right-4 hover:cursor-pointer">
-                  <i class="fa-solid fa-xmark"></i>
-               </DrawerClose>
-
-               <ul
-                  @click="
-                     (event) => {
-                        openToc = false;
-                        onAnchorsClicked(event);
-                     }
-                  "
-               >
-                  <li v-for="{ label, href } in readerStore.navigation">
-                     <a :href="href"> {{ label }} </a>
-                  </li>
-               </ul>
-            </DrawerContent>
-         </DrawerPortal>
-      </DrawerRoot>
-
-      <article
-         @click="onAnchorsClicked"
-         class="prose prose-headings:text-(--ink) w-full max-w-full p-4 py-4 font-sans text-(--ink) md:px-16 xl:px-32 2xl:px-64"
-      >
-         <section
-            v-for="(section, index) in readerStore.sections"
-            :key="section.idref"
-            :data-id-ref="section.idref"
-            :data-path-ref="section.path"
-            :data-section-index="index"
-            v-html="section.content"
-            class="[&_img,&_svg]:mx-auto [&_img,&_svg]:block [&_img,&_svg]:max-h-[80dvh] [&_img,&_svg]:max-w-[80dvw]"
-         ></section>
-      </article>
-
-      <footer class="sticky bottom-0 z-100 py-2 text-right font-sans text-xs">
-         <span>{{ readerStore.charactersRead }} / {{ readerStore.totalCharacters }}</span>
-         <span class="mx-2">ー</span>
-         <span> {{ readerStore.progress }}% </span>
-      </footer>
-   </template>
-</template>
 
 <style scoped></style>
