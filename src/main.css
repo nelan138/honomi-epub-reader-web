@@ -18,6 +18,10 @@
    --font-serif: 'Spectral', 'Georgia', serif;
 }
 
+@theme {
+   --breakpoint-3xl: 120rem; /* 1920px */
+}
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {

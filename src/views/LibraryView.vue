@@ -1,3 +1,117 @@
+<template>
+   <Header>
+      <div class="flex gap-6">
+         <label class="cursor-pointer">
+            <i class="fa-solid fa-upload scale-[110%]"></i>
+            <input
+               @change="
+                  (event) => {
+                     const target = event.target as HTMLInputElement;
+                     if (target.files) handleImportingBooks(target.files);
+                  }
+               "
+               class="hidden"
+               type="file"
+               accept=".epub,application/epub+zip"
+               multiple
+            />
+         </label>
+
+         <a
+            href="https://github.com/nelan138/honomi-epub-reader-web"
+            target="_blank"
+            rel="noopener noreferrer"
+            class=""
+         >
+            <i class="fa-brands fa-github scale-[110%]"></i>
+         </a>
+      </div>
+
+      <div class="flex gap-6">
+         <button @click="handleAddingShelf" type="button" class="hover:cursor-pointer">
+            <i class="fa-solid fa-folder-plus scale-[110%]"></i>
+         </button>
+
+         <button @click="themeStore.toggleTheme" type="button" class="hover:cursor-pointer">
+            <i class="fa-solid fa-circle-half-stroke scale-[110%]"></i>
+         </button>
+      </div>
+   </Header>
+
+   <BookShelf
+      v-for="shelf in shelfStore.shelves"
+      :key="shelf.id"
+      :shelf="shelf"
+      @rename="handleRenamingShelf"
+      @delete="handleDeletingShelf"
+      @move-up="shelfStore.moveShelfUp"
+      @move-down="shelfStore.moveShelfDown"
+      @expand="shelfStore.expandShelf"
+      @collapse="shelfStore.collapseShelf"
+   >
+      <!-- todo: use collapsible later -->
+      <div v-if="shelf.expanded" class="3xl:grid-cols-4 grid w-full grid-cols-1 gap-4 lg:grid-cols-3">
+         <BookCard
+            v-for="book in bookShelfMap.get(shelf.id) ?? []"
+            :key="book.id"
+            @click="router.push(`reader/${book.id}`)"
+            columns="1fr_2fr"
+         >
+            <template #image>
+               <Image :ratio="2 / 3" :alt="book.metadata.title" :src="blobToUrl(book.cover)" />
+            </template>
+
+            <template #metadata>
+               <div class="flex h-full flex-col gap-4 pl-4">
+                  <div class="flex min-w-0 flex-1 flex-col font-serif md:gap-2 md:text-[100%]">
+                     <h3 class="line-clamp-1 font-sans font-medium break-all">{{ book.metadata.title }}</h3>
+                     <p class="truncate text-[80%]">{{ book.metadata.creator }}</p>
+                     <p class="truncate text-[80%]">{{ book.metadata.publisher }}</p>
+                     <p class="truncate text-[80%] uppercase">{{ book.metadata.language }}</p>
+                  </div>
+
+                  <ProgressRoot
+                     :model-value="(book.charactersRead * 100) / book.totalCharacters"
+                     class="relative h-1 w-full overflow-hidden rounded-full bg-(--progress-bar-bg)"
+                  >
+                     <ProgressIndicator
+                        class="h-full w-full bg-(--progress-bar-color)"
+                        :style="`transform: translateX(-${100 - (book.charactersRead * 100) / book.totalCharacters}%)`"
+                     />
+                  </ProgressRoot>
+
+                  <div @click.stop class="flex justify-end gap-4 md:gap-8 lg:justify-around lg:gap-2">
+                     <button
+                        @click="handleRenamingBook(book.id)"
+                        type="button"
+                        class="aspect-square hover:cursor-pointer"
+                     >
+                        <i class="fa-solid fa-pen-to-square"></i>
+                     </button>
+
+                     <button
+                        @click="handleChangingBookShelf(book.id)"
+                        type="button"
+                        class="aspect-square hover:cursor-pointer"
+                     >
+                        <i class="fa-solid fa-right-left"></i>
+                     </button>
+
+                     <button
+                        @click="handleDeletingBook(book.id)"
+                        type="button"
+                        class="aspect-square hover:cursor-pointer"
+                     >
+                        <i class="fa-solid fa-trash"></i>
+                     </button>
+                  </div>
+               </div>
+            </template>
+         </BookCard>
+      </div>
+   </BookShelf>
+</template>
+
 <script setup lang="ts">
 import { tryCatch } from '@src/utils';
 import { useShelfStore } from '@src/stores/useShelfStore';
@@ -8,6 +122,8 @@ import { usePrompt } from '@src/composables/usePrompt';
 import { useAlert } from '@src/composables/useAlert';
 import { useSelect } from '@src/composables/useSelect';
 import Header from '@src/components/Header.vue';
+import Image from '@src/components/Image.vue';
+import { ProgressRoot, ProgressIndicator } from 'reka-ui';
 
 /* *** */
 
@@ -181,97 +297,17 @@ const handleDeletingShelf = async (shelfId: number) => {
 };
 
 const router = useRouter();
+const blobToUrl = (blob: Blob) => URL.createObjectURL(blob);
 </script>
 
-<template>
-   <Header>
-      <ul class="flex gap-6">
-         <li>
-            <label class="cursor-pointer">
-               <i class="fa-solid fa-upload scale-[110%]"></i>
-               <input
-                  @change="
-                     (event) => {
-                        const target = event.target as HTMLInputElement;
-                        if (target.files) handleImportingBooks(target.files);
-                     }
-                  "
-                  class="hidden"
-                  type="file"
-                  accept=".epub,application/epub+zip"
-                  multiple
-               />
-            </label>
-         </li>
-         <li>
-            <a
-               href="https://github.com/nelan138/honomi-epub-reader-web"
-               target="_blank"
-               rel="noopener noreferrer"
-               class=""
-            >
-               <i class="fa-brands fa-github scale-[110%]"></i>
-            </a>
-         </li>
-      </ul>
-
-      <ul class="flex gap-6">
-         <li>
-            <button @click="handleAddingShelf" type="button" class="hover:cursor-pointer">
-               <i class="fa-solid fa-folder-plus scale-[110%]"></i>
-            </button>
-         </li>
-         <li>
-            <button @click="themeStore.toggleTheme" type="button" class="hover:cursor-pointer">
-               <i class="fa-solid fa-circle-half-stroke scale-[110%]"></i>
-            </button>
-         </li>
-      </ul>
-   </Header>
-
-   <BookShelf
-      v-for="shelf in shelfStore.shelves"
-      :key="shelf.id"
-      :shelf="shelf"
-      @rename="handleRenamingShelf"
-      @delete="handleDeletingShelf"
-      @move-up="shelfStore.moveShelfUp"
-      @move-down="shelfStore.moveShelfDown"
-      @expand="shelfStore.expandShelf"
-      @collapse="shelfStore.collapseShelf"
-   >
-      <TransitionGroup
-         v-if="shelf.expanded"
-         tag="div"
-         name="book-list"
-         class="grid w-full grid-cols-1 gap-4 lg:grid-cols-3 2xl:grid-cols-4"
-      >
-         <BookCard
-            v-for="book in bookShelfMap.get(shelf.id) ?? []"
-            :key="book.id"
-            :book="book"
-            @open="router.push(`/reader/${book.id}`)"
-            @rename="handleRenamingBook"
-            @delete="handleDeletingBook"
-            @change-shelf="handleChangingBookShelf"
-         />
-      </TransitionGroup>
-   </BookShelf>
-</template>
-
 <style scoped>
-.book-list-enter-active,
-.book-list-leave-active {
-   transition: all 0.25s ease;
+:global(html) {
+   --progress-bar-bg: #e5ded0;
+   --progress-bar-color: #8c6d46;
 }
 
-.book-list-enter-from,
-.book-list-leave-to {
-   opacity: 0;
-   transform: translateY(8px) scale(0.96);
-}
-
-.book-list-move {
-   transition: transform 0.25s ease;
+:global(html.dark) {
+   --progress-bar-bg: #262b30;
+   --progress-bar-color: #878f97;
 }
 </style>
