@@ -221,6 +221,7 @@ const openToc = ref(false);
                <i class="fa-solid fa-left-long"></i>
             </button>
          </li>
+
          <li>
             <button
                @click="
@@ -235,6 +236,7 @@ const openToc = ref(false);
                <i class="fa-solid fa-list"></i>
             </button>
          </li>
+
          <li>
             <button @click="openHeader = false" type="button" class="hover:cursor-pointer">
                <i class="fa-solid fa-angle-up"></i>
@@ -251,12 +253,14 @@ const openToc = ref(false);
       </ul>
    </Header>
 
+   <!-- Header toggle -->
    <div v-else class="fixed top-0 left-0 z-50 flex h-10 items-center justify-end bg-transparent px-4">
       <button @click="openHeader = true" type="button" class="hover:cursor-pointer">
          <i class="fa-solid fa-chevron-down"></i>
       </button>
    </div>
 
+   <!-- Loading screen -->
    <div
       v-if="readerStore.isLoading"
       class="flex min-h-[60vh] w-full flex-col items-center justify-center gap-3 p-8 font-sans"
@@ -307,7 +311,7 @@ const openToc = ref(false);
             :data-section-index="index"
             v-html="section.content"
             class="[&_img,&_svg]:mx-auto [&_img,&_svg]:block [&_img,&_svg]:max-h-[80dvh] [&_img,&_svg]:max-w-[80dvw]"
-         />
+         ></section>
       </article>
 
       <footer class="sticky bottom-0 z-50 py-2 text-right font-sans text-xs">
