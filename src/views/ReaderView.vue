@@ -271,13 +271,14 @@ const openToc = ref(false);
             <DrawerOverlay class="fixed inset-0 z-50 bg-black/50" />
             <DrawerContent
                :disable-outside-pointer-events="false"
-               class="fixed top-0 left-0 z-100 h-full w-80 max-w-[85vw] bg-amber-50 p-4"
+               class="fixed top-0 left-0 z-100 h-full w-80 max-w-[85vw] bg-(--background) p-4 text-(--ink)"
                as="aside"
             >
                <DrawerTitle>Table of Content</DrawerTitle>
                <DrawerClose class="absolute top-4 right-4 hover:cursor-pointer">
-                  <i class="fa-solid fa-xmark"></i
-               ></DrawerClose>
+                  <i class="fa-solid fa-xmark"></i>
+               </DrawerClose>
+
                <ul
                   @click="
                      (event) => {
