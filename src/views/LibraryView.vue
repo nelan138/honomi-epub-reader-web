@@ -94,15 +94,7 @@
             </template>
 
             <template #progress-bar>
-               <ProgressRoot
-                  :model-value="(book.charactersRead * 100) / book.totalCharacters"
-                  class="relative h-1 w-full overflow-hidden rounded-full bg-(--progress-bar-bg)"
-               >
-                  <ProgressIndicator
-                     class="h-full w-full bg-(--progress-bar-color)"
-                     :style="`transform: translateX(-${100 - (book.charactersRead * 100) / book.totalCharacters}%)`"
-                  />
-               </ProgressRoot>
+               <ProgressBar :value="(book.charactersRead * 100) / book.totalCharacters" />
             </template>
 
             <template #actions>
@@ -132,8 +124,8 @@ import { useToast } from '@src/composables/useToast';
 import { usePrompt } from '@src/composables/usePrompt';
 import { useAlert } from '@src/composables/useAlert';
 import { useSelect } from '@src/composables/useSelect';
-import { ProgressRoot, ProgressIndicator } from 'reka-ui';
 import { defaultShelf } from '@src/services/dexie/database';
+import ProgressBar from '@src/components/ProgressBar.vue';
 
 /* *** */
 
@@ -309,15 +301,3 @@ const handleDeletingShelf = async (shelfId: number) => {
 const router = useRouter();
 const blobToUrl = (blob: Blob) => URL.createObjectURL(blob);
 </script>
-
-<style scoped>
-:global(html) {
-   --progress-bar-bg: #e5ded0;
-   --progress-bar-color: #8c6d46;
-}
-
-:global(html.dark) {
-   --progress-bar-bg: #262b30;
-   --progress-bar-color: #878f97;
-}
-</style>
