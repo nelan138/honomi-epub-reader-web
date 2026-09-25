@@ -38,6 +38,8 @@
       </div>
    </Header>
 
+   <LoadingScreen :open="bookStore.isLoading" />
+
    <BookShelf v-for="shelf in shelfStore.shelves" :key="shelf.id">
       <template #label>
          <h2 class="font-sans font-medium tracking-widest uppercase">

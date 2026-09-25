@@ -112,16 +112,22 @@ export const useBookStore = defineStore('book', () => {
 
    // throws ParsingError or RuntimeError
    async function addBook(file: File): Promise<void> {
+      isLoading.value = true;
+
       const [book, error] = await tryCatch(EpubParser.parse(file));
 
       if (error) {
+         isLoading.value = false;
          if (error instanceof ParsingError) throw error;
          else throw new RuntimeError('Failed to import' + file.name, { cause: error });
       }
 
       const [result, error2] = await tryCatch(addBookToDB(book));
 
-      if (error2) throw new RuntimeError('Failed to import' + file.name, { cause: error2 });
+      if (error2) {
+         isLoading.value = false;
+         throw new RuntimeError('Failed to import' + file.name, { cause: error2 });
+      }
 
       books.value.push({
          id: result.bookId,
@@ -131,6 +137,8 @@ export const useBookStore = defineStore('book', () => {
          cover: book.cover,
          totalCharacters: book.totalCharacters,
       });
+
+      isLoading.value = false;
    }
 
    return {
