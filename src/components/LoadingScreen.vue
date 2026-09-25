@@ -1,6 +1,6 @@
 <template>
    <DialogRoot :open="open">
-      <DialogPortal>
+      <DialogPortal :to="to">
          <DialogOverlay class="fixed inset-0 z-50 bg-(--loading-overlay) backdrop-blur-xs transition-opacity" />
 
          <DialogContent
@@ -31,10 +31,12 @@ const {
    open = false,
    message = 'Loading...',
    subtext = 'Please wait while content is prepared',
+   to,
 } = defineProps<{
    open?: boolean;
    message?: string;
    subtext?: string;
+   to: string;
 }>();
 </script>
 

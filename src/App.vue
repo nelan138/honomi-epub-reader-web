@@ -4,9 +4,4 @@ import { RouterView } from 'vue-router';
 
 <template>
    <RouterView />
-
-   <Toaster :to="'#toast'" />
-   <PromptDialog :to="'#prompt-dialog'" />
-   <AlertDialog :to="'#alert-dialog'" />
-   <SelectDialog :to="'#select-dialog'" />
 </template>

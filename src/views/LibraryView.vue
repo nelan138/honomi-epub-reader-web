@@ -38,7 +38,12 @@
       </div>
    </Header>
 
-   <LoadingScreen :open="bookStore.isLoading" />
+   <Toaster :to="'#toast'" />
+   <PromptDialog :to="'#prompt-dialog'" />
+   <AlertDialog :to="'#alert-dialog'" />
+   <SelectDialog :to="'#select-dialog'" />
+
+   <LoadingScreen :to="'#loading-screen'" :open="bookStore.isLoading" />
 
    <BookShelf v-for="shelf in shelfStore.shelves" :key="shelf.id">
       <template #label>

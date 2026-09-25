@@ -46,7 +46,7 @@
    </div>
 
    <!-- Loading screen -->
-   <LoadingScreen :open="readerStore.isLoading" />
+   <LoadingScreen :to="'loading-screen'" :open="readerStore.isLoading" />
 
    <TableOfContent v-if="openToc" v-model:open="openToc">
       <ul
