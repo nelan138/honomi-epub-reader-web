@@ -55,57 +55,42 @@
             v-for="book in bookShelfMap.get(shelf.id) ?? []"
             :key="book.id"
             @click="router.push(`reader/${book.id}`)"
-            columns="1fr_2fr"
          >
             <template #image>
                <Image :ratio="2 / 3" :alt="book.metadata.title" :src="blobToUrl(book.cover)" />
             </template>
 
             <template #metadata>
-               <div class="flex h-full flex-col gap-4 pl-4">
-                  <div class="flex min-w-0 flex-1 flex-col font-serif md:gap-2 md:text-[100%]">
-                     <h3 class="line-clamp-1 font-sans font-medium break-all">{{ book.metadata.title }}</h3>
-                     <p class="truncate text-[80%]">{{ book.metadata.creator }}</p>
-                     <p class="truncate text-[80%]">{{ book.metadata.publisher }}</p>
-                     <p class="truncate text-[80%] uppercase">{{ book.metadata.language }}</p>
-                  </div>
+               <h3 class="line-clamp-2 font-sans font-medium break-all">{{ book.metadata.title }}</h3>
+               <p class="truncate text-[80%]">{{ book.metadata.creator }}</p>
+               <p class="truncate text-[80%]">{{ book.metadata.publisher }}</p>
+               <p class="truncate text-[80%]">{{ book.metadata.language }}</p>
+            </template>
 
-                  <ProgressRoot
-                     :model-value="(book.charactersRead * 100) / book.totalCharacters"
-                     class="relative h-1 w-full overflow-hidden rounded-full bg-(--progress-bar-bg)"
-                  >
-                     <ProgressIndicator
-                        class="h-full w-full bg-(--progress-bar-color)"
-                        :style="`transform: translateX(-${100 - (book.charactersRead * 100) / book.totalCharacters}%)`"
-                     />
-                  </ProgressRoot>
+            <template #progress-bar>
+               <ProgressRoot
+                  :model-value="(book.charactersRead * 100) / book.totalCharacters"
+                  class="relative h-1 w-full overflow-hidden rounded-full bg-(--progress-bar-bg)"
+               >
+                  <ProgressIndicator
+                     class="h-full w-full bg-(--progress-bar-color)"
+                     :style="`transform: translateX(-${100 - (book.charactersRead * 100) / book.totalCharacters}%)`"
+                  />
+               </ProgressRoot>
+            </template>
 
-                  <div @click.stop class="flex justify-end gap-4 md:gap-8 lg:justify-around lg:gap-2">
-                     <button
-                        @click="handleRenamingBook(book.id)"
-                        type="button"
-                        class="aspect-square hover:cursor-pointer"
-                     >
-                        <i class="fa-solid fa-pen-to-square"></i>
-                     </button>
+            <template #actions>
+               <button @click="handleRenamingBook(book.id)" type="button" class="hover:cursor-pointer">
+                  <i class="fa-solid fa-pen-to-square"></i>
+               </button>
 
-                     <button
-                        @click="handleChangingBookShelf(book.id)"
-                        type="button"
-                        class="aspect-square hover:cursor-pointer"
-                     >
-                        <i class="fa-solid fa-right-left"></i>
-                     </button>
+               <button @click="handleChangingBookShelf(book.id)" type="button" class="hover:cursor-pointer">
+                  <i class="fa-solid fa-right-left"></i>
+               </button>
 
-                     <button
-                        @click="handleDeletingBook(book.id)"
-                        type="button"
-                        class="aspect-square hover:cursor-pointer"
-                     >
-                        <i class="fa-solid fa-trash"></i>
-                     </button>
-                  </div>
-               </div>
+               <button @click="handleDeletingBook(book.id)" type="button" class="hover:cursor-pointer">
+                  <i class="fa-solid fa-trash"></i>
+               </button>
             </template>
          </BookCard>
       </div>
@@ -121,8 +106,6 @@ import { useToast } from '@src/composables/useToast';
 import { usePrompt } from '@src/composables/usePrompt';
 import { useAlert } from '@src/composables/useAlert';
 import { useSelect } from '@src/composables/useSelect';
-import Header from '@src/components/Header.vue';
-import Image from '@src/components/Image.vue';
 import { ProgressRoot, ProgressIndicator } from 'reka-ui';
 
 /* *** */

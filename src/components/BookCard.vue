@@ -1,36 +1,28 @@
 <template>
    <article
-      :class="[
-         columnClassMap[props.columns],
-         'grid w-full rounded-md border border-(--card-border) bg-(--card) p-2 shadow-sm md:p-4',
-      ]"
+      class="grid w-full grid-cols-[1fr_2fr] rounded-md border border-(--card-border) bg-(--card) p-2 shadow-sm md:p-4"
    >
       <div class="flex h-full w-full items-center justify-center overflow-hidden">
          <slot name="image" />
       </div>
 
       <div class="h-full w-full min-w-0 overflow-hidden">
-         <slot name="metadata" />
+         <div class="flex h-full flex-col gap-4 pl-4">
+            <div class="flex min-w-0 flex-1 flex-col font-serif md:gap-2 md:text-[100%]">
+               <slot name="metadata" />
+            </div>
+
+            <slot name="progress-bar" />
+
+            <div @click.stop class="flex justify-end gap-4 md:gap-8 lg:justify-around lg:gap-2">
+               <slot name="actions" />
+            </div>
+         </div>
       </div>
    </article>
 </template>
 
-<script setup lang="ts">
-const props = withDefaults(
-   defineProps<{
-      columns?: '1fr_2fr' | '1fr_1fr' | '1fr_3fr';
-   }>(),
-   {
-      columns: '1fr_2fr',
-   }
-);
-
-const columnClassMap = {
-   '1fr_2fr': 'grid-cols-[1fr_2fr]',
-   '1fr_1fr': 'grid-cols-[1fr_1fr]',
-   '1fr_3fr': 'grid-cols-[1fr_3fr]',
-} as const;
-</script>
+<script setup lang="ts"></script>
 
 <style scoped>
 :global(html) {
