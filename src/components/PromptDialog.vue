@@ -1,35 +1,10 @@
-<script lang="ts" setup>
-import { DialogContent, DialogOverlay, DialogPortal, DialogRoot, DialogTitle, DialogDescription } from 'reka-ui';
-
-import { active, options, usePrompt } from '@src/composables/usePrompt';
-
-/* *** */
-
-const { cancel, submit } = usePrompt();
-
-const input = ref('');
-
-const { to } = defineProps<{
-   to: string;
-}>();
-
-watch(active, (value) => {
-   // open modal
-   if (value === true) {
-      input.value = options.value?.defaultValue ?? '';
-   } else {
-      input.value = '';
-   }
-});
-</script>
-
 <template>
    <DialogRoot v-model:open="active">
       <DialogPortal :to="to">
-         <DialogOverlay class="fixed inset-0 z-50 bg-(--prompt-overlay) backdrop-blur-xs" />
+         <DialogOverlay class="fixed inset-0 z-100 bg-(--prompt-overlay) backdrop-blur-xs" />
 
          <DialogContent
-            class="fixed top-1/2 left-1/2 z-50 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-xl border border-(--prompt-border) bg-(--prompt-bg) p-4 shadow-xl focus:outline-none"
+            class="fixed top-1/2 left-1/2 z-150 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-xl border border-(--prompt-border) bg-(--prompt-bg) p-4 shadow-xl focus:outline-none"
             :disable-outside-pointer-events="true"
             @escape-key-down.prevent="cancel"
             @pointer-down-outside.prevent
@@ -78,6 +53,30 @@ watch(active, (value) => {
       </DialogPortal>
    </DialogRoot>
 </template>
+
+<script lang="ts" setup>
+import { DialogContent, DialogOverlay, DialogPortal, DialogRoot, DialogTitle, DialogDescription } from 'reka-ui';
+import { active, options, usePrompt } from '@src/composables/usePrompt';
+
+/* *** */
+
+const { cancel, submit } = usePrompt();
+
+const input = ref('');
+
+const { to } = defineProps<{
+   to: string;
+}>();
+
+watch(active, (value) => {
+   // open modal
+   if (value === true) {
+      input.value = options.value?.defaultValue ?? '';
+   } else {
+      input.value = '';
+   }
+});
+</script>
 
 <style lang="css" scoped>
 :global(html) {

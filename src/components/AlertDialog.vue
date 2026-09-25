@@ -20,10 +20,10 @@ defineProps<{
 <template>
    <AlertDialogRoot v-model:open="active">
       <AlertDialogPortal :to="to">
-         <AlertDialogOverlay class="fixed inset-0 z-50 bg-(--alert-overlay) backdrop-blur-xs" />
+         <AlertDialogOverlay class="fixed inset-0 z-100 bg-(--alert-overlay) backdrop-blur-xs" />
 
          <AlertDialogContent
-            class="fixed top-1/2 left-1/2 z-50 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-xl border border-(--alert-border) bg-(--alert-bg) p-4 shadow-xl focus:outline-none"
+            class="fixed top-1/2 left-1/2 z-150 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-xl border border-(--alert-border) bg-(--alert-bg) p-4 shadow-xl focus:outline-none"
             :disable-outside-pointer-events="true"
             @keydown.enter.prevent="confirm"
             @escape-key-down.prevent="cancel"

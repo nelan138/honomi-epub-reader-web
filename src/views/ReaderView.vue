@@ -254,7 +254,7 @@ const openToc = ref(false);
    </Header>
 
    <!-- Header toggle -->
-   <div v-else class="fixed top-0 left-0 z-50 flex h-10 items-center justify-end bg-transparent px-4">
+   <div v-else class="fixed top-0 left-0 z-100 flex h-10 items-center justify-end bg-transparent px-4">
       <button @click="openHeader = true" type="button" class="hover:cursor-pointer">
          <i class="fa-solid fa-chevron-down"></i>
       </button>
@@ -272,10 +272,10 @@ const openToc = ref(false);
    <template v-else>
       <DrawerRoot v-if="openToc" v-model:open="openToc">
          <DrawerPortal :disabled="true">
-            <DrawerOverlay class="fixed inset-0 z-50 bg-black/50" />
+            <DrawerOverlay class="fixed inset-0 z-100 bg-black/50" />
             <DrawerContent
                :disable-outside-pointer-events="false"
-               class="fixed top-0 left-0 z-100 h-full w-80 max-w-[85vw] bg-(--background) p-4 text-(--ink)"
+               class="fixed top-0 left-0 z-150 h-full w-80 max-w-[85vw] bg-(--background) p-4 text-(--ink)"
                as="aside"
             >
                <DrawerTitle>Table of Content</DrawerTitle>
@@ -314,7 +314,7 @@ const openToc = ref(false);
          ></section>
       </article>
 
-      <footer class="sticky bottom-0 z-50 py-2 text-right font-sans text-xs">
+      <footer class="sticky bottom-0 z-100 py-2 text-right font-sans text-xs">
          <span>{{ readerStore.charactersRead }} / {{ readerStore.totalCharacters }}</span>
          <span class="mx-2">ー</span>
          <span> {{ readerStore.progress }}% </span>

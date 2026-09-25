@@ -66,18 +66,17 @@
             </template>
 
             <button
-               @click="shelf.expanded ? shelfStore.collapseShelf(shelf.id) : shelfStore.expandShelf(shelf.id)" "
                type="button"
+               @click="shelf.expanded ? shelfStore.collapseShelf(shelf.id) : shelfStore.expandShelf(shelf.id)"
                class="hover:cursor-pointer"
             >
                <i v-if="shelf.expanded" class="fa-solid fa-caret-down"></i>
                <i v-else class="fa-solid fa-caret-right"></i>
             </button>
-
          </div>
       </template>
 
-      <template v-if="shelf.expanded"  #books>
+      <template #books v-if="shelf.expanded">
          <BookCard
             v-for="book in bookShelfMap.get(shelf.id) ?? []"
             :key="book.id"

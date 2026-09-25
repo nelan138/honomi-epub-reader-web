@@ -1,29 +1,3 @@
-<script setup lang="ts">
-import { notifications, type Notification } from '@src/composables/useToast';
-import {
-   ToastDescription,
-   ToastProvider,
-   ToastRoot,
-   ToastTitle,
-   ToastViewport,
-   ToastClose,
-   ToastPortal,
-} from 'reka-ui';
-
-function handleDismiss(notification: Notification) {
-   notification.active = false;
-
-   setTimeout(() => {
-      const index = notifications.value.indexOf(notification);
-      if (index !== -1) notifications.value.splice(index, 1);
-   }, 300); // ? because reka uses 100ms on exist
-}
-
-const {} = defineProps<{
-   to: string;
-}>();
-</script>
-
 <template>
    <ToastProvider>
       <ToastRoot
@@ -46,11 +20,39 @@ const {} = defineProps<{
       </ToastRoot>
       <ToastPortal :to="to">
          <ToastViewport
-            class="fixed right-0 bottom-0 z-1000 m-0 flex w-97.5 max-w-[100vw] list-none flex-col gap-2.5 p-(--viewport-padding) outline-none [--viewport-padding:25px]"
+            class="fixed right-0 bottom-0 z-150 m-0 flex w-97.5 max-w-[100vw] list-none flex-col gap-2.5 p-(--viewport-padding) outline-none [--viewport-padding:25px]"
          />
       </ToastPortal>
    </ToastProvider>
 </template>
+
+<script setup lang="ts">
+import { notifications, type Notification } from '@src/composables/useToast';
+import {
+   ToastDescription,
+   ToastProvider,
+   ToastRoot,
+   ToastTitle,
+   ToastViewport,
+   ToastClose,
+   ToastPortal,
+} from 'reka-ui';
+
+/* *** */
+
+function handleDismiss(notification: Notification) {
+   notification.active = false;
+
+   setTimeout(() => {
+      const index = notifications.value.indexOf(notification);
+      if (index !== -1) notifications.value.splice(index, 1);
+   }, 300); // ? because reka uses 100ms on exist
+}
+
+const {} = defineProps<{
+   to: string;
+}>();
+</script>
 
 <style lang="css" scoped>
 :global(html) {

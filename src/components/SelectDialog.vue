@@ -1,22 +1,10 @@
-<script setup lang="ts">
-import { DialogContent, DialogDescription, DialogOverlay, DialogPortal, DialogRoot, DialogTitle } from 'reka-ui';
-import { ListboxContent, ListboxItem, ListboxRoot } from 'reka-ui';
-import { active, options, selections, useSelect } from '@src/composables/useSelect';
-
-const { confirm, cancel } = useSelect();
-
-const { to } = defineProps<{
-   to: string;
-}>();
-</script>
-
 <template>
    <DialogRoot v-model:open="active">
       <DialogPortal :to="to">
-         <DialogOverlay class="fixed inset-0 z-50 bg-(--select-overlay) backdrop-blur-xs" />
+         <DialogOverlay class="fixed inset-0 z-100 bg-(--select-overlay) backdrop-blur-xs" />
 
          <DialogContent
-            class="fixed top-1/2 left-1/2 z-50 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-xl border border-(--select-border) bg-(--select-bg) p-4 shadow-xl focus:outline-none"
+            class="fixed top-1/2 left-1/2 z-150 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-xl border border-(--select-border) bg-(--select-bg) p-4 shadow-xl focus:outline-none"
             @pointer-down-outside.prevent
             :disable-outside-pointer-events="true"
             @escape-key-down.prevent="cancel"
@@ -52,6 +40,20 @@ const { to } = defineProps<{
       </DialogPortal>
    </DialogRoot>
 </template>
+
+<script setup lang="ts">
+import { DialogContent, DialogDescription, DialogOverlay, DialogPortal, DialogRoot, DialogTitle } from 'reka-ui';
+import { ListboxContent, ListboxItem, ListboxRoot } from 'reka-ui';
+import { active, options, selections, useSelect } from '@src/composables/useSelect';
+
+/* *** */
+
+const { confirm, cancel } = useSelect();
+
+const { to } = defineProps<{
+   to: string;
+}>();
+</script>
 
 <style lang="css" scoped>
 :global(html) {
