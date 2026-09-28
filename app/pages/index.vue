@@ -1,7 +1,9 @@
 <template>
-   <div>Hello, World!</div>
+   <BookShelf>
+      <BookCard />
+      <BookCard />
+      <BookCard />
+   </BookShelf>
 </template>
 
 <script setup lang="ts"></script>
-
-<style scoped></style>
