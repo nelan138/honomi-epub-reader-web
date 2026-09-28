@@ -21,13 +21,18 @@
             </div>
          </div>
 
-         <UProgress size="sm" color="neutral" :model-value="progress" :max="100" />
+         <UProgress
+            size="sm"
+            color="neutral"
+            :model-value="progress"
+            :max="100"
+         />
 
          <UFieldGroup
             orientation="horizontal"
             class="flex justify-end gap-4 md:gap-8 lg:justify-around lg:gap-2"
          >
-            <UButton variant="soft" color="neutral" icon="lucide:pen-line" />
+            <UButton variant="soft" color="neutral" icon="lucide:pen-line" @click="handleRenamingBook(id)"/>
 
             <UButton
                variant="soft"
@@ -42,7 +47,13 @@
 </template>
 
 <script lang="ts" setup>
+const inputModal = useInputModal();
+const booksStore = useBooksStore();
+
+/* *** */
+
 const {
+   id,
    cover = undefined,
    meta = {
       title: "No title",
@@ -52,6 +63,7 @@ const {
    },
    progress = 0,
 } = defineProps<{
+   id: number;
    cover?: string;
    meta?: {
       title?: string;
@@ -61,6 +73,16 @@ const {
    };
    progress?: number;
 }>();
+
+async function handleRenamingBook(id: number) {
+   const newName = await inputModal.open({
+      title: "Rename book",
+      description: "Enter a new name for the book",
+   });
+
+   if (!newName) return;
+   booksStore.rename(id, newName);
+}
 
 onUnmounted(() => {
    if (cover && cover.startsWith("blob:")) URL.revokeObjectURL(cover);

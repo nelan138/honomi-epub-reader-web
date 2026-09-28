@@ -18,7 +18,12 @@
             @submit="emit('close', state.input)"
          >
             <UFormField name="input">
-               <UInput v-model="state.input" autofocus class="w-full">
+               <UInput
+                  v-model="state.input"
+                  :maxlength="maxLength"
+                  autofocus
+                  class="w-full"
+               >
                   <template #trailing>
                      <span class="text-xs text-muted">
                         {{ state.input.length }} / {{ maxLength }}

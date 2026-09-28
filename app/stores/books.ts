@@ -1,5 +1,9 @@
 import { defineStore } from "pinia";
-import { addBookToDB, getBooksFromDB } from "~/services/dexie/bookRepo";
+import {
+   addBookToDB,
+   getBooksFromDB,
+   renameBookInDB,
+} from "~/services/dexie/bookRepo";
 import { EpubParser } from "~/services/epub/epubParser";
 
 export const useBooksStore = defineStore("books", {
@@ -57,6 +61,22 @@ export const useBooksStore = defineStore("books", {
          };
 
          this.books.push(newBook);
+      },
+
+      async rename(id: number, newName: string) {
+         // UI first
+         const target = this.books.find((book) => book.id === id);
+         if (!target) throw new NotFoundError("Book not found");
+
+         target.metadata.title = newName;
+
+         // Sync
+         const [_, error] = await tryCatch(renameBookInDB(id, newName));
+
+         if (error) {
+            await this.syncWithDB();
+            throw error;
+         }
       },
    },
 
