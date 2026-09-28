@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import {
    addBookToDB,
+   deleteBookFromDB,
    getBooksFromDB,
    renameBookInDB,
 } from "~/services/dexie/bookRepo";
@@ -72,6 +73,17 @@ export const useBooksStore = defineStore("books", {
 
          // Sync
          const [_, error] = await tryCatch(renameBookInDB(id, newName));
+
+         if (error) {
+            await this.syncWithDB();
+            throw error;
+         }
+      },
+
+      async delete(id: number) {
+         this.books = this.books.filter((book) => book.id !== id);
+
+         const [_, error] = await tryCatch(deleteBookFromDB(id));
 
          if (error) {
             await this.syncWithDB();

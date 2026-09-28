@@ -32,7 +32,12 @@
             orientation="horizontal"
             class="flex justify-end gap-4 md:gap-8 lg:justify-around lg:gap-2"
          >
-            <UButton variant="soft" color="neutral" icon="lucide:pen-line" @click="handleRenamingBook(id)"/>
+            <UButton
+               variant="soft"
+               color="neutral"
+               icon="lucide:pen-line"
+               @click="handleRenamingBook()"
+            />
 
             <UButton
                variant="soft"
@@ -40,7 +45,12 @@
                icon="lucide:arrow-left-right"
             />
 
-            <UButton variant="soft" color="warning" icon="lucide:trash" />
+            <UButton
+               variant="soft"
+               color="warning"
+               icon="lucide:trash"
+               @click="handleDeletingBook()"
+            />
          </UFieldGroup>
       </div>
    </article>
@@ -51,6 +61,10 @@ const inputModal = useInputModal();
 const booksStore = useBooksStore();
 
 /* *** */
+
+onUnmounted(() => {
+   if (cover && cover.startsWith("blob:")) URL.revokeObjectURL(cover);
+});
 
 const {
    id,
@@ -74,7 +88,7 @@ const {
    progress?: number;
 }>();
 
-async function handleRenamingBook(id: number) {
+async function handleRenamingBook() {
    const newName = await inputModal.open({
       title: "Rename book",
       description: "Enter a new name for the book",
@@ -84,9 +98,9 @@ async function handleRenamingBook(id: number) {
    booksStore.rename(id, newName);
 }
 
-onUnmounted(() => {
-   if (cover && cover.startsWith("blob:")) URL.revokeObjectURL(cover);
-});
+async function handleDeletingBook() {
+   booksStore.delete(id);
+}
 </script>
 
 <style></style>
