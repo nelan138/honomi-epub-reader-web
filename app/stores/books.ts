@@ -1,8 +1,6 @@
 import { defineStore } from "pinia";
 import { addBookToDB, getBooksFromDB } from "~/services/dexie/bookRepo";
-import type { BookRecord } from "~/services/dexie/database";
-import { EpubParser, ParsingError } from "~/services/epub/epubParser";
-import { RuntimeError } from "~/types/errors";
+import { EpubParser } from "~/services/epub/epubParser";
 
 export const useBooksStore = defineStore("books", {
    state: () => ({

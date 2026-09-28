@@ -3,9 +3,6 @@ import { strFromU8 } from "fflate";
 
 /* *** */
 
-// * only letters and numbers
-const UNICODE_GLYPH_REGEX = /[\p{L}\p{N}]/gu;
-
 export class EpubParser {
    constructor(private file: File) {}
 
@@ -221,6 +218,9 @@ export function getElementCharacterCount(htmlString: string): number {
       element.remove();
 
    const rawText = doc.body?.textContent ?? "";
+   // * only letters and numbers
+   const UNICODE_GLYPH_REGEX = /[\p{L}\p{N}]/gu;
+
    return rawText.match(UNICODE_GLYPH_REGEX)?.length ?? 0;
 }
 
@@ -247,9 +247,9 @@ function getMimeType(path: string): string {
    return MIME_MAP[ext] ?? "application/octet-stream";
 }
 
-export const URI_SCHEME_REGEX = /^[a-z][a-z0-9+.-]*:/i;
-
 function resolvePath(relative: string, absolute: string): string {
+   const URI_SCHEME_REGEX = /^[a-z][a-z0-9+.-]*:/i;
+
    // if contains external link
    if (URI_SCHEME_REGEX.test(relative)) return relative;
 

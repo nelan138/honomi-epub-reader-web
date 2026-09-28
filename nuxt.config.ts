@@ -7,7 +7,7 @@ export default defineNuxtConfig({
    css: ["~/assets/css/main.css"],
 
    imports: {
-      dirs: ["~/types", "~/services", "~/defaults"],
+      dirs: ["~/types", "~/defaults"],
    },
 
    modules: [
@@ -17,5 +17,4 @@ export default defineNuxtConfig({
       "@pinia/nuxt",
       "@nuxt/image",
    ],
-
 });

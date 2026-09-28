@@ -7,7 +7,9 @@
          :name="shelf.name"
       >
          <BookCard
-            v-for="book in booksStore.books"
+            v-for="book in booksStore.books.filter(
+               (book) => book.shelfId === shelf.id,
+            )"
             :key="book.id"
             :cover="book.cover ? createBlobUrl(book.cover) : undefined"
             :meta="book.metadata"
