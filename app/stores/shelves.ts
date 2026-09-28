@@ -1,4 +1,7 @@
 import { defineStore } from "pinia";
+import type { ShelfRecord } from "~/services/dexie/database";
+import { addShelfToDB, deleteShelfFromDB, getShelvesFromDB, renameShelfInDB } from "~/services/dexie/shelfRepo";
+import { NotFoundError } from "~/types/errors";
 
 export const useShelvesStore = defineStore("shelves", {
    state: () => ({

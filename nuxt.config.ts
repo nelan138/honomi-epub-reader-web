@@ -2,9 +2,12 @@
 export default defineNuxtConfig({
    compatibilityDate: "2025-07-15",
    devtools: { enabled: false },
+   ssr: false, // client-side heavy
+
+   css: ["~/assets/css/main.css"],
 
    imports: {
-      dirs: ["~/services", "~/services/**", "~/types", "~/types/**"],
+      dirs: ["~/types", "~/services", "~/defaults"],
    },
 
    modules: [
@@ -15,5 +18,4 @@ export default defineNuxtConfig({
       "@nuxt/image",
    ],
 
-   css: ["~/assets/css/main.css"],
 });

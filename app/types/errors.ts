@@ -17,3 +17,15 @@ export class RuntimeError extends Error {
       this.name = "RuntimeError";
    }
 }
+
+export class ParsingError extends Error {
+   constructor(
+      message: string,
+      options?: {
+         cause?: unknown;
+      },
+   ) {
+      super(message, { cause: options?.cause });
+      this.name = "ParsingError";
+   }
+}

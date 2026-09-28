@@ -2,39 +2,69 @@
    <article
       class="grid gap-4 w-full grid-cols-[1fr_2fr] rounded-md border border-(--card-border) bg-(--card) p-2 shadow-sm md:p-4"
    >
-      <LazyNuxtImg alt="book-cover" src="/img/default-book-cover.jpeg" />
+      <LazyNuxtImg
+         class="my-auto"
+         :alt="`Book cover for ${meta.title}`"
+         :src="cover || '/img/default-book-cover.jpeg'"
+      />
 
       <div class="w-full overflow-hidden flex h-full flex-col gap-4">
          <div class="flex min-w-0 flex-1 flex-col">
             <h3 class="text-base font-medium line-clamp-2 break-all">
-               Book Title
+               {{ meta.title }}
             </h3>
 
             <div class="text-sm">
-               <p class="truncate">Creator</p>
-               <p class="truncate">Publisher</p>
-               <p class="truncate">Language</p>
+               <p class="truncate">{{ meta.creator }}</p>
+               <p class="truncate">{{ meta.publisher }}</p>
+               <p class="truncate">{{ meta.language }}</p>
             </div>
          </div>
 
-         <UProgress size="sm" color="neutral" :model-value="67" :max="100" />
+         <UProgress size="sm" color="neutral" :model-value="progress" :max="100" />
 
          <UFieldGroup
             orientation="horizontal"
             class="flex justify-end gap-4 md:gap-8 lg:justify-around lg:gap-2"
          >
             <UButton variant="soft" color="neutral" icon="lucide:pen-line" />
+
             <UButton
                variant="soft"
                color="neutral"
                icon="lucide:arrow-left-right"
             />
+
             <UButton variant="soft" color="warning" icon="lucide:trash" />
          </UFieldGroup>
       </div>
    </article>
 </template>
 
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+const {
+   cover = undefined,
+   meta = {
+      title: "No title",
+      creator: "Unknown",
+      publisher: "Unknown",
+      language: undefined,
+   },
+   progress = 0,
+} = defineProps<{
+   cover?: string;
+   meta?: {
+      title?: string;
+      creator?: string;
+      publisher?: string;
+      language?: string;
+   };
+   progress?: number;
+}>();
+
+onUnmounted(() => {
+   if (cover && cover.startsWith("blob:")) URL.revokeObjectURL(cover);
+});
+</script>
 
 <style></style>

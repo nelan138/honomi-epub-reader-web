@@ -1,3 +1,5 @@
+import { db } from "./database";
+
 export async function addShelfToDB(shelf: Shelf): Promise<{ id: number }> {
    const store = db.shelves;
 

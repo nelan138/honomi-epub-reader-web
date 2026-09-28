@@ -59,6 +59,8 @@
 </template>
 
 <script lang="ts" setup>
+import { defaultShelf } from '~/services/dexie/database';
+
 const inputModal = useInputModal();
 const toast = useToast();
 const store = useShelvesStore();

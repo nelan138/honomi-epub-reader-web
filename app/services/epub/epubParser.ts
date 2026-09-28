@@ -3,77 +3,8 @@ import { strFromU8 } from "fflate";
 
 /* *** */
 
-export class ParsingError extends Error {
-   constructor(
-      message: string,
-      options?: {
-         cause?: unknown;
-      },
-   ) {
-      super(message, { cause: options?.cause });
-      this.name = "ParsingError";
-   }
-}
-
-export type Section = {
-   content: string; // ! html string
-   idref: string;
-   path: string; // ! absolute path in archive
-};
-
-export type NavigationItem = {
-   label: string;
-   href: string; // ! absolute path in archive
-   // no children
-};
-
-/**
- * * What parsed from parser
- */
-export type Book = {
-   cover: Blob;
-   metadata: {
-      title: string;
-      creator: string;
-      publisher: string;
-      language: string;
-   };
-   // ! each section contains exactly one <body> tag as html string
-   sections: Section[];
-
-   navigation?: NavigationItem[];
-
-   totalCharacters: number;
-   images: Record<string, Blob>;
-};
-
 // * only letters and numbers
 const UNICODE_GLYPH_REGEX = /[\p{L}\p{N}]/gu;
-
-const SVG_NS = "http://www.w3.org/2000/svg";
-const XLINK_NS = "http://www.w3.org/1999/xlink";
-const XHTML_NS = "http://www.w3.org/1999/xhtml";
-
-/** Module scope */
-let defaultCoverBlob: Blob | null = null;
-
-/** does not throw on fail */
-async function getDefaultCoverBlob(): Promise<Blob> {
-   if (defaultCoverBlob) return Promise.resolve(defaultCoverBlob);
-
-   const defaultCoverUrl = new URL(
-      "@src/assets/default-book-cover.jpeg",
-      import.meta.url,
-   ).href;
-   defaultCoverBlob = await fetch(defaultCoverUrl).then((res) => res.blob());
-
-   if (!defaultCoverBlob) {
-      console.warn("[Epub] Failed to fetch default cover image.");
-      defaultCoverBlob = new Blob();
-   }
-
-   return defaultCoverBlob;
-}
 
 export class EpubParser {
    constructor(private file: File) {}
@@ -192,6 +123,9 @@ export class EpubParser {
 
       let runningCharCount = 0;
       const processBookSections = (): Section[] => {
+         const domParser = new DOMParser();
+         const xmlSerializer = new XMLSerializer();
+
          const _sections: Section[] = [];
          for (const spineItem of spine) {
             if (!spineItem.linear) {
@@ -261,7 +195,7 @@ export class EpubParser {
       };
 
       return {
-         cover: book.cover ?? (await getDefaultCoverBlob()),
+         cover: book.cover,
          metadata: {
             title: book.metadata.title,
             creator: book.metadata.creator ?? "Unknown",
@@ -277,6 +211,8 @@ export class EpubParser {
 }
 
 export function getElementCharacterCount(htmlString: string): number {
+   const domParser = new DOMParser();
+
    // 'text/html' cuz don't wanna think too much
    const doc = domParser.parseFromString(htmlString, "text/html");
 

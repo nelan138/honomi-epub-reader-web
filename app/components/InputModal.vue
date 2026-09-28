@@ -17,7 +17,7 @@
             :validate-on="['input']"
             @submit="emit('close', state.input)"
          >
-            <UFormField  name="input">
+            <UFormField name="input">
                <UInput v-model="state.input" autofocus class="w-full">
                   <template #trailing>
                      <span class="text-xs text-muted">

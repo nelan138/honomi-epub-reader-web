@@ -1,3 +1,5 @@
+import { db, defaultShelf } from "./database";
+
 export async function addBookToDB(book: Book): Promise<{ bookId: number; shelfId: number }> {
    const store = db.books;
 
