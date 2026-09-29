@@ -21,7 +21,7 @@
                      handleAddingNewBooks(target.files);
                   }
                "
-            >
+            />
 
             <UButton
                to="https://github.com/nelan138/honomi-epub-reader-web"
@@ -43,7 +43,7 @@
          </template>
       </UHeader>
 
-      <UMain>
+      <UMain class="bg-muted">
          <UContainer>
             <slot />
          </UContainer>

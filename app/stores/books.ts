@@ -10,7 +10,15 @@ import { EpubParser } from "~/services/epub/epubParser";
 
 export const useBooksStore = defineStore("books", {
    state: () => ({
-      books: [] as BookRecord[],
+      books: [] as Pick<
+         BookRecord,
+         | "id"
+         | "shelfId"
+         | "charactersRead"
+         | "cover"
+         | "metadata"
+         | "totalCharacters"
+      >[],
 
       isLoading: false,
       isLoaded: false,
@@ -21,7 +29,14 @@ export const useBooksStore = defineStore("books", {
          const [data, error] = await tryCatch(getBooksFromDB());
          if (error) throw error;
 
-         this.books = data;
+         this.books = data.map((book) => ({
+            id: book.id,
+            shelfId: book.shelfId,
+            charactersRead: book.charactersRead,
+            cover: book.cover,
+            metadata: book.metadata,
+            totalCharacters: book.totalCharacters,
+         }));
       },
 
       async load() {

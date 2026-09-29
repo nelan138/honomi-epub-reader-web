@@ -1,14 +1,16 @@
 <template>
    <article
-      class="grid gap-4 w-full grid-cols-[1fr_2fr] rounded-md border border-(--card-border) bg-(--card) p-2 shadow-sm md:p-4"
+      class="grid bg-default gap-4 w-full grid-cols-[1fr_2fr] rounded-md border p-2 shadow-sm md:p-4"
+      @click="navigateTo(`/reader/book-${id}`)"
    >
-      <LazyNuxtImg
-         class="my-auto"
+      <NuxtImg
+         class="my-auto aspect-2/3 h-full"
          :alt="`Book cover for ${meta.title}`"
          :src="cover || '/img/default-book-cover.jpeg'"
+         densities="1x 2x"
       />
 
-      <div class="w-full overflow-hidden flex h-full flex-col gap-4">
+      <div class="w-full overflow-hidden flex flex-col gap-4">
          <div class="flex min-w-0 flex-1 flex-col">
             <h3 class="text-base font-medium line-clamp-2 break-all">
                {{ meta.title }}
@@ -23,14 +25,15 @@
 
          <UProgress
             size="sm"
-            color="neutral"
+            color="primary"
             :model-value="progress"
             :max="100"
          />
 
          <UFieldGroup
             orientation="horizontal"
-            class="flex justify-end gap-4 md:gap-8 lg:justify-around lg:gap-2"
+            class="flex justify-end p-2 gap-4 md:gap-8 lg:justify-around lg:gap-2"
+            @click.stop
          >
             <UButton
                variant="soft"
