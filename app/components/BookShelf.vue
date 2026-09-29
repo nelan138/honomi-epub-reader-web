@@ -18,12 +18,14 @@
                   variant="ghost"
                   color="neutral"
                   icon="lucide:circle-chevron-up"
+                  @click="handleMovingShelf('up')"
                />
 
                <UButton
                   variant="ghost"
                   color="neutral"
                   icon="lucide:circle-chevron-down"
+                  @click="handleMovingShelf('down')"
                />
 
                <UButton
@@ -35,19 +37,16 @@
             </template>
 
             <UButton
-               v-if="expanded"
                variant="ghost"
                color="neutral"
-               icon="lucide:chevron-down"
-               @click="expanded = false"
-            />
-
-            <UButton
-               v-else
-               variant="ghost"
-               color="neutral"
-               icon="lucide:chevron-up"
-               @click="expanded = true"
+               icon="lucide:chevron-right"
+               :ui="{
+                  leadingIcon: [
+                     'transition-transform duration-200 ease-out',
+                     expanded ? 'rotate-90' : 'rotate-0',
+                  ],
+               }"
+               @click="expanded = !expanded"
             />
          </div>
       </header>
@@ -109,5 +108,16 @@ async function handleDeletingShelf() {
    });
 
    if (confirmed) store.delete(id);
+}
+
+async function handleMovingShelf(direction: "up" | "down") {
+   const [_, e] = await tryCatch(store.move(id, direction));
+   if (e) {
+      toast.add({
+         title: "Failed to move shelf",
+         description: e.message,
+         color: "error",
+      });
+   }
 }
 </script>

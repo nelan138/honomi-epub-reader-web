@@ -12,7 +12,7 @@
          onOpenAutoFocus: handleOpenAutoFocus,
       }"
    >
-      <template #body>
+      <template #footer>
          <UFieldGroup class="flex justify-end gap-2 w-full">
             <UButton
                label="Cancel"
@@ -52,4 +52,3 @@ function handleOpenAutoFocus(e: Event) {
 }
 </script>
 
-<style></style>

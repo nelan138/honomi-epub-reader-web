@@ -43,6 +43,7 @@
                variant="soft"
                color="neutral"
                icon="lucide:arrow-left-right"
+               @click="handleChangingBookShelf"
             />
 
             <UButton
@@ -59,7 +60,9 @@
 <script lang="ts" setup>
 const inputModal = useInputModal();
 const alertModal = useAlertModal();
-const store = useBooksStore();
+const listModal = useListModal();
+const booksStore = useBooksStore();
+const shelvesStore = useShelvesStore();
 
 /* *** */
 
@@ -96,7 +99,7 @@ async function handleRenamingBook() {
    });
 
    if (!newName) return;
-   store.rename(id, newName);
+   booksStore.rename(id, newName);
 }
 
 async function handleDeletingBook() {
@@ -105,8 +108,23 @@ async function handleDeletingBook() {
       description: "Are you sure you want to delete this book?",
    });
 
-   if (confirmed) store.delete(id);
+   if (confirmed) booksStore.delete(id);
+}
+
+async function handleChangingBookShelf() {
+   const selectedShelf = await listModal.open({
+      title: "Change book shelf",
+      description: "Select a new shelf for the book",
+      items: shelvesStore.shelves.map((shelf) => {
+         return {
+            label: shelf.name,
+            id: shelf.id,
+         };
+      }),
+   });
+
+   if (!selectedShelf) return;
+
+   booksStore.changeShelf(id, selectedShelf.id);
 }
 </script>
-
-<style></style>

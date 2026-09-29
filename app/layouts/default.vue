@@ -12,13 +12,13 @@
             <input
                ref="fileInput"
                hidden
+               multiple
                type="file"
                accept=".epub, application/epub+zip"
                @change="
                   (event) => {
                      const target = event.target as HTMLInputElement;
                      handleAddingNewBooks(target.files);
-                     target.value = '';
                   }
                "
             >
@@ -95,7 +95,7 @@ async function handleAddingNewShelf() {
 async function handleAddingNewBooks(files: FileList | null | undefined) {
    if (!files || files.length === 0) return;
 
-   for (const file of files) {
+   for (const file of Array.from(files)) {
       const [_, error] = await tryCatch(booksStore.add(file));
       if (error) {
          toast.add({

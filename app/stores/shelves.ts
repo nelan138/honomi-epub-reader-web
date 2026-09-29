@@ -1,5 +1,12 @@
 import { defineStore } from "pinia";
-import { addShelfToDB, deleteShelfFromDB, getShelvesFromDB, renameShelfInDB } from "~/services/dexie/shelfRepo";
+import { defaultShelf } from "~/services/dexie/database";
+import {
+   addShelfToDB,
+   deleteShelfFromDB,
+   getShelvesFromDB,
+   renameShelfInDB,
+   swapShelfDisplayOrdersInDB,
+} from "~/services/dexie/shelfRepo";
 import { NotFoundError } from "~/types/errors";
 
 export const useShelvesStore = defineStore("shelves", {
@@ -90,6 +97,65 @@ export const useShelvesStore = defineStore("shelves", {
             await this.syncWithDB();
             throw error;
          }
+      },
+
+      async move(shelfId: number, direction: "up" | "down") {
+         // UI first
+         const indexOfTargetShelf = this.shelves.findIndex(
+            (shelf) => shelf.id === shelfId,
+         );
+         const targetShelf = this.shelves[indexOfTargetShelf];
+         if (!targetShelf) throw new NotFoundError("Shelf does not exist!");
+
+         const minDisplayOrder = defaultShelf.displayOrder + 1;
+         const maxDisplayOrder =
+            defaultShelf.displayOrder + this.shelves.length - 1;
+
+         const newDisplayOrder =
+            direction === "up"
+               ? targetShelf.displayOrder - 1
+               : targetShelf.displayOrder + 1;
+
+         if (
+            newDisplayOrder < minDisplayOrder ||
+            newDisplayOrder > maxDisplayOrder
+         )
+            throw new RuntimeError(
+               "Shelf is already at the boundary and cannot be moved further.",
+            );
+
+         const indexOfShelfToSwap = this.shelves.findIndex(
+            (shelf) => shelf.displayOrder === newDisplayOrder,
+         );
+
+         const shelfToSwap = this.shelves[indexOfShelfToSwap];
+         if (!shelfToSwap)
+            throw new NotFoundError("Shelf to swap does not exist!");
+
+         [targetShelf.displayOrder, shelfToSwap.displayOrder] = [
+            shelfToSwap.displayOrder,
+            targetShelf.displayOrder,
+         ];
+
+         this.shelves[indexOfTargetShelf] = shelfToSwap;
+         this.shelves[indexOfShelfToSwap] = targetShelf;
+
+         const [_, error] = await tryCatch(
+            swapShelfDisplayOrdersInDB(targetShelf.id, shelfToSwap.id),
+         );
+
+         if (error) {
+            await this.syncWithDB();
+            throw error;
+         }
+      },
+
+      async moveUp(shelfId: number) {
+         await this.move(shelfId, "up");
+      },
+
+      async moveDown(shelfId: number) {
+         await this.move(shelfId, "down");
       },
    },
 });

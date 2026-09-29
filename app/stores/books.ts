@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import {
    addBookToDB,
+   changeBookShelfInDB,
    deleteBookFromDB,
    getBooksFromDB,
    renameBookInDB,
@@ -84,6 +85,22 @@ export const useBooksStore = defineStore("books", {
          this.books = this.books.filter((book) => book.id !== id);
 
          const [_, error] = await tryCatch(deleteBookFromDB(id));
+
+         if (error) {
+            await this.syncWithDB();
+            throw error;
+         }
+      },
+
+      async changeShelf(id: number, toShelf: number) {
+         // UI first
+         const target = this.books.find((book) => book.id === id);
+         if (!target) throw new NotFoundError("Book not found");
+
+         target.shelfId = toShelf;
+
+         // Sync later
+         const [_, error] = await tryCatch(changeBookShelfInDB(id, toShelf));
 
          if (error) {
             await this.syncWithDB();
