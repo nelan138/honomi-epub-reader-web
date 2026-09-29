@@ -100,7 +100,6 @@ export const useReaderStore = defineStore("reader", {
 
                const blobUrl = URL.createObjectURL(blob);
                imageEl.setAttribute("src", blobUrl);
-               console.log(blobUrl);
 
                imgBlobUrls.push(blobUrl);
             }
@@ -109,6 +108,51 @@ export const useReaderStore = defineStore("reader", {
          }
 
          return imgBlobUrls;
+      },
+
+      /**
+       * 1. replaces the href with the correct element's id in reader content
+       * (bcs all sections are rendered in page not in separate files)
+       * 2. add `id='<file path>' to each section so that any href with no fragment (#) will reference that section instead`
+       * 3. this process affects both the book.navigation and all the <a> inside all section.content
+       * * Skips external links
+       */
+      processAnchorInternalLinks() {
+         if (this.book === null || this.book.navigation === undefined) return;
+         const URI_SCHEME_REGEX = /^[a-z][a-z0-9+.-]*:/i;
+
+         // * navigation
+         for (const item of this.book.navigation) {
+            if (URI_SCHEME_REGEX.test(item.href)) continue; // skip external
+
+            const [filePath, fragment] = item.href.split("#");
+            console.log(`[Epub] Resolved anchor href: ${item.href} -> ${fragment ?? filePath}`);
+
+            if (!fragment && filePath) item.href = `#${filePath}`;
+            else if (fragment) item.href = `#${fragment}`;
+         }
+
+         // * content
+         for (const section of this.book.sections) {
+            const doc = domParser.parseFromString(
+               section.content,
+               "application/xhtml+xml",
+            );
+            doc.documentElement.id = section.path;
+            for (const anchorEl of doc.querySelectorAll("a")) {
+               const href = anchorEl.getAttribute("href");
+               if (!href || URI_SCHEME_REGEX.test(href)) continue; // skip external
+
+               const [filePath, fragment] = href.split("#");
+
+               if (!fragment && filePath)
+                  anchorEl.setAttribute("href", `#${filePath}`);
+
+               else if (fragment) anchorEl.setAttribute("href", `#${fragment}`);
+            }
+
+            section.content = xmlSerializer.serializeToString(doc);
+         }
       },
    },
 });
