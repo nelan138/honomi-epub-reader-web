@@ -35,12 +35,15 @@
       </template>
 
       <template #footer>
-         <div class="flex justify-end gap-2 w-full">
-            <UButton type="button" variant="ghost" @click="emit('close', null)"
-               >Cancel</UButton
-            >
-            <UButton type="submit" form="input-modal-form">Submit</UButton>
-         </div>
+         <UFieldGroup class="flex justify-end gap-2 w-full">
+            <UButton
+               label="Cancel"
+               type="button"
+               variant="ghost"
+               @click="emit('close', null)"
+            />
+            <UButton label="Submit" type="submit" form="input-modal-form" />
+         </UFieldGroup>
       </template>
    </UModal>
 </template>

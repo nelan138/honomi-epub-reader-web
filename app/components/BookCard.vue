@@ -36,7 +36,7 @@
                variant="soft"
                color="neutral"
                icon="lucide:pen-line"
-               @click="handleRenamingBook()"
+               @click="handleRenamingBook"
             />
 
             <UButton
@@ -49,7 +49,7 @@
                variant="soft"
                color="warning"
                icon="lucide:trash"
-               @click="handleDeletingBook()"
+               @click="handleDeletingBook"
             />
          </UFieldGroup>
       </div>
@@ -58,7 +58,8 @@
 
 <script lang="ts" setup>
 const inputModal = useInputModal();
-const booksStore = useBooksStore();
+const alertModal = useAlertModal();
+const store = useBooksStore();
 
 /* *** */
 
@@ -95,11 +96,16 @@ async function handleRenamingBook() {
    });
 
    if (!newName) return;
-   booksStore.rename(id, newName);
+   store.rename(id, newName);
 }
 
 async function handleDeletingBook() {
-   booksStore.delete(id);
+   const confirmed = await alertModal.open({
+      title: "Delete book",
+      description: "Are you sure you want to delete this book?",
+   });
+
+   if (confirmed) store.delete(id);
 }
 </script>
 

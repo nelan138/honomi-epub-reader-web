@@ -11,23 +11,26 @@
                   variant="ghost"
                   color="neutral"
                   icon="lucide:pencil"
-                  @click="handleRenamingShelf(id)"
+                  @click="handleRenamingShelf"
                />
+
                <UButton
                   variant="ghost"
                   color="neutral"
                   icon="lucide:circle-chevron-up"
                />
+
                <UButton
                   variant="ghost"
                   color="neutral"
                   icon="lucide:circle-chevron-down"
                />
+
                <UButton
                   variant="ghost"
                   color="neutral"
                   icon="lucide:x"
-                  @click="store.delete(id)"
+                  @click="handleDeletingShelf"
                />
             </template>
 
@@ -59,9 +62,11 @@
 </template>
 
 <script lang="ts" setup>
-import { defaultShelf } from '~/services/dexie/database';
+import { defaultShelf } from "~/services/dexie/database";
 
 const inputModal = useInputModal();
+const alertModal = useAlertModal();
+
 const toast = useToast();
 const store = useShelvesStore();
 
@@ -78,7 +83,7 @@ const { id, name } = defineProps<{
 
 const expanded = ref(true);
 
-async function handleRenamingShelf(id: number) {
+async function handleRenamingShelf() {
    const newName = await inputModal.open({
       title: "Rename Shelf",
       description: "Name must be unique, and cannot be empty",
@@ -95,5 +100,14 @@ async function handleRenamingShelf(id: number) {
    }
 
    store.rename(id, newName);
+}
+
+async function handleDeletingShelf() {
+   const confirmed = await alertModal.open({
+      title: "Delete Shelf",
+      description: "Are you sure you want to delete this shelf?",
+   });
+
+   if (confirmed) store.delete(id);
 }
 </script>
