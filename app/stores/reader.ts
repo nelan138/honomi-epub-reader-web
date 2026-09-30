@@ -1,16 +1,14 @@
 import { defineStore } from "pinia";
-import { getBookFromDB } from "~/services/dexie/bookRepo";
+import {
+   getBookFromDB,
+   updateCharactersReadInDB,
+} from "~/services/dexie/bookRepo";
 
 export const useReaderStore = defineStore("reader", {
    state: () => ({
       book: null as Pick<
          BookRecord,
-         | "charactersRead"
-         | "id"
-         | "sections"
-         | "navigation"
-         | "images"
-         | "totalCharacters"
+         "charactersRead" | "id" | "sections" | "navigation" | "images"
       > | null,
 
       isLoading: false,
@@ -18,24 +16,46 @@ export const useReaderStore = defineStore("reader", {
    }),
 
    getters: {
-      progress: (state) => {
-         if (state.book === null || state.book.totalCharacters === 0)
-            return "0.00";
-         else
-            return (
-               (state.book.charactersRead * 100) /
-               state.book.totalCharacters
-            ).toFixed(2);
+      characters(): number {
+         if (this.book === null) return 0;
+
+         let runningCount = 0;
+         for (const section of this.book.sections) {
+            const doc = domParser.parseFromString(
+               section.content,
+               "application/xhtml+xml",
+            );
+
+            for (const pEl of doc.querySelectorAll("p")) {
+               runningCount += getCharacterCOuntInElement(pEl);
+            }
+         }
+
+         return runningCount;
       },
 
-      navigation: (state) => {
-         if (state.book === null) return [];
-         else return state.book.navigation;
+      charactersRead(): number {
+         return this.book?.charactersRead ?? 0;
       },
 
-      sections: (state) => {
-         if (state.book === null) return [];
-         return state.book.sections;
+      progress(): number {
+         if (!this.book || this.characters === 0) {
+            return 0;
+         }
+
+         return (this.charactersRead / this.characters) * 100;
+      },
+
+      navigation(): NavigationItem[] {
+         if (this.book === null) return [];
+
+         return this.book.navigation ?? [];
+      },
+
+      sections(): Section[] {
+         if (this.book === null) return [];
+
+         return this.book.sections;
       },
    },
 
@@ -113,11 +133,14 @@ export const useReaderStore = defineStore("reader", {
       /**
        * 1. replaces the href with the correct element's id in reader content
        * (bcs all sections are rendered in page not in separate files)
+       *
        * 2. add `id='<file path>' to each section so that any href with no fragment (#) will reference that section instead`
+       *
        * 3. this process affects both the book.navigation and all the <a> inside all section.content
-       * * Skips external links
+       *
+       * ! Skips external links
        */
-      processAnchorInternalLinks() {
+      loadAnchorInternalLinks() {
          if (this.book === null || this.book.navigation === undefined) return;
          const URI_SCHEME_REGEX = /^[a-z][a-z0-9+.-]*:/i;
 
@@ -126,7 +149,9 @@ export const useReaderStore = defineStore("reader", {
             if (URI_SCHEME_REGEX.test(item.href)) continue; // skip external
 
             const [filePath, fragment] = item.href.split("#");
-            console.log(`[Epub] Resolved anchor href: ${item.href} -> ${fragment ?? filePath}`);
+            console.log(
+               `[Epub] Resolved anchor href: ${item.href} -> ${fragment ?? filePath}`,
+            );
 
             if (!fragment && filePath) item.href = `#${filePath}`;
             else if (fragment) item.href = `#${fragment}`;
@@ -147,11 +172,21 @@ export const useReaderStore = defineStore("reader", {
 
                if (!fragment && filePath)
                   anchorEl.setAttribute("href", `#${filePath}`);
-
                else if (fragment) anchorEl.setAttribute("href", `#${fragment}`);
             }
 
             section.content = xmlSerializer.serializeToString(doc);
+         }
+      },
+
+      updateProgress(charactersRead: number, options?: { syncWithDb: boolean }) {
+         if (this.book === null) return;
+         if (charactersRead < 0 || charactersRead > this.characters) return;
+
+         this.book.charactersRead = charactersRead;
+
+         if (options?.syncWithDb) {
+            updateCharactersReadInDB(this.book.id, charactersRead);
          }
       },
    },

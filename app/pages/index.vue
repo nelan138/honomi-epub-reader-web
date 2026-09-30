@@ -21,6 +21,10 @@
 </template>
 
 <script setup lang="ts">
+definePageMeta({
+   layout: "default",
+});
+
 const toast = useToast();
 const shelvesStore = useShelvesStore();
 const booksStore = useBooksStore();
@@ -51,5 +55,6 @@ onMounted(async () => {
 
 onUnmounted(() => {
    shelvesStore.$reset();
+   booksStore.$reset();
 });
 </script>

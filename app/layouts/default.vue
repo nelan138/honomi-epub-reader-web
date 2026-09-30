@@ -1,6 +1,12 @@
+<!-- eslint-disable vue/html-self-closing -->
 <template>
    <div>
-      <UHeader :toggle="false">
+      <UHeader
+         :toggle="false"
+         :ui="{
+            root: 'bg-default',
+         }"
+      >
          <template #left>
             <UButton
                variant="outline"

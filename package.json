@@ -31,6 +31,7 @@
       "@tiptap/starter-kit": "^3.31.3",
       "@tiptap/suggestion": "^3.31.3",
       "@tiptap/vue-3": "^3.31.3",
+      "@vueuse/nuxt": "^15.0.0",
       "dexie": "^4.4.6",
       "fflate": "^0.8.3",
       "nuxt": "^4.5.2",
@@ -42,6 +43,7 @@
    "devDependencies": {
       "@iconify-json/lucide": "^1.2.137",
       "@nuxt/eslint": "^1.17.0",
+      "@tailwindcss/typography": "^0.5.20",
       "eslint": "^10.11.0",
       "typescript": "^6.0.3"
    }

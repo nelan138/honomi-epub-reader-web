@@ -15,6 +15,8 @@ export class EpubParser {
       if (error)
          throw new ParsingError("Failed to parse EPUB file.", { cause: error });
 
+      let runningCount = 0;
+
       const archive = book.archive;
       const manifest = book.manifest;
       const spine = book.spine;
@@ -118,12 +120,12 @@ export class EpubParser {
          return body;
       };
 
-      let runningCharCount = 0;
       const processBookSections = (): Section[] => {
          const domParser = new DOMParser();
          const xmlSerializer = new XMLSerializer();
 
          const _sections: Section[] = [];
+
          for (const spineItem of spine) {
             if (!spineItem.linear) {
                // Skip non-linear cuz im lazy >.<
@@ -170,16 +172,16 @@ export class EpubParser {
                // console.log(`[Epub] Resolved anchor href: ${rawHref} -> ${anchorEl.getAttribute('href')}`);
             }
 
-            for (const paragraphEl of processedBodyEl.getElementsByTagName(
-               "p",
-            )) {
-               runningCharCount += getElementCharacterCount(
-                  paragraphEl.innerHTML,
-               );
-               paragraphEl.setAttribute(
+            for (const pEl of processedBodyEl.querySelectorAll("p")) {
+               pEl.setAttribute(
                   "data-characters-read",
-                  runningCharCount.toString(),
+                  runningCount.toString(),
                );
+
+               const count = getCharacterCOuntInElement(pEl);
+               pEl.setAttribute("data-characters", count.toString());
+
+               runningCount += count;
             }
 
             _sections.push({
@@ -200,28 +202,11 @@ export class EpubParser {
             language: book.metadata.language,
          },
          sections: processBookSections(),
+         totalCharacters: runningCount,
          navigation: book.navigation,
-         totalCharacters: runningCharCount,
          images,
       };
    }
-}
-
-export function getElementCharacterCount(htmlString: string): number {
-   const domParser = new DOMParser();
-
-   // 'text/html' cuz don't wanna think too much
-   const doc = domParser.parseFromString(htmlString, "text/html");
-
-   // Drop noise tags
-   for (const element of doc.querySelectorAll("rt, rp, style, script"))
-      element.remove();
-
-   const rawText = doc.body?.textContent ?? "";
-   // * only letters and numbers
-   const UNICODE_GLYPH_REGEX = /[\p{L}\p{N}]/gu;
-
-   return rawText.match(UNICODE_GLYPH_REGEX)?.length ?? 0;
 }
 
 // i don't wanna deal with img so i excluded it

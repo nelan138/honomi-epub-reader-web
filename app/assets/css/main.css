@@ -1,7 +1,6 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 @import "@nuxt/ui";
-
-@source "../../../content/**/*";
 
 
 @theme {
