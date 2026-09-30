@@ -14,7 +14,7 @@
 
 <script setup lang="ts">
 definePageMeta({
-   layout: "reader",
+   layout: 'reader',
 });
 const readerStore = useReaderStore();
 const route = useRoute();
@@ -28,7 +28,7 @@ let progressCache = 0;
 
 const getCurrentCharactersRead = () => {
    let headerHeight = 0;
-   const header = document.querySelector("header");
+   const header = document.querySelector('header');
    if (header) headerHeight = header.getBoundingClientRect().bottom;
 
    const x = globalThis.innerWidth / 2;
@@ -36,19 +36,17 @@ const getCurrentCharactersRead = () => {
 
    const targetEl = document.elementFromPoint(x, y);
    if (!targetEl) {
-      console.warn("[Reader] No element found at:", { x, y });
+      console.warn('[Reader] No element found at:', { x, y });
       return progressCache;
    }
 
-   const paragraphEl = targetEl.closest("p[data-characters-read]");
+   const paragraphEl = targetEl.closest('p[data-characters-read]');
 
    // * Direct match
    if (paragraphEl) {
-      const attr = paragraphEl.getAttribute("data-characters-read");
+      const attr = paragraphEl.getAttribute('data-characters-read');
       if (!attr) {
-         console.warn(
-            "[Reader] No data-characters-read attribute found on <p> element",
-         );
+         console.warn('[Reader] No data-characters-read attribute found on <p> element');
          return progressCache;
       }
 
@@ -59,15 +57,13 @@ const getCurrentCharactersRead = () => {
    }
    // * Fallback
    else {
-      const sectionEl = targetEl.closest("section[data-index]");
+      const sectionEl = targetEl.closest('section[data-index]');
 
       let currentSectionEl = sectionEl;
       let fallbackTargetEl = null as Element | null;
 
       while (currentSectionEl !== null) {
-         const pEls = currentSectionEl.querySelectorAll(
-            "p[data-characters-read]",
-         );
+         const pEls = currentSectionEl.querySelectorAll('p[data-characters-read]');
 
          for (const pEl of pEls) {
             if (pEl.getBoundingClientRect().top > y) break;
@@ -81,7 +77,7 @@ const getCurrentCharactersRead = () => {
 
       if (!fallbackTargetEl) return progressCache;
 
-      const attr = fallbackTargetEl.getAttribute("data-characters-read");
+      const attr = fallbackTargetEl.getAttribute('data-characters-read');
       if (!attr) return progressCache;
 
       progressCache = parseInt(attr);
@@ -97,7 +93,7 @@ const onScrollEnd = useDebounceFn(() => {
 }, 1000);
 
 onMounted(() => {
-   globalThis.addEventListener("scrollend", onScrollEnd);
+   globalThis.addEventListener('scrollend', onScrollEnd);
 });
 
 onMounted(async () => {
@@ -114,13 +110,13 @@ onMounted(async () => {
    if (readerStore.charactersRead === 0) return;
 
    let targetEl: Element | null = null;
-   const paragraphs = document.querySelectorAll("p[data-characters-read]");
+   const paragraphs = document.querySelectorAll('p[data-characters-read]');
 
    for (const pEl of paragraphs) {
-      const charactersRead = Number(pEl.getAttribute("data-characters-read"));
-      const characters = Number(pEl.getAttribute("data-characters"));
+      const charactersRead = Number(pEl.getAttribute('data-characters-read'));
 
-      if (Number.isNaN(charactersRead) || characters === 0) {
+      // take the first one
+      if (Number.isNaN(charactersRead) || charactersRead === Number(targetEl?.getAttribute('data-characters-read'))) {
          continue;
       }
 
@@ -132,7 +128,7 @@ onMounted(async () => {
    }
 
    if (targetEl) {
-      targetEl.scrollIntoView({ block: "start" });
+      targetEl.scrollIntoView({ block: 'start' });
    }
 });
 
