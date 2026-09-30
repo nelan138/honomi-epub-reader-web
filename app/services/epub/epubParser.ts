@@ -169,7 +169,6 @@ export class EpubParser {
                   "href",
                   resolvePath(rawHref, manifestItem.href),
                );
-               // console.log(`[Epub] Resolved anchor href: ${rawHref} -> ${anchorEl.getAttribute('href')}`);
             }
 
             for (const pEl of processedBodyEl.querySelectorAll("p")) {

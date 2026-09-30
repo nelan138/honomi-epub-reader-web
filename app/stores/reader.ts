@@ -149,9 +149,6 @@ export const useReaderStore = defineStore("reader", {
             if (URI_SCHEME_REGEX.test(item.href)) continue; // skip external
 
             const [filePath, fragment] = item.href.split("#");
-            console.log(
-               `[Epub] Resolved anchor href: ${item.href} -> ${fragment ?? filePath}`,
-            );
 
             if (!fragment && filePath) item.href = `#${filePath}`;
             else if (fragment) item.href = `#${fragment}`;
@@ -179,7 +176,10 @@ export const useReaderStore = defineStore("reader", {
          }
       },
 
-      updateProgress(charactersRead: number, options?: { syncWithDb: boolean }) {
+      updateProgress(
+         charactersRead: number,
+         options?: { syncWithDb: boolean },
+      ) {
          if (this.book === null) return;
          if (charactersRead < 0 || charactersRead > this.characters) return;
 

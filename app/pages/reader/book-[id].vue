@@ -89,12 +89,12 @@ const getCurrentCharactersRead = () => {
    }
 };
 
-// Delay of 500ms
+// Delay of 1000ms
 const onScrollEnd = useDebounceFn(() => {
    if (readerStore.isLoading || readerStore.isLoaded === false) return;
 
    readerStore.updateProgress(getCurrentCharactersRead(), { syncWithDb: true });
-}, 500);
+}, 1000);
 
 onMounted(() => {
    globalThis.addEventListener("scrollend", onScrollEnd);
@@ -107,6 +107,33 @@ onMounted(async () => {
 
    const result = readerStore.loadImages();
    blobUrls.push(...result);
+
+   await nextTick();
+   await nextFrame();
+
+   if (readerStore.charactersRead === 0) return;
+
+   let targetEl: Element | null = null;
+   const paragraphs = document.querySelectorAll("p[data-characters-read]");
+
+   for (const pEl of paragraphs) {
+      const charactersRead = Number(pEl.getAttribute("data-characters-read"));
+      const characters = Number(pEl.getAttribute("data-characters"));
+
+      if (Number.isNaN(charactersRead) || characters === 0) {
+         continue;
+      }
+
+      if (charactersRead <= readerStore.charactersRead) {
+         targetEl = pEl;
+      } else {
+         break;
+      }
+   }
+
+   if (targetEl) {
+      targetEl.scrollIntoView({ block: "start" });
+   }
 });
 
 onUnmounted(() => {
