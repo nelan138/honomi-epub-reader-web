@@ -73,6 +73,8 @@ onUnmounted(() => {
    if (cover && cover.startsWith("blob:")) URL.revokeObjectURL(cover);
 });
 
+/* *** */
+
 const {
    id,
    cover = undefined,

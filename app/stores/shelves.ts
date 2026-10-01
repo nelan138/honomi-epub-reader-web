@@ -1,22 +1,21 @@
-import { defineStore } from "pinia";
-import { defaultShelf } from "~/services/dexie/database";
+import { defineStore } from 'pinia';
+import { defaultShelf } from '~/services/dexie/database';
 import {
    addShelfToDB,
    deleteShelfFromDB,
    getShelvesFromDB,
    renameShelfInDB,
    swapShelfDisplayOrdersInDB,
-} from "~/services/dexie/shelfRepo";
-import { NotFoundError } from "~/types/errors";
+} from '~/services/dexie/shelfRepo';
+import { NotFoundError, RuntimeError } from '~/types/errors';
 
-export const useShelvesStore = defineStore("shelves", {
+export const useShelvesStore = defineStore('shelves', {
    state: () => ({
       shelves: [] as ShelfRecord[], // ! always sorted by displayOrder
+
       isLoading: false,
       isLoaded: false,
    }),
-
-   // getters: {},
 
    actions: {
       async syncWithDB() {
@@ -29,14 +28,18 @@ export const useShelvesStore = defineStore("shelves", {
 
       async load() {
          if (this.isLoading || this.isLoaded) return;
+
          this.isLoading = true;
 
-         try {
-            await this.syncWithDB();
-            this.isLoaded = true;
-         } finally {
+         const [, error] = await tryCatch(this.syncWithDB());
+         if (error) {
             this.isLoading = false;
+            this.isLoaded = false;
+            throw new RuntimeError('Failed to fetch shelves', { cause: error });
          }
+
+         this.isLoading = false;
+         this.isLoaded = true;
       },
 
       // * add new shelf with display order of (last shelf's display order + 1)
@@ -48,7 +51,7 @@ export const useShelvesStore = defineStore("shelves", {
             addShelfToDB({
                name,
                displayOrder: nextDisplayOrder,
-            }),
+            })
          );
 
          if (error) {
@@ -67,12 +70,11 @@ export const useShelvesStore = defineStore("shelves", {
       async delete(shelfId: number) {
          // UI first
          const targetShelf = this.shelves.find((shelf) => shelf.id === shelfId);
-         if (!targetShelf) throw new NotFoundError("Shelf does not exist!");
+         if (!targetShelf) throw new NotFoundError('Shelf does not exist!');
 
          this.shelves = this.shelves.filter((shelf) => shelf.id !== shelfId);
          this.shelves.forEach((shelf) => {
-            if (shelf.displayOrder >= targetShelf.displayOrder)
-               shelf.displayOrder -= 1;
+            if (shelf.displayOrder >= targetShelf.displayOrder) shelf.displayOrder -= 1;
          });
 
          // Sync
@@ -87,7 +89,7 @@ export const useShelvesStore = defineStore("shelves", {
          // UI first
          const targetShelf = this.shelves.find((shelf) => shelf.id === shelfId);
 
-         if (!targetShelf) throw new NotFoundError("Shelf does not exist!");
+         if (!targetShelf) throw new NotFoundError('Shelf does not exist!');
 
          targetShelf.name = newName;
 
@@ -99,63 +101,36 @@ export const useShelvesStore = defineStore("shelves", {
          }
       },
 
-      async move(shelfId: number, direction: "up" | "down") {
+      async move(shelfId: number, direction: 'up' | 'down') {
          // UI first
-         const indexOfTargetShelf = this.shelves.findIndex(
-            (shelf) => shelf.id === shelfId,
-         );
+         const indexOfTargetShelf = this.shelves.findIndex((shelf) => shelf.id === shelfId);
          const targetShelf = this.shelves[indexOfTargetShelf];
-         if (!targetShelf) throw new NotFoundError("Shelf does not exist!");
+         if (!targetShelf) throw new NotFoundError('Shelf does not exist!');
 
          const minDisplayOrder = defaultShelf.displayOrder + 1;
-         const maxDisplayOrder =
-            defaultShelf.displayOrder + this.shelves.length - 1;
+         const maxDisplayOrder = defaultShelf.displayOrder + this.shelves.length - 1;
 
-         const newDisplayOrder =
-            direction === "up"
-               ? targetShelf.displayOrder - 1
-               : targetShelf.displayOrder + 1;
+         const newDisplayOrder = direction === 'up' ? targetShelf.displayOrder - 1 : targetShelf.displayOrder + 1;
 
-         if (
-            newDisplayOrder < minDisplayOrder ||
-            newDisplayOrder > maxDisplayOrder
-         )
-            throw new RuntimeError(
-               "Shelf is already at the boundary and cannot be moved further.",
-            );
+         if (newDisplayOrder < minDisplayOrder || newDisplayOrder > maxDisplayOrder)
+            throw new RuntimeError('Shelf is already at the boundary and cannot be moved further.');
 
-         const indexOfShelfToSwap = this.shelves.findIndex(
-            (shelf) => shelf.displayOrder === newDisplayOrder,
-         );
+         const indexOfShelfToSwap = this.shelves.findIndex((shelf) => shelf.displayOrder === newDisplayOrder);
 
          const shelfToSwap = this.shelves[indexOfShelfToSwap];
-         if (!shelfToSwap)
-            throw new NotFoundError("Shelf to swap does not exist!");
+         if (!shelfToSwap) throw new NotFoundError('Shelf to swap does not exist!');
 
-         [targetShelf.displayOrder, shelfToSwap.displayOrder] = [
-            shelfToSwap.displayOrder,
-            targetShelf.displayOrder,
-         ];
+         [targetShelf.displayOrder, shelfToSwap.displayOrder] = [shelfToSwap.displayOrder, targetShelf.displayOrder];
 
          this.shelves[indexOfTargetShelf] = shelfToSwap;
          this.shelves[indexOfShelfToSwap] = targetShelf;
 
-         const [_, error] = await tryCatch(
-            swapShelfDisplayOrdersInDB(targetShelf.id, shelfToSwap.id),
-         );
+         const [_, error] = await tryCatch(swapShelfDisplayOrdersInDB(targetShelf.id, shelfToSwap.id));
 
          if (error) {
             await this.syncWithDB();
             throw error;
          }
-      },
-
-      async moveUp(shelfId: number) {
-         await this.move(shelfId, "up");
-      },
-
-      async moveDown(shelfId: number) {
-         await this.move(shelfId, "down");
       },
    },
 });

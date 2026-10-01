@@ -39,7 +39,7 @@ export const useBooksStore = defineStore('books', {
          if (error) {
             this.isLoading = false;
             this.isLoaded = false;
-            throw new RuntimeError('Failed to sync with DB', { cause: error });
+            throw new RuntimeError('Failed to fetch books', { cause: error });
          }
 
          this.isLoading = false;
@@ -62,7 +62,7 @@ export const useBooksStore = defineStore('books', {
          }
 
          const { bookId: id, shelfId } = result;
-         
+
          const newBook: BookRecord = {
             id,
             shelfId,
