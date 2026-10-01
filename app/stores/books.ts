@@ -1,24 +1,16 @@
-import { defineStore } from "pinia";
+import { defineStore } from 'pinia';
 import {
    addBookToDB,
    changeBookShelfInDB,
    deleteBookFromDB,
    getBooksFromDB,
    renameBookInDB,
-} from "~/services/dexie/bookRepo";
-import { EpubParser } from "~/services/epub/epubParser";
+} from '~/services/dexie/bookRepo';
+import { EpubParser } from '~/services/epub/epubParser';
 
-export const useBooksStore = defineStore("books", {
+export const useBooksStore = defineStore('books', {
    state: () => ({
-      books: [] as Pick<
-         BookRecord,
-         | "id"
-         | "shelfId"
-         | "charactersRead"
-         | "cover"
-         | "metadata"
-         | "totalCharacters"
-      >[],
+      books: [] as Pick<BookRecord, 'id' | 'shelfId' | 'charactersRead' | 'cover' | 'metadata' | 'totalCharacters'>[],
 
       isLoading: false,
       isLoaded: false,
@@ -43,36 +35,37 @@ export const useBooksStore = defineStore("books", {
          if (this.isLoading || this.isLoaded) return;
          this.isLoading = true;
 
-         try {
-            await this.syncWithDB();
-            this.isLoaded = true;
-         } finally {
+         const [, error] = await tryCatch(this.syncWithDB());
+         if (error) {
             this.isLoading = false;
+            this.isLoaded = false;
+            throw new RuntimeError('Failed to sync with DB', { cause: error });
          }
+
+         this.isLoading = false;
+         this.isLoaded = true;
       },
 
       async add(file: File) {
          const [book, error] = await tryCatch(EpubParser.parse(file));
 
          if (error) {
-            if (error instanceof ParsingError) throw error;
-
-            throw new RuntimeError("Failed to import" + file.name, {
-               cause: error,
-            });
+            throw new RuntimeError(`Failed to parse ${file.name}`, { cause: error });
          }
 
-         const [data, error2] = await tryCatch(addBookToDB(book));
+         const [result, error2] = await tryCatch(addBookToDB(book));
 
          if (error2) {
-            throw new RuntimeError("Failed to import" + file.name, {
+            throw new RuntimeError(`Failed to add ${file.name}`, {
                cause: error2,
             });
          }
 
+         const { bookId: id, shelfId } = result;
+         
          const newBook: BookRecord = {
-            id: data.bookId,
-            shelfId: data.shelfId,
+            id,
+            shelfId,
             charactersRead: 0,
             ...book,
          };
@@ -83,12 +76,12 @@ export const useBooksStore = defineStore("books", {
       async rename(id: number, newName: string) {
          // UI first
          const target = this.books.find((book) => book.id === id);
-         if (!target) throw new NotFoundError("Book not found");
+         if (!target) throw new NotFoundError('Book not found');
 
          target.metadata.title = newName;
 
          // Sync
-         const [_, error] = await tryCatch(renameBookInDB(id, newName));
+         const [, error] = await tryCatch(renameBookInDB(id, newName));
 
          if (error) {
             await this.syncWithDB();
@@ -110,7 +103,7 @@ export const useBooksStore = defineStore("books", {
       async changeShelf(id: number, toShelf: number) {
          // UI first
          const target = this.books.find((book) => book.id === id);
-         if (!target) throw new NotFoundError("Book not found");
+         if (!target) throw new NotFoundError('Book not found');
 
          target.shelfId = toShelf;
 
@@ -123,6 +116,4 @@ export const useBooksStore = defineStore("books", {
          }
       },
    },
-
-   getters: {},
 });
