@@ -2,7 +2,6 @@
 <template>
    <article
       class="flow-root prose prose-p:text-default prose-headings:text-default prose-a:text-default w-full max-w-none [&_img]:mx-auto [&_img]:block [&_img]:max-h-[80dvh] [&_img]:max-w-[80dvw]"
-      @scrollend="onScrollEnd"
    >
       <section
          v-for="(section, index) in readerStore.sections"
@@ -73,12 +72,16 @@ onMounted(async () => {
    }
 
    if (targetEl) targetEl.scrollIntoView({ block: 'start' });
+
+   document.addEventListener('scrollend', onScrollEnd);
 });
 
 onUnmounted(() => {
    blobUrls.forEach((url) => URL.revokeObjectURL(url));
 
    readerStore.$reset();
+   
+   document.removeEventListener('scrollend', onScrollEnd);
 });
 
 /* *** */
