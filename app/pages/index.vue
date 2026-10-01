@@ -1,15 +1,8 @@
 <template>
    <div>
-      <BookShelf
-         v-for="shelf in shelvesStore.shelves"
-         :id="shelf.id"
-         :key="shelf.id"
-         :name="shelf.name"
-      >
+      <BookShelf v-for="shelf in shelvesStore.shelves" :id="shelf.id" :key="shelf.id" :name="shelf.name">
          <BookCard
-            v-for="book in booksStore.books.filter(
-               (book) => book.shelfId === shelf.id,
-            )"
+            v-for="book in booksStore.books.filter((book) => book.shelfId === shelf.id)"
             :id="book.id"
             :key="book.id"
             :cover="book.cover ? createBlobUrl(book.cover) : undefined"
@@ -22,7 +15,7 @@
 
 <script setup lang="ts">
 definePageMeta({
-   layout: "default",
+   layout: 'default',
 });
 
 const toast = useToast();
@@ -32,24 +25,17 @@ const booksStore = useBooksStore();
 /* *** */
 
 onMounted(async () => {
-   const [_, error] = await tryCatch(shelvesStore.load());
-   if (error) {
-      toast.add({
-         title: "Failed to load shelves",
-         description: error.message,
-         color: "error",
-      });
-   }
-});
+   const [, error1] = await tryCatch(shelvesStore.load());
+   const [, error2] = await tryCatch(booksStore.load());
 
-onMounted(async () => {
-   const [_, error] = await tryCatch(booksStore.load());
-   if (error) {
+   if (error1 || error2) {
       toast.add({
-         title: "Failed to load books",
-         description: error.message,
-         color: "error",
+         title: 'Failed to load from database',
+         description: error1?.message ?? '' + error2?.message,
+         color: 'error',
       });
+
+      return;
    }
 });
 

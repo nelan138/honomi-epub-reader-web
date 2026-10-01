@@ -2,6 +2,7 @@
 <template>
    <article
       class="flow-root prose prose-p:text-default prose-headings:text-default prose-a:text-default w-full max-w-none [&_img]:mx-auto [&_img]:block [&_img]:max-h-[80dvh] [&_img]:max-w-[80dvw]"
+      @scrollend="onScrollEnd"
    >
       <section
          v-for="(section, index) in readerStore.sections"
@@ -17,17 +18,79 @@ definePageMeta({
    layout: 'reader',
 });
 const readerStore = useReaderStore();
+const toast = useToast();
 const route = useRoute();
+const bookId = Number(route.params.id);
 
 /* *** */
 
-const bookId = Number(route.params.id);
+onMounted(async () => {
+   /**
+    * This block runs reader store set-up
+    */
+   const [, error] = await tryCatch(readerStore.load(bookId));
+   if (error) {
+      toast.add({
+         title: 'Failed to load from database',
+         description: error.message,
+         color: 'error',
+      });
+
+      return;
+   }
+
+   readerStore.loadAnchorInternalLinks();
+
+   const urls = readerStore.loadImages();
+   blobUrls.push(...urls); // ! to be freed later on unmounted
+
+   /**
+    * Guards to ensure the block below runs as expected
+    */
+   await nextTick(); //  vue update component reactivity
+   await nextFrame(); // DOM painting
+
+   /**
+    * The block below should run after Vue update all the components depending on readerStore and after the DOM finishes painting
+    */
+   if (readerStore.charactersRead === 0) return;
+
+   let targetEl: Element | null = null;
+   const paragraphs = document.querySelectorAll('p[data-characters-read]');
+
+   for (const pEl of paragraphs) {
+      const charactersRead = Number(pEl.getAttribute('data-characters-read'));
+
+      // take the first one, skips all the one with duplicate characters read (e.g: pictures)
+      if (charactersRead === Number(targetEl?.getAttribute('data-characters-read'))) {
+         continue;
+      }
+
+      if (charactersRead > readerStore.charactersRead) break;
+      else {
+         targetEl = pEl;
+      }
+   }
+
+   if (targetEl) targetEl.scrollIntoView({ block: 'start' });
+});
+
+onUnmounted(() => {
+   blobUrls.forEach((url) => URL.revokeObjectURL(url));
+
+   readerStore.$reset();
+});
+
+/* *** */
+
+/** @use on mounted */
 const blobUrls = [] as string[];
 
 let progressCache = 0;
 
 const getCurrentCharactersRead = () => {
    let headerHeight = 0;
+
    const header = document.querySelector('header');
    if (header) headerHeight = header.getBoundingClientRect().bottom;
 
@@ -35,6 +98,7 @@ const getCurrentCharactersRead = () => {
    const y = headerHeight + 10;
 
    const targetEl = document.elementFromPoint(x, y);
+
    if (!targetEl) {
       console.warn('[Reader] No element found at:', { x, y });
       return progressCache;
@@ -55,6 +119,7 @@ const getCurrentCharactersRead = () => {
 
       return offset;
    }
+
    // * Fallback
    else {
       const sectionEl = targetEl.closest('section[data-index]');
@@ -91,54 +156,6 @@ const onScrollEnd = useDebounceFn(() => {
 
    readerStore.updateProgress(getCurrentCharactersRead(), { syncWithDb: true });
 }, 1000);
-
-onMounted(() => {
-   globalThis.addEventListener('scrollend', onScrollEnd);
-});
-
-onMounted(async () => {
-   await readerStore.load(bookId);
-
-   readerStore.loadAnchorInternalLinks();
-
-   const result = readerStore.loadImages();
-   blobUrls.push(...result);
-
-   await nextTick();
-   await nextFrame();
-
-   if (readerStore.charactersRead === 0) return;
-
-   let targetEl: Element | null = null;
-   const paragraphs = document.querySelectorAll('p[data-characters-read]');
-
-   for (const pEl of paragraphs) {
-      const charactersRead = Number(pEl.getAttribute('data-characters-read'));
-
-      // take the first one
-      if (Number.isNaN(charactersRead) || charactersRead === Number(targetEl?.getAttribute('data-characters-read'))) {
-         continue;
-      }
-
-      if (charactersRead <= readerStore.charactersRead) {
-         targetEl = pEl;
-      } else {
-         break;
-      }
-   }
-
-   if (targetEl) {
-      targetEl.scrollIntoView({ block: 'start' });
-   }
-});
-
-onUnmounted(() => {
-   blobUrls.forEach((url) => {
-      URL.revokeObjectURL(url);
-   });
-
-   readerStore.$reset();
-});
 </script>
 
 <style scoped></style>
