@@ -1,33 +1,32 @@
-import { db } from "./database";
+import Dexie from 'dexie';
+import { db } from './database';
 
 export async function addShelfToDB(shelf: Shelf): Promise<{ id: number }> {
    const store = db.shelves;
 
-   const id = await store.add(shelf);
-   return { id };
+   const result = await store.add(shelf);
+   return { id: result };
 }
 
 export async function getShelvesFromDB(): Promise<ShelfRecord[]> {
-   const store = db.shelves;
-   const records = await store.toArray();
+   const shelves = await db.shelves.toArray();
 
-   return records;
+   return shelves;
 }
 
-export async function swapShelfDisplayOrdersInDB(
-   shelfId1: number,
-   shelfId2: number,
-): Promise<void> {
-   const store = db.shelves;
-   await db.transaction("rw", store, async () => {
+export async function swapShelfDisplayOrdersInDB(shelfId1: number, shelfId2: number): Promise<void> {
+   await db.transaction('rw', db.shelves, async () => {
+      const store = db.shelves;
+
       const shelf1 = await store.get(shelfId1);
       const shelf2 = await store.get(shelfId2);
 
-      if (!shelf1 || !shelf2) throw new Error("Shelf does not exist!");
+      if (!shelf1 || !shelf2) throw new Error('Shelf does not exist!');
 
       const tempDisplayOrder = shelf1.displayOrder;
 
-      await store.update(shelfId1, { displayOrder: -1 });
+      await store.update(shelfId1, { displayOrder: -1 }); // bypass unique key constraint
+
       await store.update(shelfId2, { displayOrder: tempDisplayOrder });
       await store.update(shelfId1, { displayOrder: shelf2.displayOrder });
    });
@@ -39,35 +38,24 @@ export async function swapShelfDisplayOrdersInDB(
  * For example (1->2->3->4->5) becomes (1->2->3->4) if shelf 2 is deleted
  */
 export async function deleteShelfFromDB(shelfId: number): Promise<void> {
-   const shelfStore = db.shelves;
-   const bookStore = db.books;
+   await db.transaction('readwrite', [db.books, db.shelves], async () => {
+      const displayOrder = db.shelves.get(shelfId);
+      if (!displayOrder) throw new Dexie.NotFoundError('Shelf does not exist');
 
-   await db.transaction("readwrite", bookStore, shelfStore, async () => {
-      const record = await shelfStore.get(shelfId);
-      if (!record) throw new Error("Shelf does not exist!");
+      await db.books.where('shelfId').equals(shelfId).delete();
+      await db.shelves.delete(shelfId);
 
-      await bookStore.where("shelfId").equals(shelfId).delete();
-      await shelfStore.delete(shelfId);
-
-      await shelfStore
-         .where("displayOrder")
-         .above(record.displayOrder)
+      await db.shelves
+         .where('displayOrder')
+         .above(displayOrder)
          .modify((shelf) => {
             shelf.displayOrder -= 1;
          });
    });
 }
 
-export async function renameShelfInDB(
-   shelfId: number,
-   newName: string,
-): Promise<void> {
-   const store = db.shelves;
-
-   await db.transaction("rw", store, async () => {
-      const record = (await store.get(shelfId)) as ShelfRecord | undefined;
-      if (record === undefined) throw new Error("Shelf does not exist");
-
-      await store.update(shelfId, { name: newName });
+export async function renameShelfInDB(shelfId: number, newName: string): Promise<void> {
+   db.shelves.update(shelfId, { name: newName }).then((result) => {
+      if (!result) throw new Dexie.NotFoundError('Shelf does not exist');
    });
 }
