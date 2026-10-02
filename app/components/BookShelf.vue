@@ -2,7 +2,7 @@
    <section>
       <header class="flex flex-row-1 items-center gap-2 justify-between pb-2 pt-4">
          <h2
-            class="line-clamp-1 font-mono flex items-center gap-2 text-sm uppercase font-medium tracking-[0.3em] text-primary break-all shrink-0"
+            class="line-clamp-1 font-mono flex items-center gap-2 text-sm uppercase font-semibold tracking-[0.3em] text-primary break-all shrink-0"
          >
             {{ name }}
          </h2>
@@ -42,9 +42,9 @@
                size="sm"
                variant="ghost"
                color="neutral"
-               icon="lucide:chevron-right"
+               icon="lucide:chevron-left"
                :ui="{
-                  leadingIcon: ['transition-transform duration-200 ease-out', expanded ? 'rotate-90' : 'rotate-0'],
+                  leadingIcon: ['transition-transform duration-200 ease-out', expanded ? '-rotate-90' : 'rotate-0'],
                }"
                @click="expanded = !expanded"
             />

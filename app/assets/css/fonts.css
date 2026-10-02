@@ -1,3 +1,5 @@
-:root {
+@theme {
    --font-mono: 'Inconsolata', 'Inconsolata Fallback';
+   --font-serif: 'EB Garamond', 'EB Garamond Fallback', georgia, 'Times New Roman', serif;
+   --font-sans: 'Be Vietnam Pro', 'Be Vietnam Pro Fallback', ui-sans-serif, system-ui, sans-serif;
 }

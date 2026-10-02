@@ -16,7 +16,7 @@
                {{ meta.title }}
             </h3>
 
-            <div class="pt-1 text-sm text-muted">
+            <div class="pt-1 text-xs text-muted font-sans flex flex-col gap-2 lg:gap-1">
                <p class="truncate">{{ meta.creator }}</p>
                <p class="truncate">{{ meta.publisher }}</p>
                <p class="truncate">{{ meta.language }}</p>
