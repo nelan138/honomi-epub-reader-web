@@ -13,7 +13,7 @@
 
          <ul class="flex flex-col h-full w-full text-lg text-default">
             <li v-for="item in readerStore.navigation" :key="item.href">
-               <a :href="item.href" class="flex items-center px-4 py-3 hover:underline">
+               <a :href="item.href" class="flex items-center px-4 py-3 hover:underline" @click="slideIsOpen = false">
                   {{ item.label }}
                </a>
             </li>
