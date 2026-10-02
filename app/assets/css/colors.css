@@ -1,9 +1,9 @@
 :root {
-   --ui-primary: #96700f;
+  --ui-primary: #96700f;
 }
 
 .dark {
-   --ui-primary: #f0c05a;
+  --ui-primary: #b88a18;
 }
 
 @theme {
@@ -19,17 +19,17 @@
    --color-parchment-900: #372b1f;
    --color-parchment-950: #231c15;
 
-   --color-ebony-50: #ffffff;
-   --color-ebony-100: #e5e5e6;
-   --color-ebony-200: #cbcccc;
-   --color-ebony-300: #b1b2b3;
-   --color-ebony-400: #979899;
-   --color-ebony-500: #7d7f80;
-   --color-ebony-600: #636566;
-   --color-ebony-700: #494b4d;
-   --color-ebony-800: #2f3233;
-   --color-ebony-900: #15181a;
-   --color-ebony-950: #0b0d0e;
+   --color-charcoal-50: #f4f5f6;
+   --color-charcoal-100: #e6e7e9;
+   --color-charcoal-200: #cacdd1;
+   --color-charcoal-300: #a6abb1;
+   --color-charcoal-400: #7e848d;
+   --color-charcoal-500: #5d636b;
+   --color-charcoal-600: #42464d;
+   --color-charcoal-700: #242629; /* Muted tone */
+   --color-charcoal-800: #1d1e22;
+   --color-charcoal-900: #19191d;
+   --color-charcoal-950: #16161a; /* Darkest tone */
 }
 
 @theme {
@@ -47,15 +47,15 @@
 }
 
 .dark {
-   --color-neutral-50: var(--color-ebony-950);
-   --color-neutral-100: var(--color-ebony-900);
-   --color-neutral-200: var(--color-ebony-800);
-   --color-neutral-300: var(--color-ebony-700);
-   --color-neutral-400: var(--color-ebony-600);
-   --color-neutral-500: var(--color-ebony-500);
-   --color-neutral-600: var(--color-ebony-400);
-   --color-neutral-700: var(--color-ebony-300);
-   --color-neutral-800: var(--color-ebony-200);
-   --color-neutral-900: var(--color-ebony-100);
-   --color-neutral-950: var(--color-ebony-50);
+   --color-neutral-50: var(--color-charcoal-950);
+   --color-neutral-100: var(--color-charcoal-900);
+   --color-neutral-200: var(--color-charcoal-800);
+   --color-neutral-300: var(--color-charcoal-700);
+   --color-neutral-400: var(--color-charcoal-600);
+   --color-neutral-500: var(--color-charcoal-500);
+   --color-neutral-600: var(--color-charcoal-400);
+   --color-neutral-700: var(--color-charcoal-300);
+   --color-neutral-800: var(--color-charcoal-200);
+   --color-neutral-900: var(--color-charcoal-100);
+   --color-neutral-950: var(--color-charcoal-50);
 }

@@ -1,15 +1,9 @@
 <!-- eslint-disable vue/html-self-closing -->
 <template>
    <div>
-      <UHeader
-         :toggle="false"
-         :ui="{
-            root: 'bg-default',
-         }"
-         class="border-inverted"
-      >
+      <UHeader :toggle="false" class="bg-default border-default">
          <template #left>
-            <UButton variant="ghost" color="primary" icon="lucide:file-up" @click="triggerFileInput" />
+            <UButton variant="outline" color="primary" icon="lucide:file-up" @click="triggerFileInput" />
 
             <input
                ref="fileInput"
@@ -30,7 +24,7 @@
                target="_blank"
                variant="link"
                color="neutral"
-               icon="lucide:github"
+               icon="grommet-icons:github"
             />
          </template>
 

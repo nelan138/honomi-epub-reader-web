@@ -1,31 +1,14 @@
 <template>
    <div>
-      <UHeader
-         :toggle="false"
-         :ui="{
-            root: 'bg-default',
-         }"
-      >
+      <UHeader :toggle="false" class="bg-default border-default">
          <template #left>
             <UButton color="neutral" variant="ghost" icon="lucide:arrow-left" @click="navigateTo('/')" />
 
-            <USlideover side="left" title="Table of Content" :close="true" :overlay="false">
-               <UButton color="neutral" variant="ghost" icon="lucide:list" />
-
-               <template #body>
-                  <div>
-                     <ul>
-                        <li v-for="item in readerStore.navigation" :key="item.href">
-                           <a :href="item.href">{{ item.label }}</a>
-                        </li>
-                     </ul>
-                  </div>
-               </template>
-            </USlideover>
+            <TableOfContent />
          </template>
 
          <template #right>
-            <UColorModeButton color="secondary" />
+            <UColorModeButton color="neutral" />
          </template>
       </UHeader>
 
@@ -36,7 +19,7 @@
       </UMain>
 
       <footer class="text-sm fixed bottom-0 right-0 p-2 z-100">
-         <p class="inline">{{ readerStore.charactersRead }} / {{ readerStore.characters }} - </p>
+         <p class="inline">{{ readerStore.charactersRead }} / {{ readerStore.characters }} -</p>
          <p class="inline">{{ readerStore.progress.toFixed(2) }}%</p>
       </footer>
    </div>
@@ -44,6 +27,8 @@
 
 <script lang="ts" setup>
 const readerStore = useReaderStore();
+
+/* *** */
 </script>
 
 <style scoped></style>
