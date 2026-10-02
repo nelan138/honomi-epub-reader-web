@@ -2,12 +2,13 @@
 <template>
    <UScrollArea
       as="article"
-      class="prose h-full prose-p:text-default prose-headings:text-default prose-a:text-default w-full max-w-none [&_img]:mx-auto [&_img]:block [&_img]:max-h-[80dvh] [&_img]:max-w-[80dvw]"
+      class="h-full prose w-full max-w-none [&_img]:mx-auto [&_img]:block [&_img]:max-h-[80dvh] [&_img]:max-w-[80dvw]"
    >
       <section
          v-for="(section, index) in readerStore.sections"
          :key="section.idref"
          :data-index="index"
+         class="prose-base prose-p:m-0 prose-p:text-default prose-headings:text-default prose-a:text-default"
          v-html="section.content"
       />
    </UScrollArea>

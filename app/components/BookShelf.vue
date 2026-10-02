@@ -2,7 +2,7 @@
    <section>
       <header class="flex flex-row-1 items-center gap-2 justify-between pb-2 pt-4">
          <h2
-            class="line-clamp-2 font-mono flex items-center gap-2 text-sm uppercase tracking-[0.4em] text-primary break-all shrink-0"
+            class="line-clamp-1 font-mono flex items-center gap-2 text-sm uppercase font-medium tracking-[0.3em] text-primary break-all shrink-0"
          >
             {{ name }}
          </h2>
