@@ -1,7 +1,8 @@
 <!-- eslint-disable vue/no-v-html -->
 <template>
-   <article
-      class="flow-root prose prose-p:text-default prose-headings:text-default prose-a:text-default w-full max-w-none [&_img]:mx-auto [&_img]:block [&_img]:max-h-[80dvh] [&_img]:max-w-[80dvw]"
+   <UScrollArea
+      as="article"
+      class="prose prose-p:text-default prose-headings:text-default prose-a:text-default w-full max-w-none [&_img]:mx-auto [&_img]:block [&_img]:max-h-[80dvh] [&_img]:max-w-[80dvw]"
    >
       <section
          v-for="(section, index) in readerStore.sections"
@@ -9,7 +10,7 @@
          :data-index="index"
          v-html="section.content"
       />
-   </article>
+   </UScrollArea>
 </template>
 
 <script setup lang="ts">
@@ -52,26 +53,26 @@ onMounted(async () => {
    /**
     * The block below should run after Vue update all the components depending on readerStore and after the DOM finishes painting
     */
-   if (readerStore.charactersRead === 0) return;
+   if (readerStore.charactersRead !== 0) {
+      let targetEl: Element | null = null;
+      const paragraphs = document.querySelectorAll('p[data-characters-read]');
 
-   let targetEl: Element | null = null;
-   const paragraphs = document.querySelectorAll('p[data-characters-read]');
+      for (const pEl of paragraphs) {
+         const charactersRead = Number(pEl.getAttribute('data-characters-read'));
 
-   for (const pEl of paragraphs) {
-      const charactersRead = Number(pEl.getAttribute('data-characters-read'));
+         // take the first one, skips all the one with duplicate characters read (e.g: pictures)
+         if (charactersRead === Number(targetEl?.getAttribute('data-characters-read'))) {
+            continue;
+         }
 
-      // take the first one, skips all the one with duplicate characters read (e.g: pictures)
-      if (charactersRead === Number(targetEl?.getAttribute('data-characters-read'))) {
-         continue;
+         if (charactersRead > readerStore.charactersRead) break;
+         else {
+            targetEl = pEl;
+         }
       }
 
-      if (charactersRead > readerStore.charactersRead) break;
-      else {
-         targetEl = pEl;
-      }
+      if (targetEl) targetEl.scrollIntoView({ block: 'start' });
    }
-
-   if (targetEl) targetEl.scrollIntoView({ block: 'start' });
 
    document.addEventListener('scrollend', onScrollEnd);
 });
@@ -80,7 +81,7 @@ onUnmounted(() => {
    blobUrls.forEach((url) => URL.revokeObjectURL(url));
 
    readerStore.$reset();
-   
+
    document.removeEventListener('scrollend', onScrollEnd);
 });
 
@@ -156,6 +157,7 @@ const getCurrentCharactersRead = () => {
 // Delay of 1000ms
 const onScrollEnd = useDebounceFn(() => {
    if (readerStore.isLoading || readerStore.isLoaded === false) return;
+   console.log('this is running');
 
    readerStore.updateProgress(getCurrentCharactersRead(), { syncWithDb: true });
 }, 1000);

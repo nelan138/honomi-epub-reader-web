@@ -1,3 +1,9 @@
+import type { Epub } from './types.ts';
+import { extractArchive } from './archive.ts';
+import { parseEpub } from './parser.ts';
+
+/* *** */
+
 export type {
    Epub,
    ManifestItem,
@@ -5,12 +11,6 @@ export type {
    NavigationItem,
    SpineItem,
 } from './types.ts';
-
-import type { Epub } from './types.ts';
-import { extractArchive } from './archive.ts';
-import { parseEpub } from './parser.ts';
-
-/* *** */
 
 /**
  * Parse an EPUB file into a structured `Epub` object.

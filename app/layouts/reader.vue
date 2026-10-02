@@ -7,10 +7,21 @@
          }"
       >
          <template #left>
-            <UButton
-            color="neutral"
-            variant="ghost"
-            icon="lucide:arrow-left" @click="navigateTo('/')" />
+            <UButton color="neutral" variant="ghost" icon="lucide:arrow-left" @click="navigateTo('/')" />
+
+            <USlideover side="left" title="Table of Content" :close="true" :overlay="false">
+               <UButton color="neutral" variant="ghost" icon="lucide:list" />
+
+               <template #body>
+                  <div>
+                     <ul>
+                        <li v-for="item in readerStore.navigation" :key="item.href">
+                           <a :href="item.href">{{ item.label }}</a>
+                        </li>
+                     </ul>
+                  </div>
+               </template>
+            </USlideover>
          </template>
 
          <template #right>
@@ -25,9 +36,7 @@
       </UMain>
 
       <footer class="text-sm fixed bottom-0 right-0 p-2 z-100">
-         <p class="inline">
-            {{ readerStore.charactersRead }} / {{ readerStore.characters }} -
-         </p>
+         <p class="inline">{{ readerStore.charactersRead }} / {{ readerStore.characters }} - </p>
          <p class="inline">{{ readerStore.progress.toFixed(2) }}%</p>
       </footer>
    </div>
