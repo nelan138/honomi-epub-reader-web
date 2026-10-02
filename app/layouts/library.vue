@@ -6,14 +6,10 @@
          :ui="{
             root: 'bg-default',
          }"
+         class="border-inverted"
       >
          <template #left>
-            <UButton
-               variant="outline"
-               color="primary"
-               icon="lucide:file-up"
-               @click="triggerFileInput"
-            />
+            <UButton variant="ghost" color="primary" icon="lucide:file-up" @click="triggerFileInput" />
 
             <input
                ref="fileInput"
@@ -39,13 +35,8 @@
          </template>
 
          <template #right>
-            <UButton
-               variant="ghost"
-               color="neutral"
-               icon="lucide:folder-plus"
-               @click="handleAddingNewShelf"
-            />
-            <UColorModeButton color="secondary" />
+            <UButton variant="ghost" color="neutral" icon="lucide:folder-plus" @click="handleAddingNewShelf" />
+            <UColorModeButton color="neutral" />
          </template>
       </UHeader>
 
@@ -54,8 +45,6 @@
             <slot />
          </UContainer>
       </UMain>
-
-      <UFooter />
    </div>
 </template>
 
@@ -80,17 +69,17 @@ function triggerFileInput() {
 
 async function handleAddingNewShelf() {
    const shelfName = await inputModal.open({
-      title: "New Shelf",
-      description: "Name must be unique and cannot be empty",
+      title: 'New Shelf',
+      description: 'Name must be unique and cannot be empty',
    });
 
    if (shelfName === null) return;
 
    if (shelvesStore.shelves.find((shelf) => shelf.name === shelfName)) {
       toast.add({
-         title: "Failed",
-         description: "Shelf with this name already exists",
-         color: "error",
+         title: 'Failed',
+         description: 'Shelf with this name already exists',
+         color: 'error',
       });
       return;
    }
@@ -107,7 +96,7 @@ async function handleAddingNewBooks(files: FileList | null | undefined) {
          toast.add({
             title: `Failed to add ${file.name}`,
             description: error.message,
-            color: "error",
+            color: 'error',
          });
          continue;
       }

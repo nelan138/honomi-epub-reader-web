@@ -2,7 +2,7 @@
 <template>
    <UScrollArea
       as="article"
-      class="prose prose-p:text-default prose-headings:text-default prose-a:text-default w-full max-w-none [&_img]:mx-auto [&_img]:block [&_img]:max-h-[80dvh] [&_img]:max-w-[80dvw]"
+      class="prose h-full prose-p:text-default prose-headings:text-default prose-a:text-default w-full max-w-none [&_img]:mx-auto [&_img]:block [&_img]:max-h-[80dvh] [&_img]:max-w-[80dvw]"
    >
       <section
          v-for="(section, index) in readerStore.sections"
@@ -72,17 +72,21 @@ onMounted(async () => {
       }
 
       if (targetEl) targetEl.scrollIntoView({ block: 'start' });
+      console.log('Finsihed scrolling');
    }
 
+   await nextFrame();
    document.addEventListener('scrollend', onScrollEnd);
+});
+
+onUnmounted(() => {
+   document.removeEventListener('scrollend', onScrollEnd);
 });
 
 onUnmounted(() => {
    blobUrls.forEach((url) => URL.revokeObjectURL(url));
 
    readerStore.$reset();
-
-   document.removeEventListener('scrollend', onScrollEnd);
 });
 
 /* *** */
@@ -154,13 +158,12 @@ const getCurrentCharactersRead = () => {
    }
 };
 
-// Delay of 1000ms
+// Delay of 500ms
 const onScrollEnd = useDebounceFn(() => {
    if (readerStore.isLoading || readerStore.isLoaded === false) return;
-   console.log('this is running');
 
    readerStore.updateProgress(getCurrentCharactersRead(), { syncWithDb: true });
-}, 1000);
+}, 500);
 </script>
 
 <style scoped></style>
