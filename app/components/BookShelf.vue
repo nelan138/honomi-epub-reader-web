@@ -32,6 +32,7 @@
                <UButton
                   variant="link"
                   color="neutral"
+                  size="sm"
                   icon="lucide:x"
                   class="hover:text-error"
                   @click="handleDeletingShelf"
@@ -95,7 +96,14 @@ async function handleRenamingShelf() {
       return;
    }
 
-   store.rename(id, newName);
+   const [, e] = await tryCatch(store.rename(id, newName));
+   if (e) {
+      toast.add({
+         title: 'Failed to rename shelf',
+         description: e.message,
+         color: 'error',
+      });
+   }
 }
 
 async function handleDeletingShelf() {
@@ -104,7 +112,16 @@ async function handleDeletingShelf() {
       description: 'Are you sure you want to delete this shelf?',
    });
 
-   if (confirmed) store.delete(id);
+   if (!confirmed) return;
+
+   const [, e] = await tryCatch(store.delete(id));
+   if (e) {
+      toast.add({
+         title: 'Failed to delete shelf',
+         description: e.message,
+         color: 'error',
+      });
+   }
 }
 
 async function handleMovingShelf(direction: 'up' | 'down') {
