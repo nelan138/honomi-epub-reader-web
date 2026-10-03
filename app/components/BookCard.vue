@@ -63,6 +63,7 @@ const alertModal = useAlertModal();
 const listModal = useListModal();
 const booksStore = useBooksStore();
 const shelvesStore = useShelvesStore();
+const toast = useToast();
 
 /* *** */
 
@@ -101,7 +102,15 @@ async function handleRenamingBook() {
    });
 
    if (!newName) return;
-   booksStore.rename(id, newName);
+
+   const [, e] = await tryCatch(booksStore.rename(id, newName));
+   if (e) {
+      toast.add({
+         title: 'Error renaming book',
+         description: e.message,
+         color: 'error',
+      });
+   }
 }
 
 async function handleDeletingBook() {
@@ -110,7 +119,15 @@ async function handleDeletingBook() {
       description: 'Are you sure you want to delete this book?',
    });
 
-   if (confirmed) booksStore.delete(id);
+   if (!confirmed) return;
+   const [, e] = await tryCatch(booksStore.delete(id));
+   if (e) {
+      toast.add({
+         title: 'Error deleting book',
+         description: e.message,
+         color: 'error',
+      });
+   }
 }
 
 async function handleChangingBookShelf() {
@@ -127,6 +144,13 @@ async function handleChangingBookShelf() {
 
    if (!selectedShelf) return;
 
-   booksStore.changeShelf(id, selectedShelf.id);
+   const [, e] = await tryCatch(booksStore.changeShelf(id, selectedShelf.id));
+   if (e) {
+      toast.add({
+         title: 'Error changing book shelf',
+         description: e.message,
+         color: 'error',
+      });
+   }
 }
 </script>
