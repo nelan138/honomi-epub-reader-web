@@ -39,17 +39,17 @@ export async function swapShelfDisplayOrdersInDB(shelfId1: number, shelfId2: num
  */
 export async function deleteShelfFromDB(shelfId: number): Promise<void> {
    await db.transaction('readwrite', [db.books, db.shelves], async () => {
-      const displayOrder = db.shelves.get(shelfId);
-      if (!displayOrder) throw new Dexie.NotFoundError('Shelf does not exist');
+      const shelf = await db.shelves.get(shelfId);
+      if (!shelf) throw new Dexie.NotFoundError('Shelf does not exist');
 
       await db.books.where('shelfId').equals(shelfId).delete();
       await db.shelves.delete(shelfId);
 
       await db.shelves
          .where('displayOrder')
-         .above(displayOrder)
-         .modify((shelf) => {
-            shelf.displayOrder -= 1;
+         .above(shelf.displayOrder)
+         .modify((s) => {
+            s.displayOrder -= 1;
          });
    });
 }
