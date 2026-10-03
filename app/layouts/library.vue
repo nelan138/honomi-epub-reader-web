@@ -11,12 +11,7 @@
                multiple
                type="file"
                accept=".epub, application/epub+zip"
-               @change="
-                  (event) => {
-                     const target = event.target as HTMLInputElement;
-                     handleAddingNewBooks(target.files);
-                  }
-               "
+               @change="handleInputtingFiles"
             />
 
             <UButton
@@ -83,7 +78,10 @@ async function handleAddingNewShelf() {
    shelvesStore.add(shelfName);
 }
 
-async function handleAddingNewBooks(files: FileList | null | undefined) {
+async function handleInputtingFiles(event: Event) {
+   const target = event.target as HTMLInputElement;
+   const files = target.files;
+
    if (!files || files.length === 0) return;
 
    for (const file of Array.from(files)) {
