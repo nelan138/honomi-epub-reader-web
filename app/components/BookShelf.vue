@@ -81,12 +81,14 @@ const { id, name } = defineProps<{
 const expanded = ref(true);
 
 async function handleRenamingShelf() {
-   const newName = await inputModal.open({
+   let newName = await inputModal.open({
       title: 'Rename Shelf',
       description: 'Name must be unique, and cannot be empty',
    });
 
    if (newName === null) return;
+
+   newName = newName.trim();
 
    if (store.shelves.find((shelf) => shelf.name === newName)) {
       toast.add({

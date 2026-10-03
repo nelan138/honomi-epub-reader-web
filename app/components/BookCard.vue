@@ -96,12 +96,14 @@ const {
 }>();
 
 async function handleRenamingBook() {
-   const newName = await inputModal.open({
+   let newName = await inputModal.open({
       title: 'Rename book',
       description: 'Enter a new name for the book',
    });
 
    if (!newName) return;
+
+   newName = newName.trim();
 
    const [, e] = await tryCatch(booksStore.rename(id, newName));
    if (e) {
