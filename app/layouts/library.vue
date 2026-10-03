@@ -3,7 +3,13 @@
    <div>
       <UHeader :toggle="false" class="bg-default border-default">
          <template #left>
-            <UButton variant="outline" color="primary" icon="lucide:file-up" @click="triggerFileInput" />
+            <UButton
+               variant="outline"
+               color="primary"
+               icon="lucide:file-up"
+               :loading="isImportingFiles"
+               @click="triggerFileInput"
+            />
 
             <input
                ref="fileInput"
@@ -11,7 +17,7 @@
                multiple
                type="file"
                accept=".epub, application/epub+zip"
-               @change="handleInputtingFiles"
+               @change="handleFileChange"
             />
 
             <UButton
@@ -50,10 +56,38 @@ onMounted(() => {
    booksStore.load();
 });
 
+/** @use in importing files, just for the visual of button loading */
+const isImportingFiles = ref(false);
+
 const fileInput = ref<HTMLInputElement | null>(null);
 
-function triggerFileInput() {
+async function triggerFileInput() {
    fileInput.value?.click();
+}
+
+async function handleFileChange(event: Event) {
+   const target = event.target as HTMLInputElement;
+   const files = target.files;
+
+   if (!files || files.length === 0) {
+      return;
+   }
+
+   isImportingFiles.value = true;
+
+   for (const file of Array.from(files)) {
+      const [_, error] = await tryCatch(booksStore.add(file));
+      if (error) {
+         toast.add({
+            title: `Failed to add ${file.name}`,
+            description: error.message,
+            color: 'error',
+         });
+         continue;
+      }
+   }
+
+   isImportingFiles.value = false;
 }
 
 async function handleAddingNewShelf() {
@@ -76,24 +110,5 @@ async function handleAddingNewShelf() {
    }
 
    shelvesStore.add(shelfName);
-}
-
-async function handleInputtingFiles(event: Event) {
-   const target = event.target as HTMLInputElement;
-   const files = target.files;
-
-   if (!files || files.length === 0) return;
-
-   for (const file of Array.from(files)) {
-      const [_, error] = await tryCatch(booksStore.add(file));
-      if (error) {
-         toast.add({
-            title: `Failed to add ${file.name}`,
-            description: error.message,
-            color: 'error',
-         });
-         continue;
-      }
-   }
 }
 </script>
