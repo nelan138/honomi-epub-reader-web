@@ -62,12 +62,14 @@ function triggerFileInput() {
 }
 
 async function handleAddingNewShelf() {
-   const shelfName = await inputModal.open({
+   let shelfName = await inputModal.open({
       title: 'New Shelf',
       description: 'Name must be unique and cannot be empty',
    });
 
    if (shelfName === null) return;
+
+   shelfName = shelfName.trim();
 
    if (shelvesStore.shelves.find((shelf) => shelf.name === shelfName)) {
       toast.add({
