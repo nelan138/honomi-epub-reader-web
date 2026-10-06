@@ -39,7 +39,7 @@
       </UHeader>
 
       <UMain class="bg-muted">
-         <UBanner icon="lucide:info" title="We are still in development" color="info" />
+         <UBanner icon="lucide:info" title="We are still in development" color="info" close />
 
          <UContainer>
             <slot />
@@ -49,7 +49,6 @@
 </template>
 
 <script setup lang="ts">
-
 const inputModal = useInputModal();
 const shelvesStore = useShelvesStore();
 const booksStore = useBooksStore();
