@@ -36,6 +36,8 @@
       </UHeader>
 
       <UMain class="bg-muted">
+         <UBanner icon="lucide:info" title="We are still in development" color="info" />
+
          <UContainer>
             <slot />
          </UContainer>

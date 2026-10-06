@@ -1,7 +1,5 @@
 <template>
    <div class="pb-12">
-      <UBanner icon="lucide:info" title="We are still in development" color="info" />
-
       <BookShelf v-for="shelf in shelvesStore.shelves" :id="shelf.id" :key="shelf.id" :name="shelf.name">
          <BookCard
             v-for="book in booksStore.books.filter((book) => book.shelfId === shelf.id)"
