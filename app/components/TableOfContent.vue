@@ -1,8 +1,10 @@
 <template>
-   <USlideover v-model:open="slideIsOpen" side="left" :close="true" :overlay="false">
+   <USlideover v-model:open="slideIsOpen" side="left" :close="true" :ui="{ overlay: 'fixed inset-0 bg-transparent' }">
       <UButton color="neutral" variant="ghost" icon="lucide:list" />
 
-      <template #content>
+      <template #header>
+         <h2>Table of Contents</h2>
+
          <UButton
             icon="lucide:x"
             color="neutral"
@@ -10,7 +12,9 @@
             class="absolute right-2 top-2"
             @click="slideIsOpen = false"
          />
+      </template>
 
+      <template #body>
          <ul class="flex flex-col h-full w-full text-lg text-default">
             <li v-for="item in readerStore.navigation" :key="item.href">
                <a :href="item.href" class="flex items-center px-4 py-3 hover:underline" @click="slideIsOpen = false">

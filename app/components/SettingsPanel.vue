@@ -1,5 +1,5 @@
 <template>
-   <USlideover v-model:open="isOpen" slide="right" :overlay="false" :ui="{ content: 'max-w-xs' }">
+   <USlideover v-model:open="isOpen" slide="right" :ui="{  content: 'max-w-xs', overlay: 'fixed inset-0 bg-transparent' }">
       <UButton icon="lucide:settings" variant="ghost" color="neutral" />
 
       <template #header>
