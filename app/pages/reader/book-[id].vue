@@ -5,11 +5,19 @@
       class="h-full prose w-full max-w-none [&_img]:mx-auto [&_img]:block [&_img]:max-h-[80dvh] [&_img]:max-w-[80dvw]"
    >
       <!-- prose-sm prose-base prose-lg prose-xl prose-2xl -->
+      <!-- prose-p:leading-tight prose-p:leading-snug prose-p:leading-normal prose-p:leading-relaxed prose-p:leading-loose -->
+      <!-- prose-p:tracking-tighter prose-p:tracking-tight prose-p:tracking-normal prose-p:tracking-wide prose-p:tracking-wider prose-p:tracking-widest -->
+      <!-- [font-kerning:auto] [font-kerning:none] -->
       <section
          v-for="(section, index) in readerStore.sections"
          :key="section.idref"
          :data-index="index"
-         :class="[`prose-${settingsStore.fontSize}`]"
+         :class="[
+            `prose-${settingsStore.fontSize}`,
+            `prose-p:leading-${settingsStore.fontLeading}`,
+            `prose-p:tracking-${settingsStore.fontTracking}`,
+            `[font-kerning:${settingsStore.fontKerning}]`,
+         ]"
          class="prose-p:m-0 prose-p:text-default prose-headings:text-default prose-a:text-default"
          v-html="section.content"
       />
