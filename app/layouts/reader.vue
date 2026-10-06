@@ -11,6 +11,8 @@
 
          <template #right>
             <UColorModeButton color="neutral" />
+
+            <SettingsPanel />
          </template>
       </UHeader>
 
