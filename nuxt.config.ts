@@ -24,4 +24,8 @@ export default defineNuxtConfig({
    },
 
    modules: ['@nuxt/ui', '@nuxt/icon', '@nuxt/image', '@nuxt/eslint', '@pinia/nuxt', '@vueuse/nuxt'],
+   
+   colorMode: {
+      preference: 'light',
+   },
 });
