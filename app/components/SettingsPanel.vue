@@ -16,7 +16,7 @@
 
             <li>
                <h3>Font size</h3>
-               <USelect :items="['xs', 'sm', 'md', 'lg', 'xl']" />
+               <USelect v-model="fontSize" :items="['sm', 'base', 'lg', 'xl', '2xl']" />
             </li>
 
             <li>
@@ -38,6 +38,15 @@
    </USlideover>
 </template>
 
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+const settingsStore = useSettingsStore();
+
+/* *** */
+
+const fontSize = computed({
+   get: () => settingsStore.fontSize,
+   set: (value: FontSize) => settingsStore.setFontSize(value),
+});
+</script>
 
 <style></style>

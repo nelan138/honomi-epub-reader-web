@@ -4,11 +4,13 @@
       as="article"
       class="h-full prose w-full max-w-none [&_img]:mx-auto [&_img]:block [&_img]:max-h-[80dvh] [&_img]:max-w-[80dvw]"
    >
+      <!-- prose-sm prose-base prose-lg prose-xl prose-2xl -->
       <section
          v-for="(section, index) in readerStore.sections"
          :key="section.idref"
          :data-index="index"
-         class="prose-base prose-p:m-0 prose-p:text-default prose-headings:text-default prose-a:text-default"
+         :class="[`prose-${settingsStore.fontSize}`]"
+         class="prose-p:m-0 prose-p:text-default prose-headings:text-default prose-a:text-default"
          v-html="section.content"
       />
    </UScrollArea>
@@ -18,10 +20,12 @@
 definePageMeta({
    layout: 'reader',
 });
+
 const readerStore = useReaderStore();
 const toast = useToast();
 const route = useRoute();
 const bookId = Number(route.params.id);
+const settingsStore = useSettingsStore();
 
 /* *** */
 
