@@ -1,6 +1,6 @@
 <template>
    <div>
-      <UHeader v-if="headerIsOpen" :toggle="false" class="border-default sticky top-0 z-100">
+      <UHeader v-if="headerIsOpen" :toggle="false" class="fixed top-0 w-full z-50 border-default">
          <template #left>
             <UButton color="neutral" variant="ghost" icon="lucide:arrow-left" @click="navigateTo('/')" />
 
@@ -27,9 +27,7 @@
       </header>
 
       <UMain class="bg-muted">
-         <UContainer>
-            <slot />
-         </UContainer>
+         <slot />
       </UMain>
 
       <footer class="text-xs fixed bottom-0 right-0 p-2 z-100">
