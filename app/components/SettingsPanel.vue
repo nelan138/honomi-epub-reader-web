@@ -31,6 +31,7 @@
                   trailing-icon="lucide:chevron-right"
                />
             </div>
+
             <div class="inline-flex items-center gap-2 justify-between">
                <span>Size</span>
                <USelect
@@ -75,6 +76,19 @@
                   :items="['auto', 'none']"
                   variant="none"
                   trailing-icon="lucide:chevron-right"
+               />
+            </div>
+
+            <div class="inline-flex items-center gap-2 justify-between">
+               <span>Scroll speed</span>
+
+               <UInputNumber
+                  v-model="scrollSpeed"
+                  orientation="vertical"
+                  :min="1"
+                  :max="200"
+                  variant="outline"
+                  class="w-[40%] mx-2"
                />
             </div>
          </div>
@@ -123,6 +137,11 @@ const writingMode = computed({
       else if (value === 'vertical') settingsStore.setWritingMode('vertical-rl');
       else console.warn(`Invalid writing mode: ${value}`);
    },
+});
+
+const scrollSpeed = computed({
+   get: () => settingsStore.scrollSpeed,
+   set: (value: number) => settingsStore.setScrollSpeed(value),
 });
 </script>
 

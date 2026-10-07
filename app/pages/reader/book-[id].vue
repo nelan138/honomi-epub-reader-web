@@ -195,13 +195,10 @@ const onScrollEnd = useDebounceFn(() => {
 
 const scrollArea = ref<HTMLElement | null>(null);
 
-// todo: move to settings store
-const scrollSpeed = 50; // px
-
 const onWheel = (event: WheelEvent) => {
    if (!scrollArea.value) return;
 
-   const delta = Math.sign(event.deltaY) * scrollSpeed;
+   const delta = Math.sign(event.deltaY) * settingsStore.scrollSpeed;
 
    if (settingsStore.writingMode === 'horizontal-tb') scrollArea.value.scrollTop += delta;
    else if (settingsStore.writingMode === 'vertical-rl') scrollArea.value.scrollLeft -= delta;

@@ -25,6 +25,7 @@ export const useSettingsStore = defineStore('settings', {
          fontKerning: 'auto' as FontKerning,
 
          writingMode: 'horizontal-tb' as WritingMode,
+         scrollSpeed: 80, // px
       }),
    }),
 
@@ -47,6 +48,10 @@ export const useSettingsStore = defineStore('settings', {
 
       writingMode(): WritingMode {
          return this.settings.writingMode;
+      },
+
+      scrollSpeed(): number {
+         return this.settings.scrollSpeed;
       },
    },
 
@@ -71,5 +76,9 @@ export const useSettingsStore = defineStore('settings', {
          this.settings.writingMode = mode;
          console.log('updated writingMode', mode);
       },
+
+      setScrollSpeed(speed: number) {
+         this.settings.scrollSpeed = speed;
+      }
    },
 });
