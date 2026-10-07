@@ -33,11 +33,11 @@
             :key="section.idref"
             :data-reference="section.idref"
             :class="[
-               '[&_img]:mx-auto [&_img]:block [&_img]:max-h-[80dvh] [&_img]:max-w-[80dvw]',
+               '[&_img]:block [&_img]:max-h-[80dvh] [&_img]:max-w-[80dvw] [&_img]:mx-auto',
 
                {
                   'w-full': settingsStore.writingMode === 'horizontal-tb',
-                  'h-full': settingsStore.writingMode === 'vertical-rl',
+                  'h-full [&_img]:my-[10vw]': settingsStore.writingMode === 'vertical-rl',
                },
             ]"
          >
