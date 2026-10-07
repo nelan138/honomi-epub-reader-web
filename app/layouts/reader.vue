@@ -1,6 +1,6 @@
 <template>
    <div>
-      <UHeader v-if="headerIsOpen" :toggle="false" class="bg-default border-default">
+      <UHeader v-if="headerIsOpen" :toggle="false" class="border-default sticky top-0 z-100">
          <template #left>
             <UButton color="neutral" variant="ghost" icon="lucide:arrow-left" @click="navigateTo('/')" />
 
@@ -17,7 +17,13 @@
       </UHeader>
 
       <header v-else class="fixed z-100 p-2">
-         <UButton icon="lucide:chevrons-down" color="neutral" variant="link" class="text-default cursor-pointer" @click="headerIsOpen = true"/>
+         <UButton
+            icon="lucide:chevrons-down"
+            color="neutral"
+            variant="link"
+            class="text-default cursor-pointer"
+            @click="headerIsOpen = true"
+         />
       </header>
 
       <UMain class="bg-muted">
