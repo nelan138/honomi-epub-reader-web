@@ -1,5 +1,9 @@
 <template>
-   <USlideover v-model:open="isOpen" slide="right" :ui="{  content: 'max-w-xs', overlay: 'fixed inset-0 bg-transparent' }">
+   <USlideover
+      v-model:open="isOpen"
+      slide="right"
+      :ui="{ content: 'max-w-xs', overlay: 'fixed inset-0 bg-transparent' }"
+   >
       <UButton icon="lucide:settings" variant="ghost" color="neutral" />
 
       <template #header>
@@ -17,6 +21,16 @@
       <template #body>
          <!-- todo: writing mode, font family (p, blockquote, heading), furigana, progress display -->
          <div class="flex flex-col gap-2 text-base">
+            <div class="inline-flex items-center gap-2 justify-between">
+               <span>Writing Mode</span>
+
+               <USelect
+                  v-model="writingMode"
+                  :items="['horizontal', 'vertical']"
+                  variant="none"
+                  trailing-icon="lucide:chevron-right"
+               />
+            </div>
             <div class="inline-flex items-center gap-2 justify-between">
                <span>Size</span>
                <USelect
@@ -93,6 +107,22 @@ const fontTracking = computed({
 const fontKerning = computed({
    get: () => settingsStore.fontKerning,
    set: (value: FontKerning) => settingsStore.setFontKerning(value),
+});
+
+const writingMode = computed({
+   get: () => {
+      if (settingsStore.writingMode === 'horizontal-tb') return 'horizontal';
+      else if (settingsStore.writingMode === 'vertical-rl') return 'vertical';
+      else {
+         console.warn(`Invalid writing mode: ${settingsStore.writingMode}`);
+         return 'horizontal';
+      }
+   },
+   set: (value: string) => {
+      if (value === 'horizontal') settingsStore.setWritingMode('horizontal-tb');
+      else if (value === 'vertical') settingsStore.setWritingMode('vertical-rl');
+      else console.warn(`Invalid writing mode: ${value}`);
+   },
 });
 </script>
 

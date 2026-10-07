@@ -6,8 +6,15 @@ export type FontSize = 'sm' | 'base' | 'lg' | 'xl' | '2xl';
 
 /** @use as prose-p:leading-* */
 export type FontLeading = 'tight' | 'snug' | 'normal' | 'relaxed' | 'loose';
+
+/** @use as prose-p:tracking-* */
 export type FontTracking = 'tighter' | 'tight' | 'normal' | 'wide' | 'wider' | 'widest';
+
+/** @use as [font-kerning:*] */
 export type FontKerning = 'auto' | 'none';
+
+/** @use as [writing-mode:*] */
+export type WritingMode = 'horizontal-tb' | 'vertical-rl';
 
 export const useSettingsStore = defineStore('settings', {
    state: () => ({
@@ -16,6 +23,8 @@ export const useSettingsStore = defineStore('settings', {
          fontLeading: 'normal' as FontLeading,
          fontTracking: 'normal' as FontTracking,
          fontKerning: 'auto' as FontKerning,
+
+         writingMode: 'horizontal-tb' as WritingMode,
       }),
    }),
 
@@ -35,6 +44,10 @@ export const useSettingsStore = defineStore('settings', {
       fontKerning(): FontKerning {
          return this.settings.fontKerning;
       },
+
+      writingMode(): WritingMode {
+         return this.settings.writingMode;
+      },
    },
 
    actions: {
@@ -52,6 +65,11 @@ export const useSettingsStore = defineStore('settings', {
 
       setFontKerning(kerning: FontKerning) {
          this.settings.fontKerning = kerning;
+      },
+
+      setWritingMode(mode: WritingMode) {
+         this.settings.writingMode = mode;
+         console.log('updated writingMode', mode);
       },
    },
 });
