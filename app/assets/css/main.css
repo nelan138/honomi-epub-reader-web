@@ -24,3 +24,43 @@
    --ui-bg-accented: var(--color-neutral-500);
    --ui-bg-inverted: var(--color-neutral-900);
 }
+
+@utility px-none {
+   padding-inline: 0rem;
+}
+
+@utility px-compact {
+   padding-inline: 1rem;
+}
+
+@utility px-normal {
+   padding-inline: 2rem;
+}
+
+@utility px-relaxed {
+   padding-inline: 3rem;
+}
+
+@utility px-spacious {
+   padding-inline: 4rem;
+}
+
+@utility py-none {
+   padding-block: 0rem;
+}
+
+@utility py-compact {
+   padding-block: 1rem;
+}
+
+@utility py-normal {
+   padding-block: 2rem;
+}
+
+@utility py-relaxed {
+   padding-block: 3rem;
+}
+
+@utility py-spacious {
+   padding-block: 4rem;
+}

@@ -91,6 +91,17 @@
                   class="w-[40%] mx-2"
                />
             </div>
+
+            <div class="inline-flex items-center gap-2 justify-between">
+               <span>Padding</span>
+
+               <USelect
+                  v-model="bookPadding"
+                  :items="['none', 'compact', 'normal', 'relaxed', 'spacious']"
+                  variant="none"
+                  trailing-icon="lucide:chevron-right"
+               />
+            </div>
          </div>
       </template>
    </USlideover>
@@ -131,6 +142,11 @@ const writingMode = computed({
 const scrollSpeed = computed({
    get: () => settingsStore.scrollSpeed,
    set: (value: number) => settingsStore.setScrollSpeed(value),
+});
+
+const bookPadding = computed({
+   get: () => settingsStore.bookPadding,
+   set: (value: BookPadding) => settingsStore.setBookPadding(value),
 });
 </script>
 

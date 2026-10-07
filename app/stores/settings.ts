@@ -15,6 +15,9 @@ export type FontKerning = 'auto' | 'none';
 
 export type WritingMode = 'horizontal' | 'vertical';
 
+/** @use as px-[padding-*] */
+export type BookPadding = 'none' | 'compact' | 'normal' | 'relaxed' | 'spacious';
+
 export const useSettingsStore = defineStore('settings', {
    state: () => ({
       settings: useStorage('settings', {
@@ -25,6 +28,7 @@ export const useSettingsStore = defineStore('settings', {
 
          writingMode: 'horizontal' as WritingMode,
          scrollSpeed: 80, // px
+         bookPadding: 'normal' as BookPadding,
       }),
    }),
 
@@ -52,6 +56,10 @@ export const useSettingsStore = defineStore('settings', {
       scrollSpeed(): number {
          return this.settings.scrollSpeed;
       },
+
+      bookPadding(): BookPadding {
+         return this.settings.bookPadding;
+      },
    },
 
    actions: {
@@ -78,6 +86,10 @@ export const useSettingsStore = defineStore('settings', {
 
       setScrollSpeed(speed: number) {
          this.settings.scrollSpeed = speed;
-      }
+      },
+
+      setBookPadding(margin: BookPadding) {
+         this.settings.bookPadding = margin;
+      },
    },
 });

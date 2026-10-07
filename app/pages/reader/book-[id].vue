@@ -7,6 +7,7 @@
       prose-p:leading-tight prose-p:leading-snug prose-p:leading-normal prose-p:leading-relaxed prose-p:leading-loose
       prose-p:tracking-tighter prose-p:tracking-tight prose-p:tracking-normal prose-p:tracking-wide prose-p:tracking-wider prose-p:tracking-widest
       [font-kerning:auto] [font-kerning:none]
+      px-none px-compact px-normal px-relaxed px-spacious
 
       prose article below -->
       <article
@@ -24,6 +25,7 @@
             `prose-p:leading-${settingsStore.fontLeading}`,
             `prose-p:tracking-${settingsStore.fontTracking}`,
             `[font-kerning:${settingsStore.fontKerning}]`,
+            `px-${settingsStore.bookPadding}`,
          ]"
          @scrollend="onScrollEnd"
          @wheel.prevent="onWheel"
