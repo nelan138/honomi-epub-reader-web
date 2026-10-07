@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/no-v-html -->
 <template>
-   <div class="overflow-y-scroll h-screen w-full text-wrap" @scrollend="onScrollEnd">
+   <div>
       <!-- runtime tailwind classes
 
       prose-sm prose-base prose-lg prose-xl prose-2xl
@@ -10,15 +10,37 @@
 
       prose article below -->
       <article
-         class="prose max-w-none [&_img]:mx-auto [&_img]:block [&_img]:max-h-[80dvh] [&_img]:max-w-[80dvw] prose-p:m-0 prose-p:text-default prose-headings:text-default prose-a:text-default"
+         ref="scrollArea"
          :class="[
+            'h-screen w-screen prose max-w-none prose-p:m-0 prose-p:text-default prose-headings:text-default prose-a:text-default',
+
+            {
+               '[writing-mode:horizontal-tb] overflow-y-scroll overflow-x-hidden':
+                  settingsStore.writingMode === 'horizontal-tb',
+               '[writing-mode:vertical-rl] overflow-x-scroll overflow-y-hidden':
+                  settingsStore.writingMode === 'vertical-rl',
+            },
             `prose-${settingsStore.fontSize}`,
             `prose-p:leading-${settingsStore.fontLeading}`,
             `prose-p:tracking-${settingsStore.fontTracking}`,
             `[font-kerning:${settingsStore.fontKerning}]`,
          ]"
+         @scrollend="onScrollEnd"
+         @wheel.prevent="onWheel"
       >
-         <section v-for="section in readerStore.sections" :key="section.idref" :data-reference="section.idref">
+         <section
+            v-for="section in readerStore.sections"
+            :key="section.idref"
+            :data-reference="section.idref"
+            :class="[
+               '[&_img]:mx-auto [&_img]:block [&_img]:max-h-[80dvh] [&_img]:max-w-[80dvw]',
+
+               {
+                  'w-full': settingsStore.writingMode === 'horizontal-tb',
+                  'h-full': settingsStore.writingMode === 'vertical-rl',
+               },
+            ]"
+         >
             <div v-html="section.content" />
          </section>
       </article>
@@ -170,6 +192,20 @@ const onScrollEnd = useDebounceFn(() => {
 
    readerStore.updateProgress(getCurrentCharactersRead(), { syncWithDb: true });
 }, 500);
+
+const scrollArea = ref<HTMLElement | null>(null);
+
+// todo: move to settings store
+const scrollSpeed = 50; // px
+
+const onWheel = (event: WheelEvent) => {
+   if (!scrollArea.value) return;
+
+   const delta = Math.sign(event.deltaY) * scrollSpeed;
+
+   if (settingsStore.writingMode === 'horizontal-tb') scrollArea.value.scrollTop += delta;
+   else if (settingsStore.writingMode === 'vertical-rl') scrollArea.value.scrollLeft -= delta;
+};
 </script>
 
 <style scoped></style>
