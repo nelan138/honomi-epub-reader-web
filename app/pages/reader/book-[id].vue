@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/no-v-html -->
 <template>
-   <UScrollArea>
+   <div class="overflow-y-scroll h-screen w-full text-wrap" @scrollend="onScrollEnd">
       <!-- runtime tailwind classes
 
       prose-sm prose-base prose-lg prose-xl prose-2xl
@@ -18,11 +18,11 @@
             `[font-kerning:${settingsStore.fontKerning}]`,
          ]"
       >
-         <section v-for="(section, index) in readerStore.sections" :key="section.idref" :data-index="index">
+         <section v-for="section in readerStore.sections" :key="section.idref" :data-reference="section.idref">
             <div v-html="section.content" />
          </section>
       </article>
-   </UScrollArea>
+   </div>
 </template>
 
 <script setup lang="ts">
@@ -75,26 +75,18 @@ onMounted(async () => {
          const charactersRead = Number(pEl.getAttribute('data-characters-read'));
 
          // take the first one, skips all the one with duplicate characters read (e.g: pictures)
-         if (charactersRead === Number(targetEl?.getAttribute('data-characters-read'))) {
-            continue;
-         }
+         const currentCharactersRead = Number(targetEl?.getAttribute('data-characters-read') ?? '-1');
+
+         if (charactersRead === currentCharactersRead) continue;
 
          if (charactersRead > readerStore.charactersRead) break;
-         else {
-            targetEl = pEl;
-         }
+
+         targetEl = pEl;
       }
 
-      if (targetEl) targetEl.scrollIntoView({ block: 'start' });
-      console.log('Finsihed scrolling');
+      targetEl?.scrollIntoView();
+      // console.log('Finished scrolling', targetEl);
    }
-
-   await nextFrame();
-   document.addEventListener('scrollend', onScrollEnd);
-});
-
-onUnmounted(() => {
-   document.removeEventListener('scrollend', onScrollEnd);
 });
 
 onUnmounted(() => {
@@ -144,7 +136,7 @@ const getCurrentCharactersRead = () => {
 
    // * Fallback
    else {
-      const sectionEl = targetEl.closest('section[data-index]');
+      const sectionEl = targetEl.closest('section[data-reference]');
 
       let currentSectionEl = sectionEl;
       let fallbackTargetEl = null as Element | null;
