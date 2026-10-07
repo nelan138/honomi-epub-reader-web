@@ -22,7 +22,7 @@
          <!-- todo: writing mode, font family (p, blockquote, heading), furigana, progress display -->
          <div class="flex flex-col gap-2 text-base">
             <div class="inline-flex items-center gap-2 justify-between">
-               <span>Writing Mode</span>
+               <span>Writing mode</span>
 
                <USelect
                   v-model="writingMode"
@@ -124,19 +124,8 @@ const fontKerning = computed({
 });
 
 const writingMode = computed({
-   get: () => {
-      if (settingsStore.writingMode === 'horizontal-tb') return 'horizontal';
-      else if (settingsStore.writingMode === 'vertical-rl') return 'vertical';
-      else {
-         console.warn(`Invalid writing mode: ${settingsStore.writingMode}`);
-         return 'horizontal';
-      }
-   },
-   set: (value: string) => {
-      if (value === 'horizontal') settingsStore.setWritingMode('horizontal-tb');
-      else if (value === 'vertical') settingsStore.setWritingMode('vertical-rl');
-      else console.warn(`Invalid writing mode: ${value}`);
-   },
+   get: () => settingsStore.writingMode,
+   set: (value: WritingMode) => settingsStore.setWritingMode(value),
 });
 
 const scrollSpeed = computed({

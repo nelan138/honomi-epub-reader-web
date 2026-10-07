@@ -13,8 +13,7 @@ export type FontTracking = 'tighter' | 'tight' | 'normal' | 'wide' | 'wider' | '
 /** @use as [font-kerning:*] */
 export type FontKerning = 'auto' | 'none';
 
-/** @use as [writing-mode:*] */
-export type WritingMode = 'horizontal-tb' | 'vertical-rl';
+export type WritingMode = 'horizontal' | 'vertical';
 
 export const useSettingsStore = defineStore('settings', {
    state: () => ({
@@ -24,7 +23,7 @@ export const useSettingsStore = defineStore('settings', {
          fontTracking: 'normal' as FontTracking,
          fontKerning: 'auto' as FontKerning,
 
-         writingMode: 'horizontal-tb' as WritingMode,
+         writingMode: 'horizontal' as WritingMode,
          scrollSpeed: 80, // px
       }),
    }),

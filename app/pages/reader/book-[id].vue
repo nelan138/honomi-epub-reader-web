@@ -16,9 +16,9 @@
 
             {
                '[writing-mode:horizontal-tb] overflow-y-scroll overflow-x-hidden':
-                  settingsStore.writingMode === 'horizontal-tb',
+                  settingsStore.writingMode === 'horizontal',
                '[writing-mode:vertical-rl] overflow-x-scroll overflow-y-hidden':
-                  settingsStore.writingMode === 'vertical-rl',
+                  settingsStore.writingMode === 'vertical',
             },
             `prose-${settingsStore.fontSize}`,
             `prose-p:leading-${settingsStore.fontLeading}`,
@@ -36,8 +36,8 @@
                '[&_img]:block [&_img]:max-h-[80dvh] [&_img]:max-w-[80dvw] [&_img]:mx-auto',
 
                {
-                  'w-full': settingsStore.writingMode === 'horizontal-tb',
-                  'h-full [&_img]:my-[10vw]': settingsStore.writingMode === 'vertical-rl',
+                  'w-full': settingsStore.writingMode === 'horizontal',
+                  'h-full [&_img]:my-[10vw]': settingsStore.writingMode === 'vertical',
                },
             ]"
          >
@@ -200,8 +200,8 @@ const onWheel = (event: WheelEvent) => {
 
    const delta = Math.sign(event.deltaY) * settingsStore.scrollSpeed;
 
-   if (settingsStore.writingMode === 'horizontal-tb') scrollArea.value.scrollTop += delta;
-   else if (settingsStore.writingMode === 'vertical-rl') scrollArea.value.scrollLeft -= delta;
+   if (settingsStore.writingMode === 'horizontal') scrollArea.value.scrollTop += delta;
+   else if (settingsStore.writingMode === 'vertical') scrollArea.value.scrollLeft -= delta;
 };
 </script>
 
