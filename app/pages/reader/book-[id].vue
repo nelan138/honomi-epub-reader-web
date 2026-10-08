@@ -132,8 +132,15 @@ const getCurrentCharactersRead = () => {
    const header = document.querySelector('header');
    if (header) headerHeight = header.getBoundingClientRect().bottom;
 
-   const x = globalThis.innerWidth / 2;
-   const y = headerHeight + 10;
+   // x = the middle of the screen, y = top edge
+   let x = globalThis.innerWidth / 2;
+   let y = headerHeight + 10;
+
+   // x = right edge, y = middle of the screen
+   if (settingsStore.writingMode === 'vertical') {
+      x = globalThis.innerWidth - 10;
+      y = globalThis.innerHeight / 2;
+   }
 
    const targetEl = document.elementFromPoint(x, y);
 
@@ -146,16 +153,11 @@ const getCurrentCharactersRead = () => {
 
    // * Direct match
    if (paragraphEl) {
-      const attr = paragraphEl.getAttribute('data-characters-read');
-      if (!attr) {
-         console.warn('[Reader] No data-characters-read attribute found on <p> element');
-         return progressCache;
-      }
+      const attr = paragraphEl.getAttribute('data-characters-read') as string;
 
-      const offset = parseInt(attr);
-      progressCache = offset;
+      progressCache = parseInt(attr);
 
-      return offset;
+      return progressCache;
    }
 
    // * Fallback
@@ -169,21 +171,25 @@ const getCurrentCharactersRead = () => {
          const pEls = currentSectionEl.querySelectorAll('p[data-characters-read]');
 
          for (const pEl of pEls) {
-            if (pEl.getBoundingClientRect().top > y) break;
+            const rect = pEl.getBoundingClientRect();
+
+            if (settingsStore.writingMode === 'horizontal' && rect.top > y) break;
+            else if (settingsStore.writingMode === 'vertical' && rect.right < x) break;
+
             fallbackTargetEl = pEl;
          }
 
-         if (pEls.length > 0) break;
+         if (fallbackTargetEl) break;
 
          currentSectionEl = currentSectionEl.previousElementSibling;
       }
 
       if (!fallbackTargetEl) return progressCache;
 
-      const attr = fallbackTargetEl.getAttribute('data-characters-read');
-      if (!attr) return progressCache;
+      const attr = fallbackTargetEl.getAttribute('data-characters-read') as string;
 
       progressCache = parseInt(attr);
+
       return progressCache;
    }
 };
