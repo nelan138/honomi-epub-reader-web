@@ -170,5 +170,27 @@ export const useReaderStore = defineStore('reader', {
             updateCharactersReadInDB(this.book.id, charactersRead);
          }
       },
+
+      restoreLastSection() {
+         if (this.charactersRead !== 0) {
+            let targetEl: Element | null = null;
+            const paragraphs = document.querySelectorAll('p[data-characters-read]');
+
+            for (const pEl of paragraphs) {
+               const charactersRead = Number(pEl.getAttribute('data-characters-read'));
+
+               // take the first one, skips all the one with duplicate characters read (e.g: pictures)
+               const currentCharactersRead = Number(targetEl?.getAttribute('data-characters-read') ?? '-1');
+
+               if (charactersRead === currentCharactersRead) continue;
+
+               if (charactersRead > this.charactersRead) break;
+
+               targetEl = pEl;
+            }
+
+            targetEl?.scrollIntoView();
+         }
+      },
    },
 });

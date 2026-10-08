@@ -91,26 +91,7 @@ onMounted(async () => {
    /**
     * The block below should run after Vue update all the components depending on readerStore and after the DOM finishes painting
     */
-   if (readerStore.charactersRead !== 0) {
-      let targetEl: Element | null = null;
-      const paragraphs = document.querySelectorAll('p[data-characters-read]');
-
-      for (const pEl of paragraphs) {
-         const charactersRead = Number(pEl.getAttribute('data-characters-read'));
-
-         // take the first one, skips all the one with duplicate characters read (e.g: pictures)
-         const currentCharactersRead = Number(targetEl?.getAttribute('data-characters-read') ?? '-1');
-
-         if (charactersRead === currentCharactersRead) continue;
-
-         if (charactersRead > readerStore.charactersRead) break;
-
-         targetEl = pEl;
-      }
-
-      targetEl?.scrollIntoView();
-      // console.log('Finished scrolling', targetEl);
-   }
+   readerStore.restoreLastSection();
 });
 
 onUnmounted(() => {
