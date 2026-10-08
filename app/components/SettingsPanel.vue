@@ -19,7 +19,7 @@
       </template>
 
       <template #body>
-         <!-- todo: writing mode, font family (p, blockquote, heading), furigana, progress display -->
+         <!-- todo: font family (p, blockquote, heading), furigana, progress display -->
          <div class="flex flex-col gap-2 text-base">
             <div class="inline-flex items-center gap-2 justify-between">
                <span>Writing mode</span>
