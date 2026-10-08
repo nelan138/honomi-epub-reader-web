@@ -18,6 +18,8 @@ export type WritingMode = 'horizontal' | 'vertical';
 /** @use as px-[padding-*] */
 export type BookPadding = 'none' | 'compact' | 'normal' | 'relaxed' | 'spacious';
 
+export type ProgressDisplay = 'default' | 'percentage' | 'none';
+
 export const useSettingsStore = defineStore('settings', {
    state: () => ({
       settings: useStorage('settings', {
@@ -29,6 +31,7 @@ export const useSettingsStore = defineStore('settings', {
          writingMode: 'horizontal' as WritingMode,
          scrollSpeed: 80, // px
          bookPadding: 'normal' as BookPadding,
+         progressDisplay: 'default' as ProgressDisplay,
       }),
    }),
 
@@ -60,6 +63,10 @@ export const useSettingsStore = defineStore('settings', {
       bookPadding(): BookPadding {
          return this.settings.bookPadding;
       },
+
+      progressDisplay(): ProgressDisplay {
+         return this.settings.progressDisplay;
+      }
    },
 
    actions: {
@@ -91,5 +98,9 @@ export const useSettingsStore = defineStore('settings', {
       setBookPadding(margin: BookPadding) {
          this.settings.bookPadding = margin;
       },
+
+      setProgressDisplay(display: ProgressDisplay) {
+         this.settings.progressDisplay = display;
+      }
    },
 });

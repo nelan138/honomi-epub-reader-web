@@ -102,6 +102,17 @@
                   trailing-icon="lucide:chevron-right"
                />
             </div>
+
+            <div class="inline-flex items-center gap-2 justify-between">
+               <span>Progress display</span>
+
+               <USelect
+                  v-model="progressDisplay"
+                  :items="['default', 'percentage', 'none']"
+                  variant="none"
+                  trailing-icon="lucide:chevron-right"
+               />
+            </div>
          </div>
       </template>
    </USlideover>
@@ -152,6 +163,11 @@ const scrollSpeed = computed({
 const bookPadding = computed({
    get: () => settingsStore.bookPadding,
    set: (value: BookPadding) => settingsStore.setBookPadding(value),
+});
+
+const progressDisplay = computed({
+   get: () => settingsStore.progressDisplay,
+   set: (value: ProgressDisplay) => settingsStore.setProgressDisplay(value),
 });
 </script>
 
