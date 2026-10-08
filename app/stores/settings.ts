@@ -20,6 +20,8 @@ export type BookPadding = 'none' | 'compact' | 'normal' | 'relaxed' | 'spacious'
 
 export type ProgressDisplay = 'default' | 'percentage' | 'none';
 
+export type FuriganaDisplay = 'show' | 'hover' | 'none';
+
 export const useSettingsStore = defineStore('settings', {
    state: () => ({
       settings: useStorage('settings', {
@@ -32,6 +34,7 @@ export const useSettingsStore = defineStore('settings', {
          scrollSpeed: 80, // px
          bookPadding: 'normal' as BookPadding,
          progressDisplay: 'default' as ProgressDisplay,
+         furiganaDisplay: 'show' as FuriganaDisplay,
       }),
    }),
 
@@ -66,6 +69,10 @@ export const useSettingsStore = defineStore('settings', {
 
       progressDisplay(): ProgressDisplay {
          return this.settings.progressDisplay;
+      },
+
+      furiganaDisplay(): FuriganaDisplay {
+         return this.settings.furiganaDisplay;
       }
    },
 
@@ -101,6 +108,10 @@ export const useSettingsStore = defineStore('settings', {
 
       setProgressDisplay(display: ProgressDisplay) {
          this.settings.progressDisplay = display;
+      },
+
+      setFuriganaDisplay(display: FuriganaDisplay) {
+         this.settings.furiganaDisplay = display;
       }
    },
 });

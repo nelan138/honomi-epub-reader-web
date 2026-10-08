@@ -19,7 +19,7 @@
       </template>
 
       <template #body>
-         <!-- todo: font family (p, blockquote, heading), furigana, progress display -->
+         <!-- todo: font family (p, blockquote, heading) -->
          <div class="flex flex-col gap-2 text-base">
             <div class="inline-flex items-center gap-2 justify-between">
                <span>Writing mode</span>
@@ -104,11 +104,22 @@
             </div>
 
             <div class="inline-flex items-center gap-2 justify-between">
-               <span>Progress display</span>
+               <span>Progress</span>
 
                <USelect
                   v-model="progressDisplay"
                   :items="['default', 'percentage', 'none']"
+                  variant="none"
+                  trailing-icon="lucide:chevron-right"
+               />
+            </div>
+
+            <div class="inline-flex items-center gap-2 justify-between">
+               <span>Furigana</span>
+
+               <USelect
+                  v-model="furiganaDisplay"
+                  :items="['show', 'hover', 'none']"
                   variant="none"
                   trailing-icon="lucide:chevron-right"
                />
@@ -168,6 +179,11 @@ const bookPadding = computed({
 const progressDisplay = computed({
    get: () => settingsStore.progressDisplay,
    set: (value: ProgressDisplay) => settingsStore.setProgressDisplay(value),
+});
+
+const furiganaDisplay = computed({
+   get: () => settingsStore.furiganaDisplay,
+   set: (value: FuriganaDisplay) => settingsStore.setFuriganaDisplay(value),
 });
 </script>
 

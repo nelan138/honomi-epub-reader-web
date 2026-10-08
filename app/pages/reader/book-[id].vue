@@ -40,6 +40,8 @@
                {
                   'w-full': settingsStore.writingMode === 'horizontal',
                   'h-full [&_img]:my-[10vw]': settingsStore.writingMode === 'vertical',
+                  '[&_rt]:invisible': settingsStore.furiganaDisplay === 'none',
+                  '[&_rt]:invisible [&_ruby:hover>rt]:visible': settingsStore.furiganaDisplay === 'hover',
                },
             ]"
          >
