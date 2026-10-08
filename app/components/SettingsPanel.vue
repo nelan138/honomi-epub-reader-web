@@ -109,6 +109,7 @@
 
 <script lang="ts" setup>
 const settingsStore = useSettingsStore();
+const readerStore = useReaderStore();
 
 /* *** */
 
@@ -137,6 +138,10 @@ const fontKerning = computed({
 const writingMode = computed({
    get: () => settingsStore.writingMode,
    set: (value: WritingMode) => settingsStore.setWritingMode(value),
+});
+
+watch(writingMode, () => {
+   readerStore.restoreLastSection();
 });
 
 const scrollSpeed = computed({
