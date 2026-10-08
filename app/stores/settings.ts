@@ -31,7 +31,7 @@ export const useSettingsStore = defineStore('settings', {
          fontKerning: 'auto' as FontKerning,
 
          writingMode: 'horizontal' as WritingMode,
-         scrollSpeed: 80, // px
+         scrollSpeed: 120, // px
          bookPadding: 'normal' as BookPadding,
          progressDisplay: 'default' as ProgressDisplay,
          furiganaDisplay: 'show' as FuriganaDisplay,
