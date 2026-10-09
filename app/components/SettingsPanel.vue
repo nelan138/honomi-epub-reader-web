@@ -162,7 +162,10 @@ const writingMode = computed({
    set: (value: WritingMode) => settingsStore.setWritingMode(value),
 });
 
-watch(writingMode, () => {
+watch(writingMode, async () => {
+   await nextTick();
+   await nextFrame();
+
    readerStore.restoreLastSection();
 });
 

@@ -12,7 +12,7 @@
 
       <div class="w-full overflow-hidden flex flex-col gap-4">
          <div class="flex min-w-0 flex-1 flex-col">
-            <h3 class="text-base text-default font-serif font-medium line-clamp-2 break-all">
+            <h3 class="text-base text-default font-serif font-medium line-clamp-2 break-all" @click.stop>
                {{ meta.title }}
             </h3>
 

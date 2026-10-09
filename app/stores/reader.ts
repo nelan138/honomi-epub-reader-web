@@ -172,25 +172,25 @@ export const useReaderStore = defineStore('reader', {
       },
 
       restoreLastSection() {
-         if (this.charactersRead !== 0) {
-            let targetEl: Element | null = null;
-            const paragraphs = document.querySelectorAll('p[data-characters-read]');
+         if (this.charactersRead === 0) return;
 
-            for (const pEl of paragraphs) {
-               const charactersRead = Number(pEl.getAttribute('data-characters-read'));
+         let targetEl: Element | null = null;
+         const paragraphs = document.querySelectorAll('p[data-characters-read]');
 
-               // take the first one, skips all the one with duplicate characters read (e.g: pictures)
-               const currentCharactersRead = Number(targetEl?.getAttribute('data-characters-read') ?? '-1');
+         for (const pEl of paragraphs) {
+            const charactersRead = Number(pEl.getAttribute('data-characters-read'));
 
-               if (charactersRead === currentCharactersRead) continue;
+            // take the first one, skips all the one with duplicate characters read (e.g: pictures)
+            const currentCharactersRead = Number(targetEl?.getAttribute('data-characters-read') ?? '-1');
 
-               if (charactersRead > this.charactersRead) break;
+            if (charactersRead === currentCharactersRead) continue;
 
-               targetEl = pEl;
-            }
+            if (charactersRead > this.charactersRead) break;
 
-            targetEl?.scrollIntoView();
+            targetEl = pEl;
          }
+
+         targetEl?.scrollIntoView();
       },
    },
 });
