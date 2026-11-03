@@ -1,13 +1,11 @@
 <template>
    <div
       class="h-screen w-screen"
-      :class="[
-         {
-            '[writing-mode:horizontal-tb] overflow-y-scroll overflow-x-hidden *:w-full': orientation === 'horizontal',
-            '[writing-mode:vertical-rl] overflow-x-scroll overflow-y-hidden *:h-full [&_img]:my-[10vw]':
-               orientation === 'vertical',
-         },
-      ]"
+      :class="{
+         '[writing-mode:horizontal-tb] overflow-y-scroll overflow-x-hidden *:w-full': orientation === 'vertical',
+         '[writing-mode:vertical-rl] overflow-x-scroll overflow-y-hidden *:h-full [&_img]:my-[10vw]':
+            orientation === 'horizontal',
+      }"
       @scrollend="onScrollEnd"
       @wheel.prevent="onWheel"
    >
@@ -38,7 +36,7 @@ const getCurrentCharactersRead = () => {
    let y = headerHeight + 10;
 
    // x = right edge, y = middle of the screen
-   if (orientation === 'vertical') {
+   if (orientation === 'horizontal') {
       x = globalThis.innerWidth - 10;
       y = globalThis.innerHeight / 2;
    }
@@ -74,8 +72,8 @@ const getCurrentCharactersRead = () => {
          for (const pEl of pEls) {
             const rect = pEl.getBoundingClientRect();
 
-            if (orientation === 'horizontal' && rect.top > y) break;
-            else if (orientation === 'vertical' && rect.right < x) break;
+            if (orientation === 'vertical' && rect.top > y) break;
+            else if (orientation === 'horizontal' && rect.right < x) break;
 
             fallbackTargetEl = pEl;
          }
@@ -107,11 +105,9 @@ const onWheel = (event: WheelEvent) => {
    const delta = Math.sign(event.deltaY) * scrollSpeed;
 
    if (orientation === 'horizontal') {
-      element.scrollTop += delta;
-   } else if (orientation === 'vertical') {
       element.scrollLeft -= delta;
+   } else if (orientation === 'vertical') {
+      element.scrollTop += delta;
    }
 };
 </script>
-
-<style></style>
