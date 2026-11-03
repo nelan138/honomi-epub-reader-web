@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 /* ***
  */
-navigateTo('/library/manager');
+navigateTo('/book/manager');
 /*
  *** */
 </script>
