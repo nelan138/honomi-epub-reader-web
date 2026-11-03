@@ -19,3 +19,9 @@
    --tracking-wider: 0.05em;
    --tracking-widest: 0.1em;
 }
+
+@source inline("prose-{sm,base,lg,xl,2xl}");
+@source inline("prose-p:leading-{tight,snug,normal,relaxed,loose}");
+@source inline("prose-p:tracking-{tighter,tight,normal,wide,wider,widest}");
+@source inline("[font-kerning:{auto,none}]");
+@source inline("px-{none,compact,normal,relaxed,spacious}");

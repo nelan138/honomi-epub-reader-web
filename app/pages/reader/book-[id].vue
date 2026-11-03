@@ -62,5 +62,3 @@ onUnmounted(() => {
    readerStore.$reset();
 });
 </script>
-
-<style scoped></style>
