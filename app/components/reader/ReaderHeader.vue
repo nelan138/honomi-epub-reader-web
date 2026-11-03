@@ -1,7 +1,7 @@
 <template>
    <UHeader v-if="headerIsOpen" :toggle="false" class="fixed top-0 w-full z-50 border-default">
       <template #left>
-         <UButton color="neutral" variant="ghost" icon="lucide:arrow-left" @click="navigateTo('/')" />
+         <UButton color="neutral" variant="ghost" icon="lucide:arrow-left" to="/" />
 
          <ReaderToC />
 
