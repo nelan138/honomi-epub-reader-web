@@ -42,7 +42,25 @@
                >
                   <template #content-bottom>
                      <USeparator />
-                     <UButton icon="lucide:plus" label="new font" size="sm" color="neutral" variant="ghost" class="m-1"/>
+
+                     <UButton
+                        icon="lucide:plus"
+                        label="new font"
+                        size="sm"
+                        color="neutral"
+                        variant="ghost"
+                        class="m-1"
+                        @click="triggerFileInput"
+                     />
+
+                     <input
+                        ref="fileInput"
+                        hidden
+                        multiple
+                        type="file"
+                        accept=".ttf,.otf,.woff,.woff2"
+                        @change="handleFileChange"
+                     />
                   </template>
                </USelect>
             </div>
@@ -58,7 +76,15 @@
                >
                   <template #content-bottom>
                      <USeparator />
-                     <UButton icon="lucide:plus" label="new font" size="sm" color="neutral" variant="ghost" class="m-1"/>
+                     <UButton
+                        icon="lucide:plus"
+                        label="new font"
+                        size="sm"
+                        color="neutral"
+                        variant="ghost"
+                        class="m-1"
+                        @click="triggerFileInput"
+                     />
                   </template>
                </USelect>
             </div>
@@ -161,11 +187,18 @@
 </template>
 
 <script lang="ts" setup>
+import { addFontToDB } from '~/services/dexie/fontRepo';
+
 const settingsStore = useSettingsStore();
 const readerStore = useReaderStore();
 const fontsStore = useFontsStore();
+const toast = useToast();
 
 /* *** */
+
+onMounted(() => {
+   fontsStore.load();
+});
 
 const isOpen = ref(false);
 
@@ -224,12 +257,42 @@ const furiganaDisplay = computed({
 const paragraphFont = computed({
    get: () => settingsStore.paragraphFont,
    set: (value: string) => settingsStore.setParagraphFont(value),
-})
+});
 
 const headingFont = computed({
    get: () => settingsStore.headingFont,
    set: (value: string) => settingsStore.setHeadingFont(value),
-})
+});
+
+const fileInput = ref<HTMLInputElement | null>(null);
+
+async function triggerFileInput() {
+   fileInput.value?.click();
+}
+
+async function handleFileChange(event: Event) {
+   const target = event.target as HTMLInputElement;
+   const files = target.files;
+
+   if (!files || files.length === 0) {
+      return;
+   }
+
+   for (const font of files) {
+      const [, error] = await tryCatch(addFontToDB(font));
+      if (error) {
+         toast.add({
+            title: 'Failed to load from database',
+            description: error?.message,
+            color: 'error',
+         });
+
+         return;
+      }
+
+      await fontsStore.syncWithDB();
+   }
+}
 </script>
 
 <style></style>

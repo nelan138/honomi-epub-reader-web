@@ -13,7 +13,7 @@ export default defineNuxtConfig({
    },
 
    compatibilityDate: '2025-07-15',
-   devtools: { enabled: false },
+   devtools: { enabled: true },
 
    ssr: false, // client-side heavy
 
@@ -24,7 +24,7 @@ export default defineNuxtConfig({
    },
 
    modules: ['@nuxt/ui', '@nuxt/icon', '@nuxt/image', '@nuxt/eslint', '@pinia/nuxt', '@vueuse/nuxt'],
-   
+
    colorMode: {
       preference: 'light',
    },

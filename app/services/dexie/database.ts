@@ -5,11 +5,13 @@ import { Dexie, type EntityTable } from 'dexie';
 export const db = new Dexie('Honomi') as Dexie & {
    books: EntityTable<BookRecord, 'id'>;
    shelves: EntityTable<ShelfRecord, 'id'>;
+   fonts: EntityTable<FontRecord, 'id'>;
 };
 
 db.version(1).stores({
    books: '++id, shelfId',
    shelves: '++id, &name, &displayOrder',
+   fonts: '++id, &name',
 });
 
 export const defaultShelf: Readonly<ShelfRecord> = {
