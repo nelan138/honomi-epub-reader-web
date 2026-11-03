@@ -1,6 +1,6 @@
 <template>
    <div>
-      <LibraryHeader />
+      <BookHeader />
 
       <UMain class="bg-muted">
          <UBanner icon="lucide:info" title="We are still in development" color="info" close />

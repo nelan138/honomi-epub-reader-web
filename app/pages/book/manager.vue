@@ -15,7 +15,7 @@
 
 <script setup lang="ts">
 definePageMeta({
-   layout: 'library',
+   layout: 'book',
 });
 
 const toast = useToast();

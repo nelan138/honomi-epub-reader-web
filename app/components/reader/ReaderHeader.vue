@@ -3,7 +3,7 @@
       <template #left>
          <UButton color="neutral" variant="ghost" icon="lucide:arrow-left" @click="navigateTo('/')" />
 
-         <TableOfContent />
+         <ReaderToC />
 
          <UButton color="neutral" variant="ghost" icon="lucide:chevrons-up" @click="headerIsOpen = false" />
       </template>
@@ -11,7 +11,7 @@
       <template #right>
          <UColorModeButton color="neutral" />
 
-         <SettingsPanel />
+         <ReaderSettings />
       </template>
    </UHeader>
 
