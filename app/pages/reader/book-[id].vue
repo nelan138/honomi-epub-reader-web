@@ -1,5 +1,8 @@
 <template>
-   <ReaderScrollArea :orientation="settingsStore.writingMode" :scroll-speed="settingsStore.scrollSpeed">
+   <ReaderScrollArea
+      :orientation="settingsStore.writingMode === 'horizontal' ? 'vertical' : 'horizontal'"
+      :scroll-speed="settingsStore.scrollSpeed"
+   >
       <ReaderSection
          v-for="section in readerStore.sections"
          :key="section.idref"

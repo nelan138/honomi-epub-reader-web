@@ -1,13 +1,11 @@
 <template>
    <div
       class="h-screen w-screen"
-      :class="[
-         {
-            '[writing-mode:horizontal-tb] overflow-y-scroll overflow-x-hidden *:w-full': orientation === 'horizontal',
-            '[writing-mode:vertical-rl] overflow-x-scroll overflow-y-hidden *:h-full [&_img]:my-[10vw]':
-               orientation === 'vertical',
-         },
-      ]"
+      :class="{
+         '[writing-mode:horizontal-tb] overflow-y-scroll overflow-x-hidden *:w-full': orientation === 'vertical',
+         '[writing-mode:vertical-rl] overflow-x-scroll overflow-y-hidden *:h-full [&_img]:my-[10vw]':
+            orientation === 'horizontal',
+      }"
       @scrollend="onScrollEnd"
       @wheel.prevent="onWheel"
    >
