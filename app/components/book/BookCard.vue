@@ -1,7 +1,6 @@
 <template>
    <article
-      class="grid bg-default gap-4 w-full grid-cols-[1fr_2fr] rounded-md border-muted border p-2 shadow-sm md:p-4 hover:cursor-pointer"
-      @click="navigateTo(`/reader/book-${id}`)"
+      class="group relative grid bg-default gap-4 w-full grid-cols-[1fr_2fr] rounded-md border-muted border p-2 shadow-sm md:p-4"
    >
       <NuxtImg
          class="my-auto aspect-2/3 h-full"
@@ -12,7 +11,7 @@
 
       <div class="w-full overflow-hidden flex flex-col gap-4">
          <div class="flex min-w-0 flex-1 flex-col">
-            <h3 class="text-base text-default font-sans line-clamp-2 break-all hover:cursor-auto" @click.stop>
+            <h3 class="text-base text-default font-sans line-clamp-2 break-all">
                {{ meta.title }}
             </h3>
 
@@ -29,29 +28,26 @@
             :min="0"
             :max="100"
             color="success"
-            class="hover:cursor-auto"
             :ui="{
                track: 'h-px',
                thumb: 'h-2 w-2 ring-0 bg-inverted',
             }"
          />
 
-         <UFieldGroup
-            orientation="horizontal"
-            class="flex justify-end gap-4 md:gap-8 lg:justify-around lg:gap-2 hover:cursor-auto"
-            @click.stop
-         >
+         <UButton
+            variant="link"
+            color="neutral"
+            icon="lucide:x"
+            class="invisible hover:text-error absolute top-0 right-0 p-2 group-hover:visible"
+            @click="handleDeletingBook"
+         />
+
+         <UFieldGroup orientation="horizontal" class="flex justify-end gap-4 md:gap-8 lg:justify-around lg:gap-2">
+            <UButton variant="link" color="neutral" icon="lucide:book-open" :to="`/reader/book-${id}`" />
+
             <UButton variant="link" color="neutral" icon="lucide:pen-line" @click="handleRenamingBook" />
 
             <UButton variant="link" color="neutral" icon="lucide:arrow-left-right" @click="handleChangingBookShelf" />
-
-            <UButton
-               variant="link"
-               color="neutral"
-               icon="lucide:trash"
-               class="hover:text-error"
-               @click="handleDeletingBook"
-            />
          </UFieldGroup>
       </div>
    </article>

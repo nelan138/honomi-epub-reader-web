@@ -7,8 +7,6 @@
             {{ name }}
          </h2>
 
-         <USeparator position="start" color="neutral" />
-
          <div class="flex gap-2 shrink-0">
             <template v-if="name !== defaultShelf.name && id !== defaultShelf.id && expanded">
                <UButton size="sm" variant="link" color="neutral" icon="lucide:pencil" @click="handleRenamingShelf" />
