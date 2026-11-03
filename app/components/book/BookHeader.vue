@@ -31,8 +31,6 @@
          <UButton variant="ghost" color="neutral" icon="lucide:folder-plus" @click="handleAddingNewShelf" />
 
          <UColorModeButton color="neutral" />
-
-         <SettingsPanel />
       </template>
    </UHeader>
 </template>
