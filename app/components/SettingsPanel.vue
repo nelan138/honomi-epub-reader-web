@@ -60,7 +60,7 @@
                         type="file"
                         accept=".ttf,.otf,.woff,.woff2"
                         @change="handleFileChange"
-                     />
+                     >
                   </template>
                </USelect>
             </div>
