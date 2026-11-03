@@ -12,6 +12,7 @@
       prose article below -->
       <article
          ref="scrollArea"
+         class="prose-p:[font-family:var(--paragraph-font)]"
          :class="[
             'h-screen w-screen prose max-w-none prose-p:m-0 prose-p:text-default prose-headings:text-default prose-a:text-default',
 
@@ -26,7 +27,10 @@
             `prose-p:tracking-${settingsStore.fontTracking}`,
             `[font-kerning:${settingsStore.fontKerning}]`,
             `px-${settingsStore.bookPadding}`,
+            'prose-p:[font-family:var(--paragraph-font)]',
+            'prose-headings:[font-family:var(--heading-font)]',
          ]"
+         :style="{ '--paragraph-font': settingsStore.paragraphFont, '--heading-font': settingsStore.headingFont }"
          @scrollend="onScrollEnd"
          @wheel.prevent="onWheel"
       >

@@ -35,6 +35,8 @@ export const useSettingsStore = defineStore('settings', {
          bookPadding: 'normal' as BookPadding,
          progressDisplay: 'default' as ProgressDisplay,
          furiganaDisplay: 'show' as FuriganaDisplay,
+         paragraphFont: 'Noto Sans JP' as string,
+         headingFont: 'Noto Sans JP' as string,
       }),
    }),
 
@@ -73,7 +75,15 @@ export const useSettingsStore = defineStore('settings', {
 
       furiganaDisplay(): FuriganaDisplay {
          return this.settings.furiganaDisplay;
-      }
+      },
+
+      paragraphFont(): string {
+         return this.settings.paragraphFont;
+      },
+
+      headingFont(): string {
+         return this.settings.headingFont;
+      },
    },
 
    actions: {
@@ -112,6 +122,14 @@ export const useSettingsStore = defineStore('settings', {
 
       setFuriganaDisplay(display: FuriganaDisplay) {
          this.settings.furiganaDisplay = display;
-      }
+      },
+
+      setParagraphFont(font: string) {
+         this.settings.paragraphFont = font;
+      },
+
+      setHeadingFont(font: string) {
+         this.settings.headingFont = font;
+      },
    },
 });

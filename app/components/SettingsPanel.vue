@@ -19,7 +19,6 @@
       </template>
 
       <template #body>
-         <!-- todo: font family (p, blockquote, heading) -->
          <div class="flex flex-col gap-2 text-base">
             <div class="inline-flex items-center gap-2 justify-between">
                <span>Writing mode</span>
@@ -30,6 +29,38 @@
                   variant="none"
                   trailing-icon="lucide:chevron-right"
                />
+            </div>
+
+            <div class="inline-flex items-center gap-2 justify-between">
+               <span>Paragraph font</span>
+
+               <USelect
+                  v-model="paragraphFont"
+                  :items="fontsStore.fontNames"
+                  variant="none"
+                  trailing-icon="lucide:chevron-right"
+               >
+                  <template #content-bottom>
+                     <USeparator />
+                     <UButton icon="lucide:plus" label="new font" size="sm" color="neutral" variant="ghost" class="m-1"/>
+                  </template>
+               </USelect>
+            </div>
+
+            <div class="inline-flex items-center gap-2 justify-between">
+               <span>Heading font</span>
+
+               <USelect
+                  v-model="headingFont"
+                  :items="fontsStore.fontNames"
+                  variant="none"
+                  trailing-icon="lucide:chevron-right"
+               >
+                  <template #content-bottom>
+                     <USeparator />
+                     <UButton icon="lucide:plus" label="new font" size="sm" color="neutral" variant="ghost" class="m-1"/>
+                  </template>
+               </USelect>
             </div>
 
             <div class="inline-flex items-center gap-2 justify-between">
@@ -132,6 +163,7 @@
 <script lang="ts" setup>
 const settingsStore = useSettingsStore();
 const readerStore = useReaderStore();
+const fontsStore = useFontsStore();
 
 /* *** */
 
@@ -188,6 +220,16 @@ const furiganaDisplay = computed({
    get: () => settingsStore.furiganaDisplay,
    set: (value: FuriganaDisplay) => settingsStore.setFuriganaDisplay(value),
 });
+
+const paragraphFont = computed({
+   get: () => settingsStore.paragraphFont,
+   set: (value: string) => settingsStore.setParagraphFont(value),
+})
+
+const headingFont = computed({
+   get: () => settingsStore.headingFont,
+   set: (value: string) => settingsStore.setHeadingFont(value),
+})
 </script>
 
 <style></style>
