@@ -11,7 +11,7 @@
 
       <div class="w-full overflow-hidden flex flex-col gap-4">
          <div class="flex min-w-0 flex-1 flex-col">
-            <h3 class="text-base text-default font-sans line-clamp-2 break-all">
+            <h3 class="text-base text-default font-sans line-clamp-1 lg:line-clamp-2 break-all">
                {{ meta.title }}
             </h3>
 
