@@ -38,7 +38,7 @@
             variant="link"
             color="neutral"
             icon="lucide:x"
-            class="invisible hover:text-error absolute top-0 right-0 p-2 group-hover:visible"
+            class="hover:text-error absolute top-0 right-0 p-2 lg:invisible lg:group-hover:visible"
             @click="handleDeletingBook"
          />
 
