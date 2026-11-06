@@ -5,7 +5,7 @@
       <NuxtImg
          class="my-auto aspect-2/3 h-full"
          :alt="`Book cover for ${meta.title}`"
-         :src="cover || '/img/default-book-cover.jpeg'"
+         :src="cover || '/default-book-cover.jpeg'"
          densities="1x 2x"
       />
 

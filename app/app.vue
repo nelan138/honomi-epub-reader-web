@@ -1,11 +1,11 @@
 <template>
+   <NuxtPwaManifest />
+
    <UApp>
       <NuxtLayout>
          <NuxtPage />
       </NuxtLayout>
 
-      <div>
-         <InputModal id="input-modal" />
-      </div>
+      <InputModal id="input-modal" />
    </UApp>
 </template>
